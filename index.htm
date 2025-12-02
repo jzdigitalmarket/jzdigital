@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GEM Artificial Inteligency Systems</title>
+    <script src="https://cdn.tailwindcss.com"></script> 
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <style>
+        /* ************************************** */
+        /* *** INÍCIO DO ESTILO CSS (INTERNO) *** */
+        /* ************************************** */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0d1a2b; /* Azul-Marinho Profundo */
+            overflow-x: hidden;
+            overflow-y: scroll; 
+            background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0.05));
+            background-size: 400% 400%;
+            animation: ripple 20s ease infinite;
+            position: relative; 
+        }
+
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://portoitajai.com.br/img/cover/banner-cover5.jpg'); 
+            background-size: cover; 
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0.1; 
+            z-index: -10; 
+        }
+        
+        @keyframes ripple { 0% { background-position: 0% 0%; } 50% { background-position: 100% 100%; } 100% { background-position: 0% 0%; } }
+        @keyframes slideIn { 0% { opacity: 0; transform: translateY(40px) scale(0.95); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+        .animated-menu-item { animation: slideIn 0.8s ease-out forwards; opacity: 0; }
+        @keyframes staggerText { 0% { opacity: 0; transform: translateX(-50px) scale(1.5); } 100% { opacity: 1; transform: translateX(0) scale(1); } }
+        .char { display: inline-block; opacity: 0; animation-name: staggerText; animation-duration: 0.6s; animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94); animation-fill-mode: forwards; }
+        
+        /* --- NOVO CSS DO ROBÔ COM IMAGEM E ANIMAÇÃO DE BALANÇO --- */
+        
+        @keyframes robotFlyIn { 0% { transform: translate(-100vw, -100vh) rotate(-30deg) scale(0.5); opacity: 0; } 50% { transform: translate(20px, 20px) rotate(10deg) scale(0.8); opacity: 1; } 85% { transform: translate(0, 0) rotate(0deg) scale(1.2); opacity: 1; } 100% { transform: translate(0, 0) rotate(0deg) scale(1); opacity: 1; } }
+        
+        @keyframes robotFloatAndSway {
+            0% { transform: translateY(0px) rotate(0deg); }
+            25% { transform: translateY(-8px) rotate(-3deg); } /* Sobe e vira esq */
+            75% { transform: translateY(-4px) rotate(3deg); }  /* Desce e vira dir */
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+
+        #robot-container { 
+            position: absolute; 
+            top: 1%; 
+            left: 35%; 
+            transform: translateX(-50%); 
+            z-index: 30; 
+            cursor: pointer; 
+            width: 175px; /* Tamanho ajustado para a imagem */
+            animation: robotFlyIn 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards; 
+        }
+
+        .robot-img {
+            width: 100%;
+            height: auto;
+            filter: drop-shadow(0 0 15px rgba(0, 191, 255, 0.6)); /* Brilho Neon Azul */
+            animation: robotFloatAndSway 3s ease-in-out infinite; /* Animação de "vida" */
+        }
+        
+        #robot-container:hover .robot-img {
+            filter: drop-shadow(0 0 25px rgba(163, 230, 53, 0.8)); /* Brilho Verde no Hover */
+            transform: scale(1.1);
+            transition: all 0.3s ease;
+        }
+
+        /* --------------------------------------------------------- */
+
+        .card-glow:hover { box-shadow: 0 0 20px rgba(0, 191, 255, 1), 0 0 10px rgba(0, 191, 255, 0.6); transform: translateY(-2px) scale(1.01); } 
+        
+        /* Ícone reduzido para menu compacto */
+        .icon { width: 28px; height: 28px; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+        
+        .scale-0 { transform: scale(0); }
+        #robot-greeting { position: absolute; top: 2%; left: 50%; transform: translateX(-50%); z-index: 25; padding: 8px 15px; background-color: #3f6212; color: white; border-radius: 12px; border: 1px solid #a3e635; font-size: 0.875rem; font-weight: 500; opacity: 0; transition: opacity 0.5s ease-in-out; pointer-events: none; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); min-width: 200px; text-align: center; }
+
+        @keyframes blink-note {
+            0% { opacity: 1; }
+            50% { opacity: 0.2; } 
+            100% { opacity: 1; }
+        }
+
+        #calendar-grid .day.has-note::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            right: 50%;
+            transform: translateX(50%);
+            width: 4px;
+            height: 4px;
+            background-color: #f97316;
+            border-radius: 50%;
+            animation: blink-note 1.2s infinite alternate;
+        }
+
+        /* SIDEBARS */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            width: 250px; 
+            height: 100vh;
+            z-index: 40; 
+            background-color: rgba(26, 39, 57, 0.95); 
+            backdrop-filter: blur(5px); 
+            padding: 20px 15px; 
+            display: flex;
+            flex-direction: column; 
+            gap: 15px; 
+            overflow-y: auto;
+            animation: slideIn 0.8s ease-out forwards;
+            animation-delay: 3.70s; 
+            opacity: 0;
+        }
+
+        #sidebar-context { left: 0; border-right: 1px solid rgba(0, 191, 255, 0.3); }
+        #sidebar-utility { right: 0; border-left: 1px solid rgba(0, 191, 255, 0.3); }
+
+        .content-area {
+            padding-left: 270px;
+            padding-right: 270px;
+        }
+
+        .utility-widget {
+            padding: 15px;
+            border-radius: 8px;
+            background-color: rgba(30, 41, 59, 0.9);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            color: white;
+            text-align: center;
+        }
+
+        #kpi-grid {
+            padding: 0;
+            border-top: 4px solid #f97316; 
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 10px; 
+        }
+
+        .kpi-card {
+            padding: 10px 5px;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 0.7rem; 
+            font-weight: 600;
+        }
+
+        .kpi-card .value {
+            font-size: 1.2rem;
+            font-weight: 800;
+            margin-bottom: 2px;
+            line-height: 1.2;
+        }
+
+        .kpi-success { background-color: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; }
+        .kpi-warning { background-color: rgba(251, 191, 36, 0.2); color: #facc15; border: 1px solid #facc15; }
+        .kpi-danger { background-color: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; }
+        
+        #relogio-widget { font-size: 2.2rem; font-weight: 700; color: #00bfff; font-family: monospace; border-top: 4px solid #00bfff; }
+        #data-widget { font-size: 1.1rem; font-weight: 500; color: #a3e635; }
+        
+        '#clima-widget { border-top: 4px solid #f97316; } 
+        '.clima-icon { font-size: 2.5rem; margin-bottom: 5px; color: #fcd34d; }
+
+        #calendar-widget { border-top: 4px solid #a3e635; }
+        
+        #calendar-grid .day { 
+            padding: 4px 0; 
+            text-align: center; 
+            cursor: pointer; 
+            border-radius: 4px; 
+            transition: background-color 0.2s; 
+            color: #ccc; 
+            position: relative; 
+        }
+        
+        #calendar-grid .day:not(.empty):hover { background-color: rgba(0, 191, 255, 0.2); color: white; }
+        #calendar-grid .day.current-day { background-color: #a3e635; color: #0d1a2b; font-weight: bold; box-shadow: 0 0 8px rgba(163, 230, 53, 0.8); }
+        #calendar-grid .day.other-month { color: #555; pointer-events: none; }
+        
+        #agenda-cargas-widget { border-top: 4px solid #a3e635; padding: 0; }
+        #agenda-cargas-widget h3 { padding: 15px; margin-bottom: 0; border-bottom: 1px solid rgba(163, 230, 53, 0.3); }
+
+        #tabela-cargas-container {
+            max-height: 250px; 
+            overflow-y: auto; 
+            text-align: left;
+            padding: 15px 10px 15px 15px; 
+            font-size: 0.75rem; 
+        }
+
+        #tabela-cargas-container table { width: 100%; border-collapse: collapse; color: #ccc; }
+        #tabela-cargas-container th { font-size: 0.8rem; color: #00bfff; padding: 5px 0; position: sticky; top: 0; background-color: rgba(30, 41, 59, 0.95); z-index: 10; }
+        #tabela-cargas-container td { padding: 5px 0; border-bottom: 1px dashed rgba(255, 255, 255, 0.1); }
+
+        .status-pronto { color: #4ade80; } 
+        .status-atraso { color: #f87171; } 
+        .status-pendente { color: #facc15; } 
+
+        #notes-widget { border-top: 4px solid #f59e0b; padding: 10px; }
+        #quick-note-text { width: 100%; height: 120px; resize: none; padding: 8px; margin-top: 10px; margin-bottom: 10px; border-radius: 4px; background-color: rgba(0, 0, 0, 0.3); border: 1px solid #444; color: white; font-size: 0.875rem; }
+        #save-note-btn { background-color: #00bfff; color: #0d1a2b; font-weight: bold; padding: 6px 12px; border-radius: 4px; transition: background-color 0.2s; }
+        #save-note-btn:hover { background-color: #4dd2ff; }
+        #note-status { margin-top: 5px; font-size: 0.75rem; color: #a3e635; }
+        
+        .line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+        
+    </style>
+</head>
+<body class="min-h-screen p-4 relative">
+
+    <div id="robot-container"> 
+        <img src="robo-zim.png" alt="ZIM AI Robot" class="robot-img">
+    </div>
+
+    <div id="robot-greeting" aria-live="polite">
+        Olá! Pousei em segurança. Em que posso ajudar hoje?
+    </div>
+    
+    <div class="w-full max-w-screen-2xl mx-auto pt-6 pb-8 relative z-10 content-area">
+        
+        <header class="text-center mb-8" id="header-title">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight drop-shadow-lg">
+                <span class="text-cyan-400 inline-flex">
+                    <span class="char stagger-delay-0">G</span><span class="char stagger-delay-1">E</span><span class="char stagger-delay-2">M</span><span class="char stagger-delay-3">&nbsp;</span><span class="char stagger-delay-4">S</span><span class="char stagger-delay-5">Y</span><span class="char stagger-delay-6">S</span><span class="char stagger-delay-7">T</span><span class="char stagger-delay-8">E</span><span class="char stagger-delay-9">M</span><span class="char stagger-delay-10">S</span>
+                </span><br> 
+                <span class="inline-flex text-xl sm:text-2xl mt-1 text-gray-400">
+                    <span class="char stagger-delay-11">N</span><span class="char stagger-delay-12">a</span><span class="char stagger-delay-13">t</span><span class="char stagger-delay-14">u</span><span class="char stagger-delay-15">r</span><span class="char stagger-delay-16">a</span><span class="char stagger-delay-17">l</span><span class="char stagger-delay-18">l</span><span class="char stagger-delay-19">y</span><span class="char stagger-delay-20">&nbsp;</span><span class="char stagger-delay-21">S</span><span class="char stagger-delay-22">m</span><span class="char stagger-delay-23">a</span><span class="char stagger-delay-24">r</span><span class="char stagger-delay-25">t</span>
+                </span>
+            </h1>
+        </header>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+            
+            <a href="https://concentrador.portosempapel.gov.br/portal/" target="_blank" class="animated-menu-item card-glow transition duration-300 ease-in-out block bg-gray-800/90 p-3 rounded-lg border-t-2 border-cyan-500 hover:bg-gray-700/90 shadow-lg backdrop-blur-sm">
+                <div class="flex items-center space-x-2">
+                    <div class="text-cyan-400 p-1.5 rounded-full bg-cyan-900/50 flex-shrink-0">
+                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 10 10 11"></polyline></svg>
+                    </div>
+                    <div class="overflow-hidden">
+                        <h2 class="text-sm font-bold text-white mb-0 truncate">Concentrador PSP</h2>
+                        <p class="text-gray-400 text-xs truncate">Porto Sem Papel</p>
+                    </div>
+                </div>
+            </a>
+
+            <a href="https://portalunico.siscomex.gov.br/portal/" target="_blank" class="animated-menu-item card-glow transition duration-300 ease-in-out block bg-gray-800/90 p-3 rounded-lg border-t-2 border-emerald-500 hover:bg-gray-700/90 shadow-lg backdrop-blur-sm">
+                <div class="flex items-center space-x-2">
+                    <div class="text-emerald-400 p-1.5 rounded-full bg-emerald-900/50 flex-shrink-0">
+                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0-6 6v7a6 6 0 0 0 12 0V9a6 6 0 0 0-6-6z"></path><path d="M12 3v12"></path><path d="M16.5 14.5L12 19l-4.5-4.5"></path></svg>
+                    </div>
+                    <div class="overflow-hidden">
+                        <h2 class="text-sm font-bold text-white mb-0 truncate">SISCOMEX</h2>
+                        <p class="text-gray-400 text-xs truncate">Portal Único Comex</p>
+                    </div>
+                </div>
+            </a>
+
+            <a href="https://www4.receita.fazenda.gov.br/g33159/jsp/logon.jsp" target="_blank" class="animated-menu-item card-glow transition duration-300 ease-in-out block bg-gray-800/90 p-3 rounded-lg border-t-2 border-yellow-500 hover:bg-gray-700/90 shadow-lg backdrop-blur-sm">
+                <div class="flex items-center space-x-2">
+                    <div class="text-yellow-400 p-1.5 rounded-full bg-yellow-900/50 flex-shrink-0">
+                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                    </div>
+                    <div class="overflow-hidden">
+                        <h2 class="text-sm font-bold text-white mb-0 truncate">Receita Federal</h2>
+                        <p class="text-gray-400 text-xs truncate">Sistemas Legados</p>
+                    </div>
+                </div>
+            </a>
+
+            <a href="https://praticoszp21.com.br/movimentacao-de-navios/" target="_blank" class="animated-menu-item card-glow transition duration-300 ease-in-out block bg-gray-800/90 p-3 rounded-lg border-t-2 border-indigo-500 hover:bg-gray-700/90 shadow-lg backdrop-blur-sm">
+                <div class="flex items-center space-x-2">
+                    <div class="text-indigo-400 p-1.5 rounded-full bg-indigo-900/50 flex-shrink-0">
+                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M22 18H2V6h20v12zM6 12h12M6 6v12M18 6v12M12 2l-2 4h4l-2-4z"></path></svg>
+                    </div>
+                    <div class="overflow-hidden">
+                        <h2 class="text-sm font-bold text-white mb-0 truncate">Praticagem</h2>
+                        <p class="text-gray-400 text-xs truncate">Mov. Navios ZP21</p>
+                    </div>
+                </div>
+            </a>
+
+            <a href="https://web.whatsapp.com/" target="_blank" class="animated-menu-item card-glow transition duration-300 ease-in-out block bg-gray-800/90 p-3 rounded-lg border-t-2 border-green-500 hover:bg-gray-700/90 shadow-lg backdrop-blur-sm">
+                <div class="flex items-center space-x-2">
+                    <div class="text-green-400 p-1.5 rounded-full bg-green-900/50 flex-shrink-0">
+                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    </div>
+                    <div class="overflow-hidden">
+                        <h2 class="text-sm font-bold text-white mb-0 truncate">WhatsApp Web</h2>
+                        <p class="text-gray-400 text-xs truncate">Comunicação</p>
+                    </div>
+                </div>
+            </a>
+
+            <a href="https://outlook.office.com/mail/" target="_blank" class="animated-menu-item card-glow transition duration-300 ease-in-out block bg-gray-800/90 p-3 rounded-lg border-t-2 border-red-500 hover:bg-gray-700/90 shadow-lg backdrop-blur-sm">
+                <div class="flex items-center space-x-2">
+                    <div class="text-red-400 p-1.5 rounded-full bg-red-900/50 flex-shrink-0">
+                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                    </div>
+                    <div class="overflow-hidden">
+                        <h2 class="text-sm font-bold text-white mb-0 truncate">Outlook</h2>
+                        <p class="text-gray-400 text-xs truncate">Email Corporativo</p>
+                    </div>
+                </div>
+            </a>
+
+            <a href="https://geminai.free.nf/editorzinho.html" target="_blank" class="animated-menu-item card-glow transition duration-300 ease-in-out block bg-gray-800/90 p-3 rounded-lg border-t-2 border-purple-500 hover:bg-gray-700/90 shadow-lg backdrop-blur-sm">
+                <div class="flex items-center space-x-2">
+                    <div class="text-purple-400 p-1.5 rounded-full bg-purple-900/50 flex-shrink-0">
+                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                    </div>
+                    <div class="overflow-hidden">
+                        <h2 class="text-sm font-bold text-white mb-0 truncate">Editor de Texto</h2>
+                        <p class="text-gray-400 text-xs truncate">Rascunhos Online</p>
+                    </div>
+                </div>
+            </a>
+
+            <a href="https://www.windy.com/?-27.180,-48.755,9" target="_blank" class="animated-menu-item card-glow transition duration-300 ease-in-out block bg-gray-800/90 p-3 rounded-lg border-t-2 border-sky-500 hover:bg-gray-700/90 shadow-lg backdrop-blur-sm">
+                <div class="flex items-center space-x-2">
+                    <div class="text-sky-400 p-1.5 rounded-full bg-sky-900/50 flex-shrink-0">
+                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v10"></path><path d="M4.93 10.93l7.07 7.07l7.07-7.07"></path><path d="M20 17.6c-1.39-4.2-7.4-4.2-8.79 0c-1.63 4.9-7.79 4.9-9.42 0"></path></svg>
+                    </div>
+                    <div class="overflow-hidden">
+                        <h2 class="text-sm font-bold text-white mb-0 truncate">Windy</h2>
+                        <p class="text-gray-400 text-xs truncate">Previsão do Tempo</p>
+                    </div>
+                </div>
+            </a>
+
+            <a href="https://www.marinetraffic.com/en/ais/home/centerx:-48.602/centery:-26.906/zoom:13" target="_blank" class="animated-menu-item card-glow transition duration-300 ease-in-out block bg-gray-800/90 p-3 rounded-lg border-t-2 border-orange-500 hover:bg-gray-700/90 shadow-lg backdrop-blur-sm">
+                <div class="flex items-center space-x-2">
+                    <div class="text-orange-400 p-1.5 rounded-full bg-orange-900/50 flex-shrink-0">
+                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 20.25a2 2 0 0 1-1.41-3.41l3.54-3.54a2 2 0 1 1 2.83 2.83l-3.54 3.54A2 2 0 0 1 10 20.25z"></path><path d="M16 16l3.5-3.5"></path><path d="M4 14.5L12 6.5"></path><circle cx="12" cy="6.5" r="2.5"></circle><path d="M2 2l20 20"></path></svg>
+                    </div>
+                    <div class="overflow-hidden">
+                        <h2 class="text-sm font-bold text-white mb-0 truncate">MarineTraffic</h2>
+                        <p class="text-gray-400 text-xs truncate">Tráfego Marítimo</p>
+                    </div>
+                </div>
+            </a>
+
+            <a href="https://jbsterminais.com.br/" target="_blank" class="animated-menu-item card-glow transition duration-300 ease-in-out block bg-gray-800/90 p-3 rounded-lg border-t-2 border-orange-500 hover:bg-gray-700/90 shadow-lg backdrop-blur-sm">
+                <div class="flex items-center space-x-2">
+                    <div class="text-orange-400 p-1.5 rounded-full bg-orange-900/50 flex-shrink-0">
+                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 20.25a2 2 0 0 1-1.41-3.41l3.54-3.54a2 2 0 1 1 2.83 2.83l-3.54 3.54A2 2 0 0 1 10 20.25z"></path><path d="M16 16l3.5-3.5"></path><path d="M4 14.5L12 6.5"></path><circle cx="12" cy="6.5" r="2.5"></circle><path d="M2 2l20 20"></path></svg>
+                    </div>
+                    <div class="overflow-hidden">
+                        <h2 class="text-sm font-bold text-white mb-0 truncate">Dead-Line</h2>
+                        <p class="text-gray-400 text-xs truncate">Navios JBS</p>
+                    </div>
+                </div>
+            </a>
+            
+            
+            
+        </div>
+
+        <footer class="mt-8 text-center text-gray-500 text-sm animated-menu-item" id="footer">
+            <p>Menu de Acessos | Ambiente Portuário & Logística</p>
+            <br>
+            <p>Powered by Gemini</p>      
+        </footer>
+    </div>
+
+
+    <div id="sidebar-context" class="sidebar">
+        <h2 class="text-xl font-bold text-white mb-2 text-center border-b border-cyan-500/50 pb-2">
+            Contexto
+        </h2>
+
+
+<div id="lembrete-container">
+    <label for="horarioLembrete" class="text-gray-300 text-xs">Definir Lembrete (HH:MM):</label>
+    <div class="flex gap-2 mt-1">
+        <input type="time" id="horarioLembrete" value="22:45" class="bg-gray-700 text-white rounded p-1 text-sm border border-gray-600">
+        <button onclick="definirLembrete()" class="bg-cyan-600 text-white px-2 py-1 rounded text-xs hover:bg-cyan-500">Definir</button>
+    </div>
+    <p id="statusLembrete" style="margin-top: 5px; font-size: 0.75rem; color: #a3e635;"></p>
+</div>
+
+
+        <div id="relogio-widget" class="utility-widget">
+            --:--:--
+        </div>
+
+        <div id="calendar-widget" class="utility-widget">
+            <div class="flex justify-between items-center mb-2">
+                <button id="prev-month" class="text-cyan-400 hover:text-white transition duration-200 p-1 rounded-full"><i class="fas fa-chevron-left"></i></button>
+                <h3 id="current-month-year" class="text-lg font-semibold text-white">Mês, Ano</h3>
+                <button id="next-month" class="text-cyan-400 hover:text-white transition duration-200 p-1 rounded-full"><i class="fas fa-chevron-right"></i></button>
+            </div>
+            <div id="calendar-days-header" class="grid grid-cols-7 text-xs font-bold text-gray-400 mb-1">
+                <span>Dom</span><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span>
+            </div>
+            <div id="calendar-grid" class="grid grid-cols-7 gap-1 text-sm">
+                </div>
+            <p class="text-xs text-gray-400 mt-4"><span class="text-orange-400">•</span> Clique data para nota.</p>
+        </div>
+        
+        <!--<div id="clima-widget" class="utility-widget">
+            <p class="text-gray-300 font-semibold mb-1">Itajaí/SC</p>
+            <div id="clima-info">
+                <i class="fas fa-sync-alt fa-spin text-cyan-400 clima-icon"></i>
+                <p class="text-2xl text-yellow-300">...</p> 
+            </div>
+            <p class="text-xs text-gray-400 mt-1" id="clima-descricao">Aguardando API.</p>
+        </div>-->
+
+    </div>
+    <div id="sidebar-utility" class="sidebar">
+        <h2 class="text-xl font-bold text-white mb-2 text-center border-b border-cyan-500/50 pb-2">
+            Utilidades
+        </h2>
+
+        <div id="kpi-grid" class="utility-widget">
+            </div>
+
+        <div id="agenda-cargas-widget" class="utility-widget p-0">
+            <h3 class="font-bold text-white text-sm pt-2">Agenda (Simulada)</h3>
+            <div id="tabela-cargas-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>BL</th>
+                            <th>Prazo</th>
+                            <th>St</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-cargas-body">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div id="notes-widget" class="utility-widget">
+            <p class="font-bold text-white mb-1">Notas Rápidas</p>
+            <textarea id="quick-note-text" placeholder="Digite uma nota..." title="Bloco de Notas Rápido"></textarea>
+            <button id="save-note-btn" class="w-full text-sm">
+                Salvar
+            </button>
+            <div id="note-status"></div>
+        </div>
+        
+        <div class="utility-widget" style="border-top: 4px solid #ef4444;">
+            <p class="text-cyan-400 font-semibold mb-1 text-xs">ID Sessão</p>
+            <p class="text-[10px] text-gray-400 break-all leading-tight" id="session-display">...</p>
+        </div>
+
+    </div>
+    <div id="chatbot-widget" class="fixed bottom-4 right-4 z-50 transition-all duration-300 transform scale-0 opacity-0 pointer-events-none bg-gray-900 border border-cyan-500 rounded-lg shadow-2xl" style="width: 350px; height: 450px; transform-origin: bottom right;">
+        <div class="p-3 bg-cyan-600/80 rounded-t-lg text-white flex justify-between items-center">
+            <h3 class="font-bold text-lg">ZIM AI Assistant</h3>
+            <button id="close-chat-btn" class="text-white hover:text-gray-300">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        
+        <div class="p-2 text-white overflow-y-auto h-[calc(100%-48px)]">  
+            <div id="ai-agent-embed-area" class="w-full h-full flex items-center justify-center">
+                <p class="text-sm text-gray-400 p-4 text-center">
+                    **[AQUI ENTRA O CÓDIGO/IFRAME DO SEU CHATBOT DE IA]**
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // ******************************************************** // *** 1. CONFIGURAÇÃO DE CLIMA (ALTERE A CHAVE AQUI!) ***
+        // ********************************************************
+        const API_KEY = ""; 
+        const LATITUDE = -26.9079; 
+        const LONGITUDE = -48.6659; 
+
+        // ******************************************************** // *** 2. FUNÇÕES DE UTILIDADE (RELÓGIO, DATA, UUID) ***
+        // ********************************************************
+        
+        function atualizarRelogioEData() {
+            const agora = new Date();
+            const horas = String(agora.getHours()).padStart(2, '0');
+            const minutos = String(agora.getMinutes()).padStart(2, '0');
+            const segundos = String(agora.getSeconds()).padStart(2, '0');
+            document.getElementById('relogio-widget').textContent = `${horas}:${minutos}:${segundos}`;
+        }
+        
+        let uniqueSessionID = null;
+        function generateUniqueCode() {
+            if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+                uniqueSessionID = crypto.randomUUID();
+            } else {
+                uniqueSessionID = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                    const r = Math.random() * 16 | 0;
+                    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                    return v.toString(16);
+                });
+            }
+            document.getElementById('session-display').textContent = uniqueSessionID;
+            return uniqueSessionID;
+        }
+
+        // ******************************************************** // *** 3. LÓGICA DO CALENDÁRIO (COM ANOTAÇÕES) ***
+        // ********************************************************
+
+        let currentCalendarDate = new Date(); 
+        let calendarNotes = {};
+        
+        function formatDateToKey(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function loadNotesFromLocalStorage() {
+            const storedNotes = localStorage.getItem('calendarNotes');
+            try {
+                calendarNotes = storedNotes ? JSON.parse(storedNotes) : {};
+            } catch (e) {
+                console.error("Erro ao carregar notas:", e);
+                calendarNotes = {};
+            }
+        }
+
+        function saveNotesToLocalStorage() {
+            localStorage.setItem('calendarNotes', JSON.stringify(calendarNotes));
+        }
+
+        function renderCalendar() {
+            const grid = document.getElementById('calendar-grid');
+            const monthYearDisplay = document.getElementById('current-month-year');
+            
+            grid.innerHTML = ''; 
+            loadNotesFromLocalStorage(); 
+
+            const viewYear = currentCalendarDate.getFullYear();
+            const viewMonth = currentCalendarDate.getMonth(); 
+            
+            const today = new Date();
+            const isTodayMonth = today.getFullYear() === viewYear && today.getMonth() === viewMonth;
+            const todayDay = today.getDate();
+
+            const monthNames = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+            monthYearDisplay.textContent = `${monthNames[viewMonth]} ${viewYear}`;
+
+            const firstDayOfMonth = new Date(viewYear, viewMonth, 1).getDay(); 
+            const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+            
+            for (let i = 0; i < firstDayOfMonth; i++) {
+                const dayCell = document.createElement('div');
+                dayCell.classList.add('day', 'empty', 'other-month');
+                grid.appendChild(dayCell);
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(viewYear, viewMonth, day);
+                const dateKey = formatDateToKey(date); 
+                
+                const dayCell = document.createElement('div');
+                dayCell.classList.add('day');
+                dayCell.textContent = day;
+                dayCell.setAttribute('data-full-date', dateKey); 
+
+                if (isTodayMonth && day === todayDay) {
+                    dayCell.classList.add('current-day');
+                } else {
+                    dayCell.classList.add('text-white', 'hover:bg-cyan-600/50'); 
+                }
+                
+                const noteContent = calendarNotes[dateKey];
+                if (noteContent) {
+                    dayCell.classList.add('has-note');
+                    dayCell.setAttribute('title', `Nota: ${noteContent}`);
+                } else {
+                    dayCell.setAttribute('title', 'Clique para adicionar nota.');
+                }
+                
+                dayCell.addEventListener('click', handleDayClick);
+                grid.appendChild(dayCell);
+            }
+            
+            const totalCells = firstDayOfMonth + daysInMonth;
+            const requiredRows = Math.ceil(totalCells / 7);
+            const cellsToFill = requiredRows * 7;
+            const actualRemainingCells = cellsToFill - totalCells;
+
+            for (let i = 0; i < actualRemainingCells; i++) {
+                const dayCell = document.createElement('div');
+                dayCell.classList.add('day', 'empty', 'other-month');
+                grid.appendChild(dayCell);
+            }
+        }
+
+        function changeMonth(direction) {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + direction);
+            renderCalendar();
+        }
+        
+        function handleDayClick(event) {
+            const dayCell = event.currentTarget;
+            if (dayCell.classList.contains('empty')) return; 
+
+            const dateKey = dayCell.getAttribute('data-full-date');
+            const existingNote = calendarNotes[dateKey] || '';
+            const friendlyDate = new Date(dateKey + 'T00:00:00').toLocaleDateString('pt-BR', { weekday: 'short', day: 'numeric', month: 'short' });
+            
+            const promptMessage = existingNote 
+                ? `NOTA (${friendlyDate}):\n${existingNote}\n\n[OK p/ Editar | Limpe p/ Excluir]`
+                : `NOVA NOTA para ${friendlyDate}:`;
+            
+            const userNote = prompt(promptMessage, existingNote);
+
+            if (userNote !== null) { 
+                const trimmedNote = userNote.trim();
+                
+                if (trimmedNote === "") {
+                    if (calendarNotes[dateKey]) {
+                        delete calendarNotes[dateKey];
+                    }
+                } else {
+                    calendarNotes[dateKey] = trimmedNote;
+                }
+
+                saveNotesToLocalStorage();
+                renderCalendar(); 
+            }
+        }
+
+
+        // ******************************************************** // *** 4. LÓGICA DA TABELA DE CARGAS ***
+        // ********************************************************
+
+        const dadosSimuladosCargas = [
+            { bl: 'BRSS-871', prazo: '06/11', status: 'Pronto', cssClass: 'status-pronto' },
+            { bl: 'BRSS-872', prazo: '06/11', status: 'Atraso', cssClass: 'status-atraso' },
+            { bl: 'BRSS-873', prazo: '07/11', status: 'Pendente', cssClass: 'status-pendente' },
+            { bl: 'BRSS-874', prazo: '07/11', status: 'Pronto', cssClass: 'status-pronto' },
+            { bl: 'BRSS-875', prazo: '08/11', status: 'Pendente', cssClass: 'status-pendente' },
+            { bl: 'BRSS-876', prazo: '08/11', status: 'Pronto', cssClass: 'status-pronto' },
+            { bl: 'BRSS-877', prazo: '09/11', status: 'Pendente', cssClass: 'status-pendente' },
+            { bl: 'BRSS-878', prazo: '09/11', status: 'Pronto', cssClass: 'status-pronto' },
+        ];
+
+        function renderTabelaCargas() {
+            const tbody = document.getElementById('tabela-cargas-body');
+            tbody.innerHTML = ''; 
+
+            dadosSimuladosCargas.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="font-mono text-xs">${item.bl}</td>
+                    <td class="text-xs">${item.prazo}</td>
+                    <td class="${item.cssClass} text-xs">${item.status}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+
+        // ******************************************************** // *** 5. LÓGICA DOS KPI CARDS ***
+        // ********************************************************
+        
+        const dadosKPIs = [
+            { id: 'total-processos', label: 'Proc. Dia', value: 85, unit: 'un', cssClass: 'kpi-success' },
+            { id: 'em-atraso', label: 'Atraso', value: 3, unit: 'un', cssClass: 'kpi-danger' },
+            { id: 'pronto-embarque', label: 'Pronto', value: 92, unit: '%', cssClass: 'kpi-success' },
+            { id: 'aguardando-docs', label: 'Docs', value: 12, unit: 'un', cssClass: 'kpi-warning' },
+        ];
+
+        function renderKPIs() {
+            const kpiGrid = document.getElementById('kpi-grid');
+            kpiGrid.innerHTML = ''; 
+
+            dadosKPIs.forEach(kpi => {
+                const card = document.createElement('div');
+                card.id = kpi.id;
+                card.classList.add('kpi-card', kpi.cssClass);
+                
+                const displayValue = kpi.unit === '%' ? `${kpi.value}%` : kpi.value;
+                const displayLabel = kpi.label; 
+                
+                card.innerHTML = `
+                    <div class="value">${displayValue}</div>
+                    <div class="label" style="font-size: 0.65rem;">${displayLabel}</div>
+                `;
+                kpiGrid.appendChild(card);
+            });
+        }
+        
+        // ******************************************************** // *** 6. LÓGICA DO BLOCO DE NOTAS ***
+        // ********************************************************
+
+        let savedNoteContent = localStorage.getItem('quickNote') || "";
+        let savedNoteTitle = localStorage.getItem('quickNoteTitle') || "Nota Rápida";
+        
+        const noteTextarea = document.getElementById('quick-note-text');
+        const noteStatus = document.getElementById('note-status');
+
+        function loadQuickNote() {
+            noteTextarea.value = savedNoteContent;
+        }
+
+        function saveQuickNote() {
+            const content = noteTextarea.value.trim();
+            
+            if (content === "") {
+                noteStatus.textContent = "Nota vazia.";
+                noteStatus.style.color = '#f87171'; 
+                return;
+            }
+
+            const now = new Date();
+            const title = `Nota ${now.toLocaleTimeString()}`;
+            
+            savedNoteContent = content;
+            savedNoteTitle = title;
+            localStorage.setItem('quickNote', content);
+            localStorage.setItem('quickNoteTitle', title);
+            
+            noteStatus.textContent = `Salvo!`;
+            noteStatus.style.color = '#a3e635'; 
+            
+            setTimeout(() => {
+                noteStatus.textContent = ""; 
+            }, 3000);
+        }
+
+        // ******************************************************** // *** 7. LÓGICA DO CLIMA (FETCH API) ***
+        // ********************************************************
+
+        const iconMap = {
+            '01d': 'fas fa-sun', '01n': 'fas fa-moon', '02d': 'fas fa-cloud-sun', '02n': 'fas fa-cloud-moon',   
+            '03d': 'fas fa-cloud', '03n': 'fas fa-cloud', '04d': 'fas fa-cloud-meatball', '04n': 'fas fa-cloud-meatball',
+            '09d': 'fas fa-cloud-showers-heavy', '09n': 'fas fa-cloud-showers-heavy', '10d': 'fas fa-cloud-sun-rain', '10n': 'fas fa-cloud-moon-rain',
+            '11d': 'fas fa-bolt', '11n': 'fas fa-bolt', '13d': 'fas fa-snowflake', '13n': 'fas fa-snowflake',
+            '50d': 'fas fa-smog', '50n': 'fas fa-smog',
+        };
+
+        async function buscarClima() {
+            const climaInfoDiv = document.getElementById('clima-info');
+            const climaDescricaoP = document.getElementById('clima-descricao');
+
+            if (API_KEY === 'SUA_CHAVE_DE_API_OPENWEATHER_AQUI') {
+                climaInfoDiv.innerHTML = '<i class="fas fa-exclamation-triangle text-red-500 clima-icon" style="font-size:1.5rem"></i>';
+                climaDescricaoP.textContent = 'Sem API Key.';
+                return;
+            }
+
+            const url = `https://api.openweathermap.org/data/2.5/weather?lat=${LATITUDE}&lon=${LONGITUDE}&appid=${API_KEY}&units=metric&lang=pt_br`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (response.ok) {
+                    const temperatura = Math.round(data.main.temp);
+                    const descricao = data.weather[0].description;
+                    const icone = data.weather[0].icon;
+                    const iconeFa = iconMap[icone] || 'fas fa-question-circle'; 
+                    
+                    climaInfoDiv.innerHTML = `
+                        <i class="${iconeFa} text-2xl text-yellow-300 clima-icon" style="margin-bottom:0"></i>
+                        <span class="text-2xl font-bold ml-2">${temperatura}°</span>
+                    `;
+                    climaDescricaoP.textContent = descricao.charAt(0).toUpperCase() + descricao.slice(1); 
+                } else {
+                    climaInfoDiv.innerHTML = 'Erro';
+                }
+            } catch (error) {
+                console.error('Erro clima:', error);
+            }
+        }
+
+
+        // ******************************************************** // *** 8. LÓGICA CHATBOT E INICIALIZAÇÃO ***
+        // ********************************************************
+        
+        const robotContainer = document.getElementById('robot-container');
+        const chatbotWidget = document.getElementById('chatbot-widget');
+        const closeChatBtn = document.getElementById('close-chat-btn');
+        const robotGreeting = document.getElementById('robot-greeting');
+        const saveNoteBtn = document.getElementById('save-note-btn'); 
+
+        const greetings = [
+            "Sistema ZIM ativo.",
+            "Olá! Precisa de ajuda?",
+            "Conexão estável.",
+            "IA pronta para uso.",
+            "Processando dados...",
+            "Tudo em ordem por aqui."
+        ];
+
+        function showRandomGreeting() {
+            const randomIndex = Math.floor(Math.random() * greetings.length);
+            robotGreeting.textContent = greetings[randomIndex];
+            robotGreeting.style.opacity = '1';
+            setTimeout(() => { robotGreeting.style.opacity = '0'; }, 4000);
+        }
+        
+        function toggleChatbot() {
+            const isClosed = chatbotWidget.classList.contains('scale-0');
+
+            if (isClosed) {
+                chatbotWidget.classList.remove('scale-0', 'opacity-0', 'pointer-events-none');
+                chatbotWidget.classList.add('scale-100', 'opacity-100', 'pointer-events-auto');
+                robotContainer.style.opacity = '0'; 
+                robotContainer.style.pointerEvents = 'none'; 
+                robotGreeting.style.opacity = '0'; 
+            } else {
+                chatbotWidget.classList.remove('scale-100', 'opacity-100', 'pointer-events-auto');
+                chatbotWidget.classList.add('scale-0', 'opacity-0', 'pointer-events-none');
+                robotContainer.style.opacity = '1'; 
+                robotContainer.style.pointerEvents = 'auto'; 
+            }
+        }
+
+        window.onload = function() {
+            generateUniqueCode();
+            atualizarRelogioEData(); 
+            setInterval(atualizarRelogioEData, 1000);
+            loadNotesFromLocalStorage();
+            renderCalendar();
+            document.getElementById('prev-month').addEventListener('click', () => changeMonth(-1));
+            document.getElementById('next-month').addEventListener('click', () => changeMonth(1));
+            renderTabelaCargas();
+            renderKPIs();
+            loadQuickNote();
+            saveNoteBtn.addEventListener('click', saveQuickNote);
+            buscarClima(); 
+            setInterval(buscarClima, 600000); 
+            setTimeout(showRandomGreeting, 1700); 
+            setInterval(showRandomGreeting, 60000); 
+        };
+        
+        robotContainer.addEventListener('click', toggleChatbot);
+        closeChatBtn.addEventListener('click', toggleChatbot);
+
+        let lembreteHorario = null;
+        let lembreteAtivo = false;
+
+        function definirLembrete() {
+            const inputTime = document.getElementById('horarioLembrete').value;
+            if (inputTime) {
+                lembreteHorario = inputTime;
+                lembreteAtivo = true;
+                document.getElementById('statusLembrete').innerText = `Alarme: ${lembreteHorario}`;
+            }
+        }
+
+        function checarLembrete() {
+            if (!lembreteAtivo || !lembreteHorario) return;
+            const agora = new Date();
+            const horaAtual = agora.getHours().toString().padStart(2, '0');
+            const minutoAtual = agora.getMinutes().toString().padStart(2, '0');
+            if (`${horaAtual}:${minutoAtual}` === lembreteHorario) {
+                alert(`🚨 Lembrete: ${lembreteHorario}!`);
+                lembreteAtivo = false;
+                document.getElementById('statusLembrete').innerText = 'Disparado!';
+            }
+        }
+        setInterval(checarLembrete, 1000);
+    </script>
+</body>
+</html>

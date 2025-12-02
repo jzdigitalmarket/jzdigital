@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Bloco de Notas Gemini RTF & PDF</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #f0f0f0;
+            padding: 20px;
+        }
+        .editor-container {
+            width: 80%;
+            margin: 0 auto;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            background-color: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .toolbar {
+            padding: 10px 15px;
+            background-color: #e6e6e6; 
+            border-bottom: 1px solid #ccc;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap; 
+        }
+        .replace-bar {
+            padding: 8px 15px;
+            background-color: #dee2e6; 
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .replace-bar input {
+            padding: 6px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            flex-grow: 1;
+        }
+        .info-bar {
+            padding: 5px 15px;
+            font-size: 12px;
+            color: #666;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+        }
+        #editorTexto {
+            width: 100%;
+            height: 500px;
+            padding: 15px;
+            box-sizing: border-box;
+            border: none;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 14px;
+            outline: none;
+            overflow-y: auto;
+        }
+        button {
+            border: none;
+            padding: 8px 12px; 
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        /* NOVIDADE: Estilo para PDF */
+        #btnPDF {
+            background-color: #dc3545; /* Vermelho padrão de PDF */
+            color: white;
+            font-weight: bold;
+        }
+        #btnPDF:hover {
+            background-color: #c82333;
+        }
+        /* Estilos dos outros botões mantidos */
+        #btnUndo, #btnRedo { background-color: #6c757d; color: white; }
+        #btnUndo:hover, #btnRedo:hover { background-color: #5a6268; }
+        #btnBold, #btnItalic { background-color: #6f42c1; color: white; font-weight: bold; }
+        #btnBold:hover, #btnItalic:hover { background-color: #5a359c; }
+        #btnUnderline { background-color: #00bcd4; color: white; text-decoration: underline; }
+        #btnUnderline:hover { background-color: #0097a7; }
+        #btnAbrir { background-color: #17a2b8; color: white; }
+        #btnAbrir:hover { background-color: #117a8b; }
+        #btnMaiuscula, #btnMinuscula { background-color: #ffc107; color: #333; }
+        #btnMaiuscula:hover, #btnMinuscula:hover { background-color: #e0a800; }
+        #btnLimpar { background-color: #dc3545; color: white; }
+        #btnLimpar:hover { background-color: #bd2130; }
+        #btnSalvar { background-color: #007bff; color: white; }
+        #btnSalvar:hover { background-color: #0056b3; }
+        #btnSubstituir { background-color: #28a745; color: white; flex-shrink: 0; }
+        #btnSubstituir:hover { background-color: #1e7e34; }
+    </style>
+</head>
+<body>
+    <div class="editor-container">
+
+        <div class="toolbar">
+            <button id="btnUndo" onclick="aplicarFormato('undo')">↩️ Desfazer</button>
+            <button id="btnRedo" onclick="aplicarFormato('redo')">↪️ Refazer</button>
+            
+            <span style="border-left: 1px solid #aaa; margin: 0 5px;"></span>
+
+            <button id="btnAbrir" onclick="document.getElementById('inputArquivo').click()">📂 Abrir</button>
+            
+            <button id="btnPDF" onclick="gerarPDF()">📄 Gerar PDF</button>
+            
+            <button id="btnSalvar" onclick="salvarArquivoTXT()">💾 Salvar (TXT)</button>
+            <button id="btnLimpar" onclick="limparConteudo()">🧹 Limpar</button>
+            
+            <span style="border-left: 1px solid #aaa; margin: 0 5px;"></span>
+
+            <button id="btnBold" onclick="aplicarFormato('bold')">**Negrito**</button>
+            <button id="btnItalic" onclick="aplicarFormato('italic')">*Itálico*</button>
+            <button id="btnUnderline" onclick="aplicarFormato('underline')"><u>Sublinhado</u></button>
+            
+            <span style="border-left: 1px solid #aaa; margin: 0 5px;"></span>
+
+            <button id="btnMaiuscula" onclick="paraMaiusculas()">MAIÚSCULAS</button>
+            <button id="btnMinuscula" onclick="paraMinusculas()">minúsculas</button>
+        </div>
+
+        <div class="replace-bar">
+            <input type="text" id="palavraBuscar" placeholder="Localizar esta palavra..." />
+            <input type="text" id="palavraSubstituir" placeholder="Substituir por..." />
+            <button id="btnSubstituir" onclick="localizarESubstituir()">Substituir Tudo</button>
+        </div>
+        
+        <div class="info-bar">
+            <span>Palavras: <span id="contadorPalavras">0</span></span>
+            <span>Caracteres: <span id="contadorCaracteres">0</span></span>
+        </div>
+        
+        <div 
+            id="editorTexto" 
+            contenteditable="true"
+            placeholder="Agora seu documento pode virar um PDF!"
+            oninput="atualizarContadores()"
+            onkeydown="processarCalculo(event)"
+        >Experimente escrever algo em <b>negrito</b> e <i>itálico</i> e clique em "Gerar PDF".</div>
+        
+        <input type="file" id="inputArquivo" accept=".txt, text/plain" style="display: none;" onchange="carregarArquivo(event)">
+    </div>
+
+    <script>
+        // Renomeada para salvarArquivoTXT e ajustada para salvar o texto puro, já que o PDF cuidará da formatação.
+        function salvarArquivoTXT() {
+            const textoPuro = document.getElementById('editorTexto').textContent;
+            const blob = new Blob([textoPuro], { type: 'text/plain' });
+            const link = document.createElement('a');
+            
+            link.download = 'meu_documento_gemini.txt'; 
+            link.href = window.URL.createObjectURL(blob);
+
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            alert('Arquivo TXT salvo. Perdeu a formatação, mas é mais leve!');
+        }
+        
+        // NOVIDADE: Função Gerar PDF
+        function gerarPDF() {
+            // 1. O html2canvas pega a div de edição e a transforma em uma imagem (canvas).
+            html2canvas(document.getElementById('editorTexto')).then(canvas => {
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('p', 'mm', 'a4'); // 'p' = portrait (retrato), 'mm' = unidade, 'a4' = tamanho
+                
+                // Dimensões do PDF (A4 é 210mm x 297mm)
+                const pdfWidth = 210;
+                const pdfHeight = 297;
+                
+                // Dimensões da imagem capturada
+                const imgData = canvas.toDataURL('image/png');
+                const imgWidth = pdfWidth - 20; // 10mm de margem de cada lado
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                
+                let position = 10; // Posição inicial (margem superior)
+                let heightLeft = imgHeight; // Altura restante para adicionar
+
+                // Adiciona a primeira página
+                pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+                heightLeft -= pdfHeight - 20;
+
+                // Se o conteúdo for maior que uma página, ele adiciona novas páginas
+                while (heightLeft >= 0) {
+                    position = heightLeft - imgHeight + 10;
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+                    heightLeft -= pdfHeight;
+                }
+                
+                pdf.save('documento_gemini.pdf');
+                alert('PDF gerado com sucesso!');
+            }).catch(error => {
+                alert("Erro ao gerar PDF. O HTML pode estar muito complexo.");
+                console.error("Erro ao gerar PDF:", error);
+            });
+        }
+        
+        // As demais funções são as mesmas, incluídas para a compilação completa:
+        
+        function aplicarFormato(comando) {
+            document.execCommand(comando, false, null);
+        }
+
+        function atualizarContadores() {
+            const editor = document.getElementById('editorTexto');
+            const textoPuro = editor.textContent || editor.innerText;
+            const contagemChar = textoPuro.length;
+            document.getElementById('contadorCaracteres').textContent = contagemChar;
+            const palavras = textoPuro.trim().split(/\s+/).filter(word => word.length > 0);
+            const contagemPalavras = palavras.length;
+            document.getElementById('contadorPalavras').textContent = contagemPalavras;
+        }
+
+        function processarCalculo(event) {
+            if (event.keyCode === 13) {
+                const editor = document.getElementById('editorTexto');
+                let htmlContent = editor.innerHTML;
+                const linhas = htmlContent.split(/<br\/?>|<div>|<\/div>/);
+                const ultimaLinha = linhas[linhas.length - 1];
+                
+                if (ultimaLinha && ultimaLinha.trim().startsWith('=')) {
+                    const expressao = ultimaLinha.trim().substring(1);
+                    try {
+                        const resultado = eval(expressao);
+                        const resultadoFormatado = isNaN(resultado) ? 'ERRO' : resultado.toFixed(2);
+                        const novaLinha = `=${expressao} = <span style="font-weight: bold; color: blue;">${resultadoFormatado}</span>`;
+                        const novoConteudo = htmlContent.substring(0, htmlContent.lastIndexOf(ultimaLinha.trim())) + novaLinha;
+                        editor.innerHTML = novoConteudo;
+
+                        const range = document.createRange();
+                        const selection = window.getSelection();
+                        range.selectNodeContents(editor);
+                        range.collapse(false);
+                        selection.removeAllRanges();
+                        selection.addRange(range);
+
+                        event.preventDefault();
+                    } catch (e) {
+                        console.error('Erro de cálculo:', e);
+                    }
+                }
+            }
+        }
+        
+        function paraMaiusculas() {
+            const editor = document.getElementById('editorTexto');
+            editor.textContent = (editor.textContent || editor.innerText).toUpperCase();
+            atualizarContadores();
+        }
+
+        function paraMinusculas() {
+            const editor = document.getElementById('editorTexto');
+            editor.textContent = (editor.textContent || editor.innerText).toLowerCase();
+            atualizarContadores();
+        }
+
+        function localizarESubstituir() {
+            const editor = document.getElementById('editorTexto');
+            const buscar = document.getElementById('palavraBuscar').value;
+            const substituir = document.getElementById('palavraSubstituir').value;
+            if (buscar === '') {
+                alert('Você precisa informar o texto que deseja buscar!');
+                return;
+            }
+            let textoComHTML = editor.innerHTML; 
+            const regex = new RegExp(buscar, 'gi');
+            const novoConteudo = textoComHTML.replace(regex, substituir);
+            editor.innerHTML = novoConteudo;
+            atualizarContadores();
+            alert("Substituição executada.");
+        }
+
+        function limparConteudo() {
+            const editor = document.getElementById('editorTexto');
+            editor.innerHTML = ''; 
+            editor.focus(); 
+            atualizarContadores(); 
+            alert('Limpeza completa.');
+        }
+        
+        function carregarArquivo(event) {
+            const arquivo = event.target.files[0];
+            if (!arquivo) return;
+            const leitor = new FileReader();
+            leitor.onload = function(e) {
+                const conteudo = e.target.result;
+                const editor = document.getElementById('editorTexto');
+                editor.innerHTML = conteudo; 
+                atualizarContadores(); 
+                alert(`Arquivo "${arquivo.name}" carregado.`);
+            };
+            leitor.readAsText(arquivo);
+        }
+    </script>
+</body>
+</html>
