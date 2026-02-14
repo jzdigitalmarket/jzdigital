@@ -226,39 +226,6 @@
 </head>
 <body class="min-h-screen p-4 relative">
 
-
-<!-- script do chat de ia -->
-      
-    
-<input type="text" id="userInput" placeholder="Pergunte algo...">
-<button onclick="sendMessage()">Enviar</button>
-
-<div id="chat"></div>
-
-<script>
-async function sendMessage() {
-  const input = document.getElementById("userInput").value;
-
-  const response = await fetch("/api/chat", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ message: input })
-  });
-
-  const data = await response.json();
-
-  document.getElementById("chat").innerHTML += 
-    "<p><b>Você:</b> " + input + "</p>" +
-    "<p><b>IA:</b> " + data.reply + "</p>";
-}
-</script>
-
-
-<!-- fim do script do chat de ia -->
-
-    
     <div id="robot-container"> 
         <img src="robo-zim.png" alt="ZIM AI Robot" class="robot-img">
     </div>
@@ -512,6 +479,38 @@ async function sendMessage() {
             <div id="ai-agent-embed-area" class="w-full h-full flex items-center justify-center">
                 <p class="text-sm text-gray-400 p-4 text-center">
 
+
+<!-- script do chat de ia -->
+      
+    
+<input type="text" id="userInput" placeholder="Pergunte algo...">
+<button onclick="sendMessage()">Enviar</button>
+
+<div id="chat"></div>
+
+<script>
+async function sendMessage() {
+  const input = document.getElementById("userInput").value;
+
+  const response = await fetch("/api/chat", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ message: input })
+  });
+
+  const data = await response.json();
+
+  document.getElementById("chat").innerHTML += 
+    "<p><b>Você:</b> " + input + "</p>" +
+    "<p><b>IA:</b> " + data.reply + "</p>";
+}
+</script>
+
+
+<!-- fim do script do chat de ia -->    
+                    
                     <!--Start of Tawk.to Script-->
 <script type="text/javascript">
 var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
