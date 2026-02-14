@@ -1,0 +1,30 @@
+<!-- script do chat de ia -->
+      
+    
+<input type="text" id="userInput" placeholder="Pergunte algo...">
+<button onclick="sendMessage()">Enviar</button>
+
+<div id="chat" justify-content: center; align-items: center; height: 100vh;">
+    
+<script>
+async function sendMessage() {
+  const input = document.getElementById("userInput").value;
+
+  const response = await fetch("/api/chat", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ message: input })
+  });
+
+  const data = await response.json();
+
+  document.getElementById("chat").innerHTML += 
+    "<p><b>Você:</b> " + input + "</p>" +
+    "<p><b>IA:</b> " + data.reply + "</p>";
+}
+</script>
+
+</div>
+<!-- fim do script do chat de ia -->    
