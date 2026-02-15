@@ -1,14 +1,9 @@
-
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Apenas POST é permitido' });
+        return res.status(405).json({ error: 'Método não permitido' });
     }
 
     const { prompt } = req.body;
-
-    // Log para depuração no painel da Vercel
-    console.log("Prompt recebido:", prompt);
-    console.log("Chave API configurada:", process.env.GROQ_API_KEY ? "SIM" : "NÃO");
 
     try {
         const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -17,32 +12,35 @@ export default async function handler(req, res) {
                 "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
                 "Content-Type": "application/json"
             },
-
             body: JSON.stringify({
-    // Llama 3.1 8B é o modelo padrão atual de alta velocidade
-    model: "llama-3.1-8b-instant", 
-    messages: [
-        { role: "system", content: "Você é um agente de IA futurista. Responda de forma clara e use termos tecnológicos ocasionalmente." },
-        { role: "user", content: prompt }
-    ],
-    temperature: 0.7
-})
+                // Modelos estáveis em 2026:
+                model: "llama-3.3-70b-versatile", 
+                messages: [
+                    { 
+                        role: "system", 
+                        content: "Você é um agente futurista. Domina teorias de Riemann sobre espaços curvos." 
+                    },
+                    { role: "user", content: prompt }
+                ]
+            })
+        });
 
-
-         
-            
-            
-        const data = await response.json();
-
-        if (!response.ok) {
-            console.error("Erro da Groq:", data);
-            return res.status(response.status).json({ error: data.error?.message || "Erro na Groq" });
+        // Captura o texto bruto primeiro para evitar o erro do "Unexpected Token A"
+        const textData = await response.text();
+        
+        try {
+            const jsonData = JSON.parse(textData);
+            if (!response.ok) {
+                return res.status(response.status).json({ error: jsonData.error?.message || "Erro na Groq" });
+            }
+            return res.status(200).json(jsonData);
+        } catch (e) {
+            // Se não for JSON, o erro era a página da Vercel
+            console.error("Resposta não-JSON recebida:", textData);
+            return res.status(500).json({ error: "O servidor Vercel falhou ao conectar com a Groq." });
         }
 
-        return res.status(200).json(data);
-
     } catch (error) {
-        console.error("Erro na função:", error);
-        return res.status(500).json({ error: "Falha interna no servidor" });
+        return res.status(500).json({ error: "Erro interno de rede." });
     }
 }
