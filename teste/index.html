@@ -70,7 +70,29 @@
         const chatContainer = document.getElementById('chat-container');
         const userInput = document.getElementById('user-input');
 
-        // FUNÇÃO PARA CHAMAR A GROQ (Aqui você precisará de um Backend simples ou usar Serverless Functions da Vercel)
+
+async function sendMessage(text) {
+    appendMessage('User', text);
+    
+    try {
+        const response = await fetch("/api/chat", { // Chama sua própria API na Vercel
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ prompt: text })
+        });
+        
+        const data = await response.json();
+        const aiResponse = data.choices[0].message.content;
+        appendMessage('Agent', aiResponse);
+    } catch (err) {
+        appendMessage('System', 'ERRO NO PROTOCOLO: Verifique os logs.');
+    }
+}
+
+
+        
+        <!--
+         // FUNÇÃO PARA CHAMAR A GROQ (Aqui você precisará de um Backend simples ou usar Serverless Functions da Vercel)
         async function sendMessage(text) {
             appendMessage('User', text);
             
@@ -94,7 +116,8 @@
                 appendMessage('System', 'Erro de conexão.');
             }
         }
-
+-->
+    
         function appendMessage(sender, text) {
             const msgDiv = document.createElement('div');
             msgDiv.className = `flex flex-col gap-1 ${sender === 'User' ? 'items-end ml-auto' : 'items-start'} max-w-[80%]`;
