@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Agent | Future Interface</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -25,6 +24,15 @@
         }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: #00ffcc; border-radius: 10px; }
+        
+        /* Animação de entrada das mensagens */
+        .message-fade {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body class="h-screen flex items-center justify-center p-4">
@@ -40,25 +48,25 @@
                 <div class="w-3 h-3 bg-emerald-400 rounded-full animate-ping"></div>
                 <h1 class="font-bold tracking-widest neon-text">GROQ_AGENT_V1.0</h1>
             </div>
-            <span class="text-xs opacity-50 uppercase tracking-tighter">Status: Online</span>
+            <span class="text-[10px] opacity-50 uppercase">Protocolo Ativo</span>
         </header>
 
-        <section id="chat-container" class="flex-1 overflow-y-auto p-6 space-y-4">
-            <div class="flex flex-col gap-1 max-w-[80%]">
+        <section id="chat-container" class="flex-1 overflow-y-auto p-6 space-y-4 text-sm">
+            <div class="flex flex-col gap-1 max-w-[80%] message-fade">
                 <span class="text-[10px] opacity-40 uppercase">System</span>
-                <p class="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-sm">
-                    Iniciando protocolos... Aguardando entrada do usuário.
+                <p class="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                    Sistemas carregados. Conectado à API Groq via Vercel Edge. Aguardando comando...
                 </p>
             </div>
         </section>
 
         <footer class="p-6 bg-black/40 border-t border-emerald-500/20">
             <form id="chat-form" class="flex gap-4">
-                <input type="text" id="user-input" 
+                <input type="text" id="user-input" autocomplete="off"
                     placeholder="Digite seu comando..." 
-                    class="flex-1 bg-transparent border border-emerald-500/30 rounded-full px-6 py-3 text-sm focus:outline-none focus:border-emerald-400 transition-all placeholder:text-emerald-900">
-                <button type="submit" 
-                    class="bg-emerald-500/20 hover:bg-emerald-500/40 border border-emerald-500/50 px-8 py-3 rounded-full text-xs font-bold transition-all uppercase tracking-widest">
+                    class="flex-1 bg-transparent border border-emerald-500/30 rounded-full px-6 py-3 text-sm focus:outline-none focus:border-emerald-400 transition-all placeholder:text-emerald-900/50">
+                <button type="submit" id="send-btn"
+                    class="bg-emerald-500/20 hover:bg-emerald-500/40 border border-emerald-500/50 px-8 py-3 rounded-full text-xs font-bold transition-all uppercase tracking-widest disabled:opacity-30 disabled:cursor-not-allowed">
                     Enviar
                 </button>
             </form>
@@ -69,83 +77,62 @@
         const chatForm = document.getElementById('chat-form');
         const chatContainer = document.getElementById('chat-container');
         const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
 
-
-
-async function sendMessage(text) {
-    appendMessage('User', text);
-    
-    try {
-        // O "/" antes de api é fundamental para sites na Vercel
-        const response = await fetch("/api/chat", { 
-            method: "POST",
-            headers: { 
-                "Content-Type": "application/json" 
-            },
-            body: JSON.stringify({ prompt: text })
-        });
-        
-        if (!response.ok) {
-            // Se o servidor respondeu mas com erro (ex: 500)
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'Erro no servidor');
-        }
-        
-        const data = await response.json();
-        const aiResponse = data.choices[0].message.content;
-        appendMessage('Agent', aiResponse);
-
-    } catch (err) {
-        console.error("Erro detalhado:", err);
-        appendMessage('System', `ERRO: ${err.message}`);
-    }
-}
-
-     
-        <!--
-         // FUNÇÃO PARA CHAMAR A GROQ (Aqui você precisará de um Backend simples ou usar Serverless Functions da Vercel)
-        async function sendMessage(text) {
-            appendMessage('User', text);
-            
-            // Nota: Chamar API diretamente do Frontend expõe sua chave. 
-            // O ideal é usar uma Vercel Edge Function, mas para teste rápido:
-            try {
-                const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-                    method: "POST",
-                    headers: {
-                        "Authorization": `Bearer SUA_CHAVE_AQUI`,
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        model: "llama3-8b-8192",
-                        messages: [{ role: "user", content: text }]
-                    })
-                });
-                const data = await response.json();
-                appendMessage('Agent', data.choices[0].message.content);
-            } catch (err) {
-                appendMessage('System', 'Erro de conexão.');
-            }
-        }
--->
-    
         function appendMessage(sender, text) {
             const msgDiv = document.createElement('div');
-            msgDiv.className = `flex flex-col gap-1 ${sender === 'User' ? 'items-end ml-auto' : 'items-start'} max-w-[80%]`;
+            const isUser = sender === 'User';
+            
+            msgDiv.className = `flex flex-col gap-1 ${isUser ? 'items-end ml-auto' : 'items-start'} max-w-[80%] message-fade`;
+            
             msgDiv.innerHTML = `
                 <span class="text-[10px] opacity-40 uppercase">${sender}</span>
-                <p class="p-3 rounded-lg ${sender === 'User' ? 'bg-blue-500/10 border border-blue-500/20' : 'bg-emerald-500/10 border border-emerald-500/20'} text-sm">
+                <p class="p-3 rounded-lg ${isUser ? 'bg-blue-500/10 border border-blue-500/20' : 'bg-emerald-500/10 border border-emerald-500/20'}">
                     ${text}
                 </p>
             `;
+            
             chatContainer.appendChild(msgDiv);
             chatContainer.scrollTop = chatContainer.scrollHeight;
         }
 
+        async function sendMessage(text) {
+            // Bloqueia interface
+            sendBtn.disabled = true;
+            sendBtn.innerText = "Pensando...";
+            appendMessage('User', text);
+            
+            try {
+                const response = await fetch("/api/chat", { 
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ prompt: text })
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Falha na resposta');
+                }
+                
+                const data = await response.json();
+                const aiResponse = data.choices[0].message.content;
+                appendMessage('Agent', aiResponse);
+
+            } catch (err) {
+                console.error("Erro:", err);
+                appendMessage('System', `ERRO CRÍTICO: ${err.message}`);
+            } finally {
+                // Libera interface
+                sendBtn.disabled = false;
+                sendBtn.innerText = "Enviar";
+            }
+        }
+
         chatForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            if(userInput.value.trim()) {
-                sendMessage(userInput.value);
+            const text = userInput.value.trim();
+            if(text && !sendBtn.disabled) {
+                sendMessage(text);
                 userInput.value = '';
             }
         });
