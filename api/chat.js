@@ -1,3 +1,4 @@
+
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Apenas POST é permitido' });
@@ -16,15 +17,21 @@ export default async function handler(req, res) {
                 "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({
-                model: "llama3-8b-8192",
-                messages: [
-                    { role: "system", content: "Você é um agente futurista." },
-                    { role: "user", content: prompt }
-                ]
-            })
-        });
 
+            body: JSON.stringify({
+    // Llama 3.1 8B é o modelo padrão atual de alta velocidade
+    model: "llama-3.1-8b-instant", 
+    messages: [
+        { role: "system", content: "Você é um agente de IA futurista. Responda de forma clara e use termos tecnológicos ocasionalmente." },
+        { role: "user", content: prompt }
+    ],
+    temperature: 0.7
+})
+
+
+         
+            
+            
         const data = await response.json();
 
         if (!response.ok) {
