@@ -71,26 +71,37 @@
         const userInput = document.getElementById('user-input');
 
 
+
 async function sendMessage(text) {
     appendMessage('User', text);
     
     try {
-        const response = await fetch("/api/chat", { // Chama sua própria API na Vercel
+        // O "/" antes de api é fundamental para sites na Vercel
+        const response = await fetch("/api/chat", { 
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: { 
+                "Content-Type": "application/json" 
+            },
             body: JSON.stringify({ prompt: text })
         });
+        
+        if (!response.ok) {
+            // Se o servidor respondeu mas com erro (ex: 500)
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Erro no servidor');
+        }
         
         const data = await response.json();
         const aiResponse = data.choices[0].message.content;
         appendMessage('Agent', aiResponse);
+
     } catch (err) {
-        appendMessage('System', 'ERRO NO PROTOCOLO: Verifique os logs.');
+        console.error("Erro detalhado:", err);
+        appendMessage('System', `ERRO: ${err.message}`);
     }
 }
 
-
-        
+     
         <!--
          // FUNÇÃO PARA CHAMAR A GROQ (Aqui você precisará de um Backend simples ou usar Serverless Functions da Vercel)
         async function sendMessage(text) {
