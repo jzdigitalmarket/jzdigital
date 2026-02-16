@@ -1,14 +1,20 @@
 export default async function handler(req, res) {
-    // 1. Bloqueia métodos que não sejam POST
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Método não permitido' });
     }
 
     const { prompt } = req.body;
 
-    // Verifica se o prompt existe para evitar erro de envio vazio
-    if (!prompt) {
+    if (!prompt || typeof prompt !== 'string') {
         return res.status(400).json({ error: 'O campo prompt é obrigatório.' });
+    }
+
+    // --- Lógica de Saudação (Hardcoded para maior fidelidade) ---
+    const saudações = ['oi', 'olá', 'ola', 'bom dia', 'boa tarde', 'boa noite'];
+    if (saudações.includes(prompt.toLowerCase().trim())) {
+        return res.status(200).json({ 
+            resposta: "Olá, sou uma inteligência artificial pronta para uso, sobre o que você quer falar?" 
+        });
     }
 
     try {
@@ -19,49 +25,36 @@ export default async function handler(req, res) {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                model: "llama-3.3-70b-versatile", 
+                model: "llama-3.3-70b-versatile",
                 messages: [
                     { 
                         role: "system", 
-                        content: `Você é o estrategista da JZ Digital.
-                        
-                        CONTEXTO: Seu foco é marketing digital e tecnologia para conversão.
-                        
-                        REGRA DE RESPOSTA INICIAL: Se o usuário estiver apenas iniciando a conversa (ex: disse Oi ou Olá), responda EXCLUSIVAMENTE: "Olá, sou uma inteligência artificial pronta para uso, sobre o que você quer falar?"
-                        
-                        REGRAS GERAIS:
-                        1. Seja direto e conciso.
-                        2. Nunca mencione Riemann ou que é apenas um modelo de linguagem.
-                        
+                        content: `Você é o estrategista da JZ Digital. Foco: marketing digital e conversão. 
+                                  REGRAS: 1. Direto e conciso. 2. Nunca mencione Riemann. 
+                                  3. Nunca diga que é um modelo de linguagem.` 
                     },
                     { role: "user", content: prompt }
                 ],
-                temperature: 0.7, // Adicionado para deixar a resposta mais natural
-                max_tokens: 500   // Limita o tamanho para evitar que ele "fale demais"
+                temperature: 0.6, // Levemente menor para manter mais foco nas regras
+                max_tokens: 500
             })
         });
 
-        const textData = await response.text();
-        
-        try {
-            const jsonData = JSON.parse(textData);
-            
-            if (!response.ok) {
-                return res.status(response.status).json({ 
-                    error: jsonData.error?.message || "Erro na API da Groq" 
-                });
-            }
+        const data = await response.json();
 
-            // Retorna o JSON de sucesso para o seu frontend
-            return res.status(200).json(jsonData);
-
-        } catch (e) {
-            console.error("Erro ao processar JSON da Groq:", textData);
-            return res.status(500).json({ error: "O servidor recebeu uma resposta inválida da IA." });
+        if (!response.ok) {
+            return res.status(response.status).json({ 
+                error: data.error?.message || "Erro na API da Groq" 
+            });
         }
 
+        // Retorna apenas a string da resposta para facilitar o front-end
+        return res.status(200).json({ 
+            resposta: data.choices[0].message.content 
+        });
+
     } catch (error) {
-        console.error("Erro de rede:", error);
-        return res.status(500).json({ error: "Erro interno de rede ao conectar com a IA." });
+        console.error("Erro na integração:", error);
+        return res.status(500).json({ error: "Erro interno ao processar sua solicitação." });
     }
 }
