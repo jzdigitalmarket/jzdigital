@@ -37,6 +37,21 @@
     </main>
 
     <script>
+
+// AUDIO        
+const resVoz = await fetch('/api/speak', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text: respostaDoAgente })
+});
+const { audioContent } = await resVoz.json();
+
+const audio = new Audio("data:audio/mp3;base64," + audioContent);
+audio.play();
+
+        // FIM DO AUDIO
+
+        
         const chatForm = document.getElementById('chat-form');
         const chatContainer = document.getElementById('chat-container');
         const progress = document.getElementById('progress');
