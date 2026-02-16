@@ -60,20 +60,32 @@
             addMsg('USER', val);
             
             progress.style.width = '100%';
+
+
             try {
                 const res = await fetch("/api/chat", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ prompt: val })
                 });
+
                 const data = await res.json();
-                addMsg('AI', data.choices[0].message.content);
-            } catch {
-                addMsg('SYS', 'Connection Error');
+
+                if (res.ok) {
+                    // Ajustado para o novo formato: data.resposta
+                    addMsg('AI', data.resposta);
+                } else {
+                    addMsg('SYS', 'ERROR: ' + (data.error || 'Unknown failure'));
+                }
+            } catch (err) {
+                addMsg('SYS', 'CRITICAL: Connection Refused');
+                console.error(err);
             } finally {
                 progress.style.width = '0%';
             }
-        });
+
+            
+      
 
         window.onload = () => addMsg('SYS', 'Terminal Ready. Awaiting commands...');
     </script>
