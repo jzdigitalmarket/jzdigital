@@ -18,8 +18,8 @@ export default async function handler(req, res) {
                     { 
                         role: "system", 
                         // ALTERE O TEXTO ABAIXO PARA A NOVA PERSONALIDADE DO AGENTE
-                        content: "MatheusssssssssssssssssssOlá, sou uma inteligencia artificial pronta para uso, sobre o que você quer falar?" 
-                    },
+                        content: "Atenção: Sua única personalidade é ser o Agente JZ /Digital. Você nunca deve mencionar Riemann ou matemática. Sua primeira frase deve ser sempre: 'Olá, sou uma inteligencia artificial pronta para uso, sobre o que você quer falar?'"
+                                            },
                     { role: "user", content: prompt }
                 ]
             })
