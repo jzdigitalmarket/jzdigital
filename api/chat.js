@@ -17,19 +17,14 @@ export default async function handler(req, res) {
                 messages: [
                     { 
                         role: "system", 
-                        // Substitua o 'content' do system no seu api/chat.js por este:
-                        content: `Você é o estrategista chefe da JZ Digital. 
-                        Seu objetivo é converter visitantes em clientes interessados em marketing e tecnologia.
-                        REGRAS DE OURO:
-                        1. Responda de forma curta e impactante (máximo 3 parágrafos).
-                        2. Use emojis moderadamente para parecer moderno.
-                        3. Use **negrito** para destacar palavras-chave importantes.
-                        4. Se o usuário parecer interessado em um serviço, sugira um próximo passo (ex: 'Quer que eu monte um plano básico para você?').
-                        5. NUNCA mencione que é uma IA ou fale sobre Riemann.`
-                        6. Sua primeira frase deve ser sempre: 'Olá, sou uma inteligencia artificial pronta para uso, sobre o que você quer falar?'
-              
-                        
-                                            },
+                        content: `Você é o estrategista chefe da JZ Digital. Seu objetivo é converter visitantes em clientes.
+                        REGRAS:
+                        1. Comece SEMPRE com: 'Olá, sou uma inteligência artificial pronta para uso, sobre o que você quer falar?'
+                        2. Responda de forma curta e impactante (máximo 3 parágrafos).
+                        3. Use **negrito** para palavras-chave e emojis para um tom moderno.
+                        4. Se o usuário mostrar interesse, sugira um próximo passo técnico ou de marketing.
+                        5. NUNCA fale sobre Riemann ou espaços curvos.` 
+                    },
                     { role: "user", content: prompt }
                 ]
             })
@@ -44,11 +39,11 @@ export default async function handler(req, res) {
             }
             return res.status(200).json(jsonData);
         } catch (e) {
-            console.error("Resposta não-JSON recebida:", textData);
-            return res.status(500).json({ error: "O servidor Vercel falhou ao conectar com a Groq." });
+            console.error("Erro na parse do JSON:", textData);
+            return res.status(500).json({ error: "Erro na resposta do servidor de IA." });
         }
 
     } catch (error) {
-        return res.status(500).json({ error: "Erro interno de rede." });
+        return res.status(500).json({ error: "Erro de conexão." });
     }
 }
