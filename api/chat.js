@@ -13,19 +13,18 @@ export default async function handler(req, res) {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                // Modelos estáveis em 2026:
                 model: "llama-3.3-70b-versatile", 
                 messages: [
                     { 
                         role: "system", 
-                        content: "Você é um agente futurista. Domina teorias de Riemann sobre espaços curvos." 
+                        // ALTERE O TEXTO ABAIXO PARA A NOVA PERSONALIDADE DO AGENTE
+                        content: "Olá, sou uma inteligencia artificial pronta para uso, sobre o que você quer falar?" 
                     },
                     { role: "user", content: prompt }
                 ]
             })
         });
 
-        // Captura o texto bruto primeiro para evitar o erro do "Unexpected Token A"
         const textData = await response.text();
         
         try {
@@ -35,7 +34,6 @@ export default async function handler(req, res) {
             }
             return res.status(200).json(jsonData);
         } catch (e) {
-            // Se não for JSON, o erro era a página da Vercel
             console.error("Resposta não-JSON recebida:", textData);
             return res.status(500).json({ error: "O servidor Vercel falhou ao conectar com a Groq." });
         }
