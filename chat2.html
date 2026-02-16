@@ -1,4 +1,42 @@
-<script>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>AI | Minimalist Terminal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'JetBrains Mono', monospace; background: #000; color: #00ffcc; overflow: hidden; }
+        .glass { background: rgba(0, 255, 204, 0.01); border: 1px solid rgba(0, 255, 204, 0.2); }
+        .loading-line {
+            height: 1px; width: 0%; background: #00ffcc;
+            position: absolute; top: 0; left: 0; transition: width 0.3s;
+        }
+        .message-fade { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body class="h-screen flex items-center justify-center p-6">
+
+    <main class="w-full max-w-3xl h-[80vh] flex flex-col glass rounded-lg relative">
+        <header class="p-4 border-b border-emerald-500/20 flex justify-between items-center text-[10px] tracking-[0.4em]">
+            <span>TESTE_NOVO_SISTEMA</span>
+            <button onclick="document.getElementById('chat-container').innerHTML=''" class="hover:text-white transition-colors">[PURGE_MEMORY]</button>
+        </header>
+
+        <section id="chat-container" class="flex-1 overflow-y-auto p-6 space-y-4 text-xs"></section>
+        
+        <footer class="p-4 bg-black/40 border-t border-emerald-500/10 relative">
+            <div id="progress" class="loading-line"></div>
+            <form id="chat-form" class="flex gap-4">
+                <input type="text" id="user-input" autocomplete="off" placeholder="Command..." 
+                    class="flex-1 bg-transparent outline-none border-b border-emerald-500/20 focus:border-emerald-500 transition-all py-1">
+                <button type="submit" class="text-[10px] font-bold">[EXECUTE]</button>
+            </form>
+        </footer>
+    </main>
+
+    <script>
         const chatForm = document.getElementById('chat-form');
         const chatContainer = document.getElementById('chat-container');
         const progress = document.getElementById('progress');
@@ -13,10 +51,11 @@
 
         chatForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const val = document.getElementById('user-input').value;
+            const input = document.getElementById('user-input');
+            const val = input.value;
             if(!val) return;
 
-            document.getElementById('user-input').value = '';
+            input.value = '';
             addMsg('USER', val);
             
             progress.style.width = '100%';
@@ -29,21 +68,22 @@
                 });
 
                 const data = await res.json();
-                console.log("Resposta da API:", data); // Isso ajuda a ver o que está voltando
 
                 if (res.ok) {
-                    // O campo aqui deve bater com o que seu chat.js envia (data.resposta)
-                    addMsg('AI', data.resposta || "Sem resposta definida.");
+                    // Aqui usamos data.resposta que vem do seu chat.js otimizado
+                    addMsg('AI', data.resposta || "Sem resposta retornada.");
                 } else {
                     addMsg('SYS', 'ERROR: ' + (data.error || 'Falha na API'));
                 }
             } catch (err) {
-                console.error("Erro no Fetch:", err);
+                console.error(err);
                 addMsg('SYS', 'CRITICAL: Connection Error');
             } finally {
                 progress.style.width = '0%';
             }
-        }); // <--- ESTA CHAVE E PARÊNTESE FALTAVAM
+        }); // Chave de fechamento do evento corrigida
 
         window.onload = () => addMsg('SYS', 'Terminal Ready. Awaiting commands...');
     </script>
+</body>
+</html>
