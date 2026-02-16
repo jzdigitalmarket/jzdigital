@@ -18,7 +18,7 @@ export default async function handler(req, res) {
                     { 
                         role: "system", 
                         // ALTERE O TEXTO ABAIXO PARA A NOVA PERSONALIDADE DO AGENTE
-                        content: "Olá, sou uma inteligencia artificial pronta para uso, sobre o que você quer falar?" 
+                        content: "MatheusssssssssssssssssssOlá, sou uma inteligencia artificial pronta para uso, sobre o que você quer falar?" 
                     },
                     { role: "user", content: prompt }
                 ]
