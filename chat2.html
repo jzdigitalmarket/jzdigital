@@ -72,14 +72,13 @@
                 const data = await res.json();
 
                 if (res.ok) {
-                    // Ajustado para o novo formato: data.resposta
+                    // MUDANÇA AQUI: data.resposta é o que o chat.js novo envia
                     addMsg('AI', data.resposta);
                 } else {
-                    addMsg('SYS', 'ERROR: ' + (data.error || 'Unknown failure'));
+                    addMsg('SYS', 'ERROR: ' + (data.error || 'Falha na API'));
                 }
             } catch (err) {
-                addMsg('SYS', 'CRITICAL: Connection Refused');
-                console.error(err);
+                addMsg('SYS', 'CRITICAL: Connection Error');
             } finally {
                 progress.style.width = '0%';
             }
