@@ -53,8 +53,12 @@ export default async function handler(req, res) {
             resposta: data.choices[0].message.content 
         });
 
-    } catch (error) {
-        console.error("Erro na integração:", error);
-        return res.status(500).json({ error: "Erro interno ao processar sua solicitação." });
-    }
+} catch (error) {
+    // ADICIONE ESTA LINHA PARA VER O ERRO NO TERMINAL:
+    console.error("DETALHES DO ERRO:", error.message, error.stack); 
+    
+    return res.status(500).json({ error: "Erro interno de rede." });
 }
+
+
+ 
