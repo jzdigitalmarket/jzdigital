@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Retro Battle: 1vs1 Manual</title>
+    <title>Retro Battle: Barriers Edition</title>
     <style>
         body { margin: 0; background: #050505; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; color: #0F0; font-family: 'Courier New', monospace; }
         canvas { border: 4px solid #222; background: #000; cursor: pointer; }
@@ -31,7 +31,6 @@
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const keys = {};
     
-    // Captura teclas (usando o.key para detectar 'Enter' e ' ')
     window.onkeydown = (e) => keys[e.key.toLowerCase()] = true;
     window.onkeyup = (e) => keys[e.key.toLowerCase()] = false;
 
@@ -55,13 +54,10 @@
         
         update() {
             if (!this.alive || gameOver) return;
-            
-            // Movimentação
             if (keys[this.upKey] && this.y > 10) this.y -= 4;
             if (keys[this.downKey] && this.y < canvas.height - 30) this.y += 4;
 
-            // Tiro Manual com Cooldown (espera entre tiros)
-            let cooldown = this.powerTimer > 0 ? 200 : 600; // Powerup diminui o tempo de espera
+            let cooldown = this.powerTimer > 0 ? 200 : 600; 
             if (keys[this.shootKey] && Date.now() - this.lastShot > cooldown) {
                 bullets.push({
                     x: this.x + (this.dir > 0 ? 35 : -5), 
@@ -72,7 +68,6 @@
                 snd(this.dir > 0 ? 500 : 400, 'square', 0.1, 0.04);
                 this.lastShot = Date.now();
             }
-
             if(this.powerTimer > 0) this.powerTimer--;
         }
 
@@ -84,14 +79,18 @@
         }
     }
 
-    // P1: 'w', 's', ' ' (espaço) | P2: 'arrowup', 'arrowdown', 'enter'
     let tanks = [
         new Tank(30, 150, '#0FF', 1, 'w', 's', ' '), 
         new Tank(540, 150, '#F0F', -1, 'arrowup', 'arrowdown', 'enter')
     ];
     
     let bullets = [], particles = [], powerUp = null;
-    const walls = [{x: 285, y: 40, w: 30, h: 90}, {x: 285, y: 220, w: 30, h: 90}];
+
+    // --- BARREIRAS COM MOVIMENTO ---
+    const walls = [
+        {x: 285, y: 20, w: 30, h: 80, dy: 2}, 
+        {x: 285, y: 250, w: 30, h: 80, dy: -2}
+    ];
 
     function resetGame() {
         score1 = 0; score2 = 0;
@@ -108,29 +107,51 @@
 
         ctx.fillStyle = '#000'; ctx.fillRect(0, 0, canvas.width, canvas.height);
         
-        // Spawn de PowerUp
         if (!powerUp && Math.random() < 0.003) powerUp = {x: 290, y: 165, w: 20, h: 20};
         if(powerUp) {
             ctx.fillStyle = '#FF0'; ctx.fillRect(powerUp.x, powerUp.y, 20, 20);
         }
 
         tanks.forEach(t => { t.update(); t.draw(); });
-        ctx.fillStyle = '#333';
-        walls.forEach(w => ctx.fillRect(w.x, w.y, w.w, w.h));
+
+        // --- LÓGICA DE MOVIMENTO E COLISÃO DAS PAREDES ---
+        ctx.fillStyle = '#444';
+        walls.forEach((w, i) => {
+            w.y += w.dy;
+
+            // Colisão com as bordas superior/inferior
+            if (w.y <= 0 || w.y + w.h >= canvas.height) {
+                w.dy *= -1;
+            }
+
+            // Colisão entre as duas barreiras
+            let other = walls[(i + 1) % 2];
+            if (w.y < other.y + other.h && w.y + w.h > other.y) {
+                // Inverte as direções
+                w.dy *= -1;
+                other.dy *= -1;
+                // Afasta um pouco para não "grudar"
+                w.y += w.dy;
+                other.y += other.dy;
+            }
+
+            ctx.fillRect(w.x, w.y, w.w, w.h);
+        });
 
         // Lógica das Balas
         for (let i = bullets.length - 1; i >= 0; i--) {
             let b = bullets[i]; b.x += b.dx;
             ctx.fillStyle = "#FFF"; ctx.fillRect(b.x, b.y, 10, 3);
 
-            // Colisão PowerUp
             if(powerUp && b.x > powerUp.x && b.x < powerUp.x + 20 && b.y > powerUp.y && b.y < powerUp.y + 20) {
                 tanks.forEach(t => { if(t.color === b.c) t.powerTimer = 400; });
                 powerUp = null; b.hit = true; snd(800, 'sine', 0.2, 0.1);
             }
 
-            // Colisão Paredes
-            walls.forEach(w => { if(b.x > w.x && b.x < w.x+w.w && b.y > w.y && b.y < w.y+w.h) b.hit = true; });
+            // Colisão com Paredes Móveis
+            walls.forEach(w => { 
+                if(b.x > w.x && b.x < w.x+w.w && b.y > w.y && b.y < w.y+w.h) b.hit = true; 
+            });
 
             // Colisão Tanques
             tanks.forEach((t, idx) => {
@@ -153,7 +174,6 @@
             if (b.x < 0 || b.x > canvas.width || b.hit) bullets.splice(i, 1);
         }
 
-        // Partículas de Explosão
         particles.forEach((p, i) => {
             p.x += p.vx; p.y += p.vy; p.l -= 0.04;
             ctx.fillStyle = Math.random() > 0.4 ? p.c : "#FFF";
