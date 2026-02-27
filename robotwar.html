@@ -2,13 +2,14 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Retro Battle: Barriers Edition</title>
+    <title>Retro Battle: Gamepad Edition</title>
     <style>
         body { margin: 0; background: #050505; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; color: #0F0; font-family: 'Courier New', monospace; }
         canvas { border: 4px solid #222; background: #000; cursor: pointer; }
         .ui { font-size: 24px; margin-bottom: 10px; text-shadow: 2px 2px #030; }
         .instructions { font-size: 14px; color: #AAA; margin-top: 10px; text-align: center; line-height: 1.5; }
         .keys { color: #666; font-size: 12px; }
+        .gamepad-status { color: #555; font-size: 10px; margin-top: 5px; }
     </style>
 </head>
 <body>
@@ -17,8 +18,9 @@
 <canvas id="gameCanvas"></canvas>
 <div class="instructions">
     PRIMEIRO A 10 PONTOS VENCE<br>
-    <span class="keys">P1: [W][S] Move | [ESPAÇO] Atira</span><br>
-    <span class="keys">P2: [SETAS] Move | [ENTER] Atira</span>
+    <span class="keys">P1: [W][S] ou Controle 1 (Analógico/D-pad) | [Espaço] ou [Botão A]</span><br>
+    <span class="keys">P2: [Setas] ou Controle 2 (Analógico/D-pad) | [Enter] ou [Botão A]</span>
+    <div id="gp-info" class="gamepad-status">Nenhum controle detectado. Aperte um botão no controle do Xbox.</div>
 </div>
 
 <script>
@@ -45,20 +47,39 @@
     }
 
     class Tank {
-        constructor(x, y, color, dir, upKey, downKey, shootKey) {
+        constructor(x, y, color, dir, upKey, downKey, shootKey, gpIndex) {
             this.x = x; this.y = y; this.color = color; this.dir = dir;
             this.upKey = upKey; this.downKey = downKey; this.shootKey = shootKey;
+            this.gpIndex = gpIndex; // Índice do controle (0 para P1, 1 para P2)
             this.alive = true; this.lastShot = 0;
             this.powerTimer = 0;
         }
         
         update() {
             if (!this.alive || gameOver) return;
-            if (keys[this.upKey] && this.y > 10) this.y -= 4;
-            if (keys[this.downKey] && this.y < canvas.height - 30) this.y += 4;
+
+            // --- Lógica de Entrada (Teclado + Gamepad) ---
+            let moveUp = keys[this.upKey];
+            let moveDown = keys[this.downKey];
+            let shoot = keys[this.shootKey];
+
+            // Consulta o Gamepad
+            const gamepads = navigator.getGamepads();
+            const gp = gamepads[this.gpIndex];
+            if (gp) {
+                document.getElementById('gp-info').innerText = "Controle(s) Xbox Ativo(s)";
+                // Analógico Esquerdo ou D-Pad
+                if (gp.axes[1] < -0.5 || gp.buttons[12].pressed) moveUp = true;
+                if (gp.axes[1] > 0.5 || gp.buttons[13].pressed) moveDown = true;
+                // Botão A (índice 0)
+                if (gp.buttons[0].pressed) shoot = true;
+            }
+
+            if (moveUp && this.y > 10) this.y -= 4;
+            if (moveDown && this.y < canvas.height - 30) this.y += 4;
 
             let cooldown = this.powerTimer > 0 ? 200 : 600; 
-            if (keys[this.shootKey] && Date.now() - this.lastShot > cooldown) {
+            if (shoot && Date.now() - this.lastShot > cooldown) {
                 bullets.push({
                     x: this.x + (this.dir > 0 ? 35 : -5), 
                     y: this.y + 7, 
@@ -79,14 +100,13 @@
         }
     }
 
+    // Configuração: P1 usa controle 0, P2 usa controle 1 (se houver)
     let tanks = [
-        new Tank(30, 150, '#0FF', 1, 'w', 's', ' '), 
-        new Tank(540, 150, '#F0F', -1, 'arrowup', 'arrowdown', 'enter')
+        new Tank(30, 150, '#0FF', 1, 'w', 's', ' ', 0), 
+        new Tank(540, 150, '#F0F', -1, 'arrowup', 'arrowdown', 'enter', 1)
     ];
     
     let bullets = [], particles = [], powerUp = null;
-
-    // --- BARREIRAS COM MOVIMENTO ---
     const walls = [
         {x: 285, y: 20, w: 30, h: 80, dy: 2}, 
         {x: 285, y: 250, w: 30, h: 80, dy: -2}
@@ -114,31 +134,18 @@
 
         tanks.forEach(t => { t.update(); t.draw(); });
 
-        // --- LÓGICA DE MOVIMENTO E COLISÃO DAS PAREDES ---
         ctx.fillStyle = '#444';
         walls.forEach((w, i) => {
             w.y += w.dy;
-
-            // Colisão com as bordas superior/inferior
-            if (w.y <= 0 || w.y + w.h >= canvas.height) {
-                w.dy *= -1;
-            }
-
-            // Colisão entre as duas barreiras
+            if (w.y <= 0 || w.y + w.h >= canvas.height) w.dy *= -1;
             let other = walls[(i + 1) % 2];
             if (w.y < other.y + other.h && w.y + w.h > other.y) {
-                // Inverte as direções
-                w.dy *= -1;
-                other.dy *= -1;
-                // Afasta um pouco para não "grudar"
-                w.y += w.dy;
-                other.y += other.dy;
+                w.dy *= -1; other.dy *= -1;
+                w.y += w.dy; other.y += other.dy;
             }
-
             ctx.fillRect(w.x, w.y, w.w, w.h);
         });
 
-        // Lógica das Balas
         for (let i = bullets.length - 1; i >= 0; i--) {
             let b = bullets[i]; b.x += b.dx;
             ctx.fillStyle = "#FFF"; ctx.fillRect(b.x, b.y, 10, 3);
@@ -148,12 +155,8 @@
                 powerUp = null; b.hit = true; snd(800, 'sine', 0.2, 0.1);
             }
 
-            // Colisão com Paredes Móveis
-            walls.forEach(w => { 
-                if(b.x > w.x && b.x < w.x+w.w && b.y > w.y && b.y < w.y+w.h) b.hit = true; 
-            });
+            walls.forEach(w => { if(b.x > w.x && b.x < w.x+w.w && b.y > w.y && b.y < w.y+w.h) b.hit = true; });
 
-            // Colisão Tanques
             tanks.forEach((t, idx) => {
                 if (t.alive && b.x > t.x && b.x < t.x + 30 && b.y > t.y && b.y < t.y + 20) {
                     t.alive = false; b.hit = true;
@@ -194,12 +197,17 @@
         ctx.font = "20px 'Courier New'";
         ctx.fillText(score1 >= 10 ? "JOGADOR 1 VENCEU!" : "JOGADOR 2 VENCEU!", canvas.width/2, canvas.height/2 + 20);
         ctx.fillStyle = "#FFF";
-        ctx.fillText("CLIQUE PARA REINICIAR", canvas.width/2, canvas.height/2 + 60);
+        ctx.fillText("CLIQUE OU APERTE 'A' PARA REINICIAR", canvas.width/2, canvas.height/2 + 60);
     }
 
     canvas.addEventListener('mousedown', () => {
         if (audioCtx.state === 'suspended') audioCtx.resume();
         if (gameOver) resetGame();
+    });
+
+    // Listener para reiniciar pelo controle
+    window.addEventListener("gamepadconnected", () => {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
     });
 
     animate();
