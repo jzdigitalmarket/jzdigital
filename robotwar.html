@@ -4,38 +4,161 @@
     <meta charset="UTF-8">
     <title>Retro Battle: Gamepad Edition</title>
     <style>
-        body { margin: 0; background: #050505; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; color: #0F0; font-family: 'Courier New', monospace; }
-        canvas { border: 4px solid #222; background: #000; cursor: pointer; }
-        .ui { font-size: 24px; margin-bottom: 10px; text-shadow: 2px 2px #030; }
+        /* CSS reescrito para acomodar o fundo animado */
+        body { 
+            margin: 0; 
+            background: #000; /* Fundo base preto absoluto */
+            overflow: hidden; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            color: #0F0; 
+            font-family: 'Courier New', monospace; 
+            position: relative;
+        }
+
+        /* Canvas do Fundo Decorativo */
+        #bgCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1; /* Fica atrás de tudo */
+        }
+
+        /* Container Principal do Jogo para garantir centralização e z-index */
+        #game-container {
+            position: relative;
+            z-index: 10; /* Fica à frente do fundo decorativo */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Canvas do Jogo */
+        #gameCanvas { 
+            border: 4px solid #222; 
+            background: #000; 
+            cursor: pointer; 
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2); /* Brilho sutil */
+        }
+
+        .ui { font-size: 24px; margin-bottom: 10px; text-shadow: 2px 2px #030; pointer-events: none; }
         .timer { color: #F00; font-weight: bold; }
-        .instructions { font-size: 14px; color: #AAA; margin-top: 10px; text-align: center; line-height: 1.5; }
+        .instructions { font-size: 14px; color: #AAA; margin-top: 10px; text-align: center; line-height: 1.5; pointer-events: none; }
         .keys { color: #666; font-size: 12px; }
         .gamepad-status { color: #555; font-size: 10px; margin-top: 5px; }
     </style>
 </head>
 <body>
 
-<div class="ui">
-    P1: <span id="p1">0</span> | 
-    <span class="timer">TEMPO: <span id="timer">60</span>s</span> | 
-    P2: <span id="p2">0</span>
-</div>
-<canvas id="gameCanvas"></canvas>
-<div class="instructions">
-    MAIOR PONTUADOR EM 60 SEGUNDOS VENCE<br>
-    <span class="keys">P1: [W][S] ou Controle 1 | [Espaço] ou [Botão A]</span><br>
-    <span class="keys">P2: [Setas] ou Controle 2 | [Enter] ou [Botão A]</span>
-    <div id="gp-info" class="gamepad-status">Nenhum controle detectado. Aperte um botão no controle do Xbox.</div>
+<canvas id="bgCanvas"></canvas>
+
+<div id="game-container">
+    <div class="ui">
+        P1: <span id="p1">0</span> | 
+        <span class="timer">TEMPO: <span id="timer">60</span>s</span> | 
+        P2: <span id="p2">0</span>
+    </div>
+    <canvas id="gameCanvas"></canvas>
+    <div class="instructions">
+        MAIOR PONTUADOR EM 60 SEGUNDOS VENCE<br>
+        <span class="keys">P1: [W][S] ou Controle 1 | [Espaço] ou [Botão A]</span><br>
+        <span class="keys">P2: [Setas] ou Controle 2 | [Enter] ou [Botão A]</span>
+        <div id="gp-info" class="gamepad-status">Nenhum controle detectado. Aperte um botão no controle.</div>
+    </div>
 </div>
 
 <script>
+    // --- LÓGICA DO FUNDO GEOMÉTRICO DECORATIVO ---
+    const bgCanvas = document.getElementById('bgCanvas');
+    const bgCtx = bgCanvas.getContext('2d');
+    let shapes = [];
+
+    function resizeBg() {
+        bgCanvas.width = window.innerWidth;
+        bgCanvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeBg);
+    resizeBg();
+
+    class GeomShape {
+        constructor() {
+            this.init();
+        }
+        init() {
+            this.x = Math.random() * bgCanvas.width;
+            this.y = Math.random() * bgCanvas.height;
+            this.size = Math.random() * 30 + 10;
+            this.vx = (Math.random() - 0.5) * 0.5; // Velocidade lenta
+            this.vy = (Math.random() - 0.5) * 0.5;
+            this.rot = Math.random() * Math.PI * 2;
+            this.vr = (Math.random() - 0.5) * 0.01; // Rotação lenta
+            this.type = Math.random() > 0.5 ? 'rect' : 'tri';
+            // Cores escuras e transparentes para não ofuscar o jogo
+            const alpha = Math.random() * 0.1 + 0.02;
+            this.color = Math.random() > 0.5 ? `rgba(0, 255, 0, ${alpha})` : `rgba(0, 50, 0, ${alpha})`;
+        }
+        update() {
+            this.x += this.vx;
+            this.y += this.vy;
+            this.rot += this.vr;
+
+            // Wrap around screen
+            if (this.x < -this.size) this.x = bgCanvas.width + this.size;
+            if (this.x > bgCanvas.width + this.size) this.x = -this.size;
+            if (this.y < -this.size) this.y = bgCanvas.height + this.size;
+            if (this.y > bgCanvas.height + this.size) this.y = -this.size;
+        }
+        draw() {
+            bgCtx.save();
+            bgCtx.translate(this.x, this.y);
+            bgCtx.rotate(this.rot);
+            bgCtx.strokeStyle = this.color;
+            bgCtx.lineWidth = 1;
+            bgCtx.beginPath();
+            if (this.type === 'rect') {
+                bgCtx.rect(-this.size/2, -this.size/2, this.size, this.size);
+            } else {
+                // Triângulo equilátero
+                bgCtx.moveTo(0, -this.size/2);
+                bgCtx.lineTo(this.size/2, this.size/2);
+                bgCtx.lineTo(-this.size/2, this.size/2);
+                bgCtx.closePath();
+            }
+            bgCtx.stroke();
+            bgCtx.restore();
+        }
+    }
+
+    // Inicializa formas
+    for(let i = 0; i < 50; i++) shapes.push(new GeomShape());
+
+    function animateBg() {
+        // Fundo ligeiramente transparente para rastro sutil
+        bgCtx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+        bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
+        
+        shapes.forEach(s => {
+            s.update();
+            s.draw();
+        });
+        requestAnimationFrame(animateBg);
+    }
+    animateBg(); // Inicia animação de fundo
+
+
+    // --- LÓGICA ORIGINAL DO JOGO (COM PEQUENOS AJUSTES DE ORGANIZAÇÃO) ---
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     canvas.width = 600; canvas.height = 350;
 
     let score1 = 0, score2 = 0;
     let gameOver = false;
-    let tempoLimite = 60; // Duração da partida em segundos
+    let tempoLimite = 60; 
     let tempoInicial = Date.now();
     
     const ironias = [
@@ -83,7 +206,7 @@
             const gamepads = navigator.getGamepads();
             const gp = gamepads[this.gpIndex];
             if (gp) {
-                document.getElementById('gp-info').innerText = "Controle(s) Xbox Ativo(s)";
+                document.getElementById('gp-info').innerText = "Controle(s) Ativo(s)";
                 if (gp.axes[1] < -0.5 || gp.buttons[12].pressed) moveUp = true;
                 if (gp.axes[1] > 0.5 || gp.buttons[13].pressed) moveDown = true;
                 if (gp.buttons[0].pressed) shoot = true;
@@ -133,13 +256,13 @@
         tempoInicial = Date.now();
         bullets = []; particles = []; powerUp = null;
         tanks.forEach(t => { t.alive = true; t.powerTimer = 0; });
-        animate();
+        animateGame();
     }
 
-    function animate() {
+    // Renomeado para evitar conflito conceitual com animateBg
+    function animateGame() {
         if(gameOver) return;
 
-        // Lógica do Cronômetro
         let tempoDecorrido = Math.floor((Date.now() - tempoInicial) / 1000);
         let tempoRestante = Math.max(0, tempoLimite - tempoDecorrido);
         document.getElementById('timer').innerText = tempoRestante;
@@ -198,7 +321,7 @@
             if(p.l <= 0) particles.splice(i, 1);
         });
 
-        requestAnimationFrame(animate);
+        requestAnimationFrame(animateGame);
     }
 
     function drawGameOver() {
@@ -217,9 +340,8 @@
         } else if (score2 > score1) {
             finalMsg = "JOGADOR 2 VENCEU!";
         } else {
-            // Escolhe uma frase irônica aleatória
             finalMsg = ironias[Math.floor(Math.random() * ironias.length)];
-            ctx.fillStyle = "#FF0"; // Cor amarela para o empate irônico
+            ctx.fillStyle = "#FF0"; 
         }
         
         ctx.fillText(finalMsg, canvas.width/2, canvas.height/2 + 10);
@@ -238,7 +360,7 @@
         if (audioCtx.state === 'suspended') audioCtx.resume();
     });
 
-    animate();
+    animateGame();
 </script>
 </body>
 </html>
