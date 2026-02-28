@@ -1,24 +1,22 @@
 from flask import Flask, request, jsonify
-import random
 
 app = Flask(__name__)
 
-@app.route('/api/elogio', methods=['GET'])
-def elogio_ironico():
-    nome = request.args.get('nome', 'Jogador Desconhecido')
-    
-    frases = [
-        f"{nome}, você joga como um bot de 1995!",
-        f"Incrível, {nome}. Você quase acertou a tecla!",
-        f"Que técnica refinada, {nome}. Parece um gato andando no teclado.",
-        f"O {nome} é o terror... dos próprios aliados."
-    ]
-    
-    return jsonify({
-        "mensagem": random.choice(frases),
-        "origem": "Backend Python no Vercel"
-    })
+# Banco de dados temporário
+ranking = []
 
-# O Vercel precisa que o app seja exportado
-if __name__ == "__main__":
-    app.run()
+@app.route('/api/save-score', methods=['POST'])
+def save_score():
+    data = request.get_json()
+    nome = data.get('nome', 'Anônimo')
+    pontos = data.get('pontos', 0)
+    
+    ranking.append({"nome": nome, "pontos": pontos})
+    # Ordena do maior para o menor e pega os 5 melhores
+    ranking.sort(key=lambda x: x['pontos'], reverse=True)
+    
+    return jsonify(ranking[:5])
+
+@app.route('/api/get-ranking', methods=['GET'])
+def get_ranking():
+    return jsonify(ranking[:5])
