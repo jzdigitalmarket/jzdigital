@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <title>Retro Battle: Gamepad Edition</title>
     <style>
+        /* CSS reescrito para acomodar o fundo animado */
         body { 
             margin: 0; 
-            background: #000; 
+            background: #000; /* Fundo base preto absoluto */
             overflow: hidden; 
             display: flex; 
             flex-direction: column; 
@@ -18,32 +19,38 @@
             position: relative;
         }
 
+        /* Canvas do Fundo Decorativo */
         #bgCanvas {
             position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: 1;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1; /* Fica atrás de tudo */
         }
 
+        /* Container Principal do Jogo para garantir centralização e z-index */
         #game-container {
             position: relative;
-            z-index: 10;
+            z-index: 10; /* Fica à frente do fundo decorativo */
             display: flex;
             flex-direction: column;
             align-items: center;
         }
 
+        /* Canvas do Jogo */
         #gameCanvas { 
             border: 4px solid #222; 
             background: #000; 
             cursor: pointer; 
-            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2); /* Brilho sutil */
         }
 
         .ui { font-size: 24px; margin-bottom: 10px; text-shadow: 2px 2px #030; pointer-events: none; }
         .timer { color: #F00; font-weight: bold; }
         .instructions { font-size: 14px; color: #AAA; margin-top: 10px; text-align: center; line-height: 1.5; pointer-events: none; }
         .keys { color: #666; font-size: 12px; }
+        .gamepad-status { color: #555; font-size: 10px; margin-top: 5px; }
     </style>
 </head>
 <body>
@@ -59,82 +66,116 @@
     <canvas id="gameCanvas"></canvas>
     <div class="instructions">
         MAIOR PONTUADOR EM 60 SEGUNDOS VENCE<br>
-        <span class="keys">P1: [W][S] | P2: [Setas]</span>
-        <div id="gp-info" style="color: #555; font-size: 10px;">Aperte um botão no controle.</div>
+        <span class="keys">P1: [W][S] ou Controle 1 | [Espaço] ou [Botão A]</span><br>
+        <span class="keys">P2: [Setas] ou Controle 2 | [Enter] ou [Botão A]</span>
+        <div id="gp-info" class="gamepad-status">Nenhum controle detectado. Aperte um botão no controle.</div>
     </div>
 </div>
 
 <script>
-    // --- FUNDO GEOMÉTRICO ---
+    // --- LÓGICA DO FUNDO GEOMÉTRICO DECORATIVO ---
     const bgCanvas = document.getElementById('bgCanvas');
     const bgCtx = bgCanvas.getContext('2d');
     let shapes = [];
 
-    function resizeBg() { bgCanvas.width = window.innerWidth; bgCanvas.height = window.innerHeight; }
+    function resizeBg() {
+        bgCanvas.width = window.innerWidth;
+        bgCanvas.height = window.innerHeight;
+    }
     window.addEventListener('resize', resizeBg);
     resizeBg();
 
     class GeomShape {
-        constructor() { this.init(); }
+        constructor() {
+            this.init();
+        }
         init() {
             this.x = Math.random() * bgCanvas.width;
             this.y = Math.random() * bgCanvas.height;
             this.size = Math.random() * 30 + 10;
-            this.vx = (Math.random() - 0.5) * 0.5;
+            this.vx = (Math.random() - 0.5) * 0.5; // Velocidade lenta
             this.vy = (Math.random() - 0.5) * 0.5;
             this.rot = Math.random() * Math.PI * 2;
-            this.vr = (Math.random() - 0.5) * 0.01;
+            this.vr = (Math.random() - 0.5) * 0.01; // Rotação lenta
             this.type = Math.random() > 0.5 ? 'rect' : 'tri';
+            // Cores escuras e transparentes para não ofuscar o jogo
             const alpha = Math.random() * 0.1 + 0.02;
-            this.color = `rgba(0, 255, 0, ${alpha})`;
+            this.color = Math.random() > 0.5 ? `rgba(0, 255, 0, ${alpha})` : `rgba(0, 50, 0, ${alpha})`;
         }
         update() {
-            this.x += this.vx; this.y += this.vy; this.rot += this.vr;
+            this.x += this.vx;
+            this.y += this.vy;
+            this.rot += this.vr;
+
+            // Wrap around screen
             if (this.x < -this.size) this.x = bgCanvas.width + this.size;
             if (this.x > bgCanvas.width + this.size) this.x = -this.size;
+            if (this.y < -this.size) this.y = bgCanvas.height + this.size;
+            if (this.y > bgCanvas.height + this.size) this.y = -this.size;
         }
         draw() {
-            bgCtx.save(); bgCtx.translate(this.x, this.y); bgCtx.rotate(this.rot);
-            bgCtx.strokeStyle = this.color; bgCtx.beginPath();
-            if (this.type === 'rect') bgCtx.rect(-this.size/2, -this.size/2, this.size, this.size);
-            else { bgCtx.moveTo(0, -this.size/2); bgCtx.lineTo(this.size/2, this.size/2); bgCtx.lineTo(-this.size/2, this.size/2); bgCtx.closePath(); }
-            bgCtx.stroke(); bgCtx.restore();
+            bgCtx.save();
+            bgCtx.translate(this.x, this.y);
+            bgCtx.rotate(this.rot);
+            bgCtx.strokeStyle = this.color;
+            bgCtx.lineWidth = 1;
+            bgCtx.beginPath();
+            if (this.type === 'rect') {
+                bgCtx.rect(-this.size/2, -this.size/2, this.size, this.size);
+            } else {
+                // Triângulo equilátero
+                bgCtx.moveTo(0, -this.size/2);
+                bgCtx.lineTo(this.size/2, this.size/2);
+                bgCtx.lineTo(-this.size/2, this.size/2);
+                bgCtx.closePath();
+            }
+            bgCtx.stroke();
+            bgCtx.restore();
         }
     }
+
+    // Inicializa formas
     for(let i = 0; i < 50; i++) shapes.push(new GeomShape());
+
     function animateBg() {
-        bgCtx.fillStyle = 'rgba(0, 0, 0, 0.05)'; bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
-        shapes.forEach(s => { s.update(); s.draw(); });
+        // Fundo ligeiramente transparente para rastro sutil
+        bgCtx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+        bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
+        
+        shapes.forEach(s => {
+            s.update();
+            s.draw();
+        });
         requestAnimationFrame(animateBg);
     }
-    animateBg();
+    animateBg(); // Inicia animação de fundo
 
-    // --- LÓGICA DO JOGO ---
+
+    // --- LÓGICA ORIGINAL DO JOGO (COM PEQUENOS AJUSTES DE ORGANIZAÇÃO) ---
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     canvas.width = 600; canvas.height = 350;
 
-    let score1 = 0, score2 = 0, gameOver = false, tempoLimite = 60, tempoInicial = Date.now();
-    const ironias = ["Parabéns! São igualmente ruins.", "O vencedor foi o tédio.", "Empate técnico: os dois perderam meu respeito."];
+    let score1 = 0, score2 = 0;
+    let gameOver = false;
+    let tempoLimite = 60; 
+    let tempoInicial = Date.now();
+    
+    const ironias = [
+        "Parabéns! Vocês são igualmente ruins.",
+        "Um empate? Minha avó jogava melhor que os dois.",
+        "Tanto esforço pra terminar do mesmo jeito que começou.",
+        "O vencedor foi o tédio.",
+        "Vocês combinaram isso? Porque foi patético.",
+        "Obrigado por desperdiçarem 60 segundos da minha vida.",
+        "Empate técnico: os dois perderam meu respeito."
+    ];
+
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const keys = {};
-
+    
     window.onkeydown = (e) => keys[e.key.toLowerCase()] = true;
     window.onkeyup = (e) => keys[e.key.toLowerCase()] = false;
-
-    // Função para falar com o Python no Vercel
-    async function enviarPontuacao(vencedor, pontos) {
-        console.log("Enviando dados para o Python...");
-        try {
-            const resposta = await fetch('/api/save-score', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ nome: vencedor, pontos: pontos })
-            });
-            const top5 = await resposta.json();
-            console.log("Ranking:", top5);
-        } catch (e) { console.error("Erro na API:", e); }
-    }
 
     function snd(f, t, d, v) {
         if(audioCtx.state !== 'running') return;
@@ -150,97 +191,173 @@
         constructor(x, y, color, dir, upKey, downKey, shootKey, gpIndex) {
             this.x = x; this.y = y; this.color = color; this.dir = dir;
             this.upKey = upKey; this.downKey = downKey; this.shootKey = shootKey;
-            this.gpIndex = gpIndex; this.alive = true; this.lastShot = 0; this.powerTimer = 0;
+            this.gpIndex = gpIndex;
+            this.alive = true; this.lastShot = 0;
+            this.powerTimer = 0;
         }
+        
         update() {
             if (!this.alive || gameOver) return;
-            let moveUp = keys[this.upKey], moveDown = keys[this.downKey], shoot = keys[this.shootKey];
-            const gp = navigator.getGamepads()[this.gpIndex];
+
+            let moveUp = keys[this.upKey];
+            let moveDown = keys[this.downKey];
+            let shoot = keys[this.shootKey];
+
+            const gamepads = navigator.getGamepads();
+            const gp = gamepads[this.gpIndex];
             if (gp) {
+                document.getElementById('gp-info').innerText = "Controle(s) Ativo(s)";
                 if (gp.axes[1] < -0.5 || gp.buttons[12].pressed) moveUp = true;
                 if (gp.axes[1] > 0.5 || gp.buttons[13].pressed) moveDown = true;
                 if (gp.buttons[0].pressed) shoot = true;
             }
+
             if (moveUp && this.y > 10) this.y -= 4;
             if (moveDown && this.y < canvas.height - 30) this.y += 4;
-            let cd = this.powerTimer > 0 ? 200 : 600;
-            if (shoot && Date.now() - this.lastShot > cd) {
-                bullets.push({x: this.x + (this.dir > 0 ? 35 : -5), y: this.y + 7, dx: this.dir * 7, c: this.color});
-                snd(400, 'square', 0.1, 0.04); this.lastShot = Date.now();
+
+            let cooldown = this.powerTimer > 0 ? 200 : 600; 
+            if (shoot && Date.now() - this.lastShot > cooldown) {
+                bullets.push({
+                    x: this.x + (this.dir > 0 ? 35 : -5), 
+                    y: this.y + 7, 
+                    dx: this.dir * 7, 
+                    c: this.color
+                });
+                snd(this.dir > 0 ? 500 : 400, 'square', 0.1, 0.04);
+                this.lastShot = Date.now();
             }
             if(this.powerTimer > 0) this.powerTimer--;
         }
-        draw() { if (this.alive) { ctx.fillStyle = this.powerTimer > 0 ? '#FFF' : this.color; ctx.fillRect(this.x, this.y, 30, 20); } }
+
+        draw() {
+            if (!this.alive) return;
+            ctx.fillStyle = this.powerTimer > 0 ? '#FFF' : this.color;
+            ctx.fillRect(this.x, this.y, 30, 20);
+            ctx.fillRect(this.x + (this.dir > 0 ? 25 : -10), this.y + 7, 15, 6);
+        }
     }
 
-    let tanks = [new Tank(30, 150, '#0FF', 1, 'w', 's', ' ', 0), new Tank(540, 150, '#F0F', -1, 'arrowup', 'arrowdown', 'enter', 1)];
+    let tanks = [
+        new Tank(30, 150, '#0FF', 1, 'w', 's', ' ', 0), 
+        new Tank(540, 150, '#F0F', -1, 'arrowup', 'arrowdown', 'enter', 1)
+    ];
+    
     let bullets = [], particles = [], powerUp = null;
-    const walls = [{x: 285, y: 20, w: 30, h: 80, dy: 2}, {x: 285, y: 250, w: 30, h: 80, dy: -2}];
+    const walls = [
+        {x: 285, y: 20, w: 30, h: 80, dy: 2}, 
+        {x: 285, y: 250, w: 30, h: 80, dy: -2}
+    ];
 
+    function resetGame() {
+        score1 = 0; score2 = 0;
+        document.getElementById('p1').innerText = 0;
+        document.getElementById('p2').innerText = 0;
+        gameOver = false;
+        tempoInicial = Date.now();
+        bullets = []; particles = []; powerUp = null;
+        tanks.forEach(t => { t.alive = true; t.powerTimer = 0; });
+        animateGame();
+    }
+
+    // Renomeado para evitar conflito conceitual com animateBg
     function animateGame() {
         if(gameOver) return;
-        let tempoRestante = Math.max(0, tempoLimite - Math.floor((Date.now() - tempoInicial) / 1000));
+
+        let tempoDecorrido = Math.floor((Date.now() - tempoInicial) / 1000);
+        let tempoRestante = Math.max(0, tempoLimite - tempoDecorrido);
         document.getElementById('timer').innerText = tempoRestante;
 
         if (tempoRestante <= 0) {
             gameOver = true;
-            finalizarPartida();
+            drawGameOver();
             return;
         }
 
         ctx.fillStyle = '#000'; ctx.fillRect(0, 0, canvas.width, canvas.height);
-        tanks.forEach(t => { t.update(); t.draw(); });
         
-        // Lógica de balas e colisões simplificada
+        if (!powerUp && Math.random() < 0.003) powerUp = {x: 290, y: 165, w: 20, h: 20};
+        if(powerUp) {
+            ctx.fillStyle = '#FF0'; ctx.fillRect(powerUp.x, powerUp.y, 20, 20);
+        }
+
+        tanks.forEach(t => { t.update(); t.draw(); });
+
+        ctx.fillStyle = '#444';
+        walls.forEach((w, i) => {
+            w.y += w.dy;
+            if (w.y <= 0 || w.y + w.h >= canvas.height) w.dy *= -1;
+            ctx.fillRect(w.x, w.y, w.w, w.h);
+        });
+
         for (let i = bullets.length - 1; i >= 0; i--) {
             let b = bullets[i]; b.x += b.dx;
             ctx.fillStyle = "#FFF"; ctx.fillRect(b.x, b.y, 10, 3);
+
+            if(powerUp && b.x > powerUp.x && b.x < powerUp.x + 20 && b.y > powerUp.y && b.y < powerUp.y + 20) {
+                tanks.forEach(t => { if(t.color === b.c) t.powerTimer = 400; });
+                powerUp = null; b.hit = true; snd(800, 'sine', 0.2, 0.1);
+            }
+
+            walls.forEach(w => { if(b.x > w.x && b.x < w.x+w.w && b.y > w.y && b.y < w.y+w.h) b.hit = true; });
+
             tanks.forEach((t, idx) => {
                 if (t.alive && b.x > t.x && b.x < t.x + 30 && b.y > t.y && b.y < t.y + 20) {
                     t.alive = false; b.hit = true;
                     if(idx === 0) score2++; else score1++;
                     document.getElementById('p1').innerText = score1;
                     document.getElementById('p2').innerText = score2;
+                    snd(80, 'sawtooth', 0.5, 0.2);
+                    for(let j=0; j<40; j++) particles.push({x: t.x+15, y: t.y+10, vx: (Math.random()-0.5)*15, vy: (Math.random()-0.5)*15, l: 1, c: t.color});
                     setTimeout(() => { if(!gameOver) t.alive = true }, 1500);
                 }
             });
             if (b.x < 0 || b.x > canvas.width || b.hit) bullets.splice(i, 1);
         }
+
+        particles.forEach((p, i) => {
+            p.x += p.vx; p.y += p.vy; p.l -= 0.04;
+            ctx.fillStyle = Math.random() > 0.4 ? p.c : "#FFF";
+            ctx.fillRect(p.x, p.y, 4, 4);
+            if(p.l <= 0) particles.splice(i, 1);
+        });
+
         requestAnimationFrame(animateGame);
     }
 
-    function finalizarPartida() {
-        // Desenha tela final
-        ctx.fillStyle = "rgba(0,0,0,0.85)"; ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = "#0F0"; ctx.textAlign = "center"; ctx.font = "40px 'Courier New'";
+    function drawGameOver() {
+        ctx.fillStyle = "rgba(0,0,0,0.85)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#0F0";
+        ctx.textAlign = "center";
+        ctx.font = "40px 'Courier New'";
         ctx.fillText("FIM DE TEMPO", canvas.width/2, canvas.height/2 - 40);
-
+        
+        ctx.font = "22px 'Courier New'";
         let finalMsg = "";
+        
         if (score1 > score2) {
             finalMsg = "JOGADOR 1 VENCEU!";
-            enviarPontuacao("Jogador 1", score1);
         } else if (score2 > score1) {
             finalMsg = "JOGADOR 2 VENCEU!";
-            enviarPontuacao("Jogador 2", score2);
         } else {
             finalMsg = ironias[Math.floor(Math.random() * ironias.length)];
-            ctx.fillStyle = "#FF0";
+            ctx.fillStyle = "#FF0"; 
         }
-        ctx.font = "20px 'Courier New'";
+        
         ctx.fillText(finalMsg, canvas.width/2, canvas.height/2 + 10);
-        ctx.fillStyle = "#FFF"; ctx.fillText("CLIQUE PARA REINICIAR", canvas.width/2, canvas.height/2 + 70);
-    }
-
-    function resetGame() {
-        score1 = 0; score2 = 0; gameOver = false; tempoInicial = Date.now();
-        document.getElementById('p1').innerText = 0; document.getElementById('p2').innerText = 0;
-        tanks.forEach(t => t.alive = true); bullets = [];
-        animateGame();
+        
+        ctx.fillStyle = "#FFF";
+        ctx.font = "16px 'Courier New'";
+        ctx.fillText("CLIQUE PARA REINICIAR", canvas.width/2, canvas.height/2 + 70);
     }
 
     canvas.addEventListener('mousedown', () => {
         if (audioCtx.state === 'suspended') audioCtx.resume();
         if (gameOver) resetGame();
+    });
+
+    window.addEventListener("gamepadconnected", () => {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
     });
 
     animateGame();
