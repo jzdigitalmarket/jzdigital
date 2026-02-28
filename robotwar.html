@@ -7,6 +7,7 @@
         body { margin: 0; background: #050505; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; color: #0F0; font-family: 'Courier New', monospace; }
         canvas { border: 4px solid #222; background: #000; cursor: pointer; }
         .ui { font-size: 24px; margin-bottom: 10px; text-shadow: 2px 2px #030; }
+        .timer { color: #F00; font-weight: bold; }
         .instructions { font-size: 14px; color: #AAA; margin-top: 10px; text-align: center; line-height: 1.5; }
         .keys { color: #666; font-size: 12px; }
         .gamepad-status { color: #555; font-size: 10px; margin-top: 5px; }
@@ -14,12 +15,16 @@
 </head>
 <body>
 
-<div class="ui">P1: <span id="p1">0</span> | P2: <span id="p2">0</span></div>
+<div class="ui">
+    P1: <span id="p1">0</span> | 
+    <span class="timer">TEMPO: <span id="timer">60</span>s</span> | 
+    P2: <span id="p2">0</span>
+</div>
 <canvas id="gameCanvas"></canvas>
 <div class="instructions">
-    PRIMEIRO A 10 PONTOS VENCE<br>
-    <span class="keys">P1: [W][S] ou Controle 1 (Analógico/D-pad) | [Espaço] ou [Botão A]</span><br>
-    <span class="keys">P2: [Setas] ou Controle 2 (Analógico/D-pad) | [Enter] ou [Botão A]</span>
+    MAIOR PONTUADOR EM 60 SEGUNDOS VENCE<br>
+    <span class="keys">P1: [W][S] ou Controle 1 | [Espaço] ou [Botão A]</span><br>
+    <span class="keys">P2: [Setas] ou Controle 2 | [Enter] ou [Botão A]</span>
     <div id="gp-info" class="gamepad-status">Nenhum controle detectado. Aperte um botão no controle do Xbox.</div>
 </div>
 
@@ -30,6 +35,19 @@
 
     let score1 = 0, score2 = 0;
     let gameOver = false;
+    let tempoLimite = 60; // Duração da partida em segundos
+    let tempoInicial = Date.now();
+    
+    const ironias = [
+        "Parabéns! Vocês são igualmente ruins.",
+        "Um empate? Minha avó jogava melhor que os dois.",
+        "Tanto esforço pra terminar do mesmo jeito que começou.",
+        "O vencedor foi o tédio.",
+        "Vocês combinaram isso? Porque foi patético.",
+        "Obrigado por desperdiçarem 60 segundos da minha vida.",
+        "Empate técnico: os dois perderam meu respeito."
+    ];
+
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const keys = {};
     
@@ -50,7 +68,7 @@
         constructor(x, y, color, dir, upKey, downKey, shootKey, gpIndex) {
             this.x = x; this.y = y; this.color = color; this.dir = dir;
             this.upKey = upKey; this.downKey = downKey; this.shootKey = shootKey;
-            this.gpIndex = gpIndex; // Índice do controle (0 para P1, 1 para P2)
+            this.gpIndex = gpIndex;
             this.alive = true; this.lastShot = 0;
             this.powerTimer = 0;
         }
@@ -58,20 +76,16 @@
         update() {
             if (!this.alive || gameOver) return;
 
-            // --- Lógica de Entrada (Teclado + Gamepad) ---
             let moveUp = keys[this.upKey];
             let moveDown = keys[this.downKey];
             let shoot = keys[this.shootKey];
 
-            // Consulta o Gamepad
             const gamepads = navigator.getGamepads();
             const gp = gamepads[this.gpIndex];
             if (gp) {
                 document.getElementById('gp-info').innerText = "Controle(s) Xbox Ativo(s)";
-                // Analógico Esquerdo ou D-Pad
                 if (gp.axes[1] < -0.5 || gp.buttons[12].pressed) moveUp = true;
                 if (gp.axes[1] > 0.5 || gp.buttons[13].pressed) moveDown = true;
-                // Botão A (índice 0)
                 if (gp.buttons[0].pressed) shoot = true;
             }
 
@@ -100,7 +114,6 @@
         }
     }
 
-    // Configuração: P1 usa controle 0, P2 usa controle 1 (se houver)
     let tanks = [
         new Tank(30, 150, '#0FF', 1, 'w', 's', ' ', 0), 
         new Tank(540, 150, '#F0F', -1, 'arrowup', 'arrowdown', 'enter', 1)
@@ -117,6 +130,7 @@
         document.getElementById('p1').innerText = 0;
         document.getElementById('p2').innerText = 0;
         gameOver = false;
+        tempoInicial = Date.now();
         bullets = []; particles = []; powerUp = null;
         tanks.forEach(t => { t.alive = true; t.powerTimer = 0; });
         animate();
@@ -124,6 +138,17 @@
 
     function animate() {
         if(gameOver) return;
+
+        // Lógica do Cronômetro
+        let tempoDecorrido = Math.floor((Date.now() - tempoInicial) / 1000);
+        let tempoRestante = Math.max(0, tempoLimite - tempoDecorrido);
+        document.getElementById('timer').innerText = tempoRestante;
+
+        if (tempoRestante <= 0) {
+            gameOver = true;
+            drawGameOver();
+            return;
+        }
 
         ctx.fillStyle = '#000'; ctx.fillRect(0, 0, canvas.width, canvas.height);
         
@@ -138,11 +163,6 @@
         walls.forEach((w, i) => {
             w.y += w.dy;
             if (w.y <= 0 || w.y + w.h >= canvas.height) w.dy *= -1;
-            let other = walls[(i + 1) % 2];
-            if (w.y < other.y + other.h && w.y + w.h > other.y) {
-                w.dy *= -1; other.dy *= -1;
-                w.y += w.dy; other.y += other.dy;
-            }
             ctx.fillRect(w.x, w.y, w.w, w.h);
         });
 
@@ -165,13 +185,7 @@
                     document.getElementById('p2').innerText = score2;
                     snd(80, 'sawtooth', 0.5, 0.2);
                     for(let j=0; j<40; j++) particles.push({x: t.x+15, y: t.y+10, vx: (Math.random()-0.5)*15, vy: (Math.random()-0.5)*15, l: 1, c: t.color});
-                    
-                    if(score1 >= 10 || score2 >= 10) {
-                        gameOver = true;
-                        setTimeout(drawGameOver, 100);
-                    } else {
-                        setTimeout(() => t.alive = true, 1500);
-                    }
+                    setTimeout(() => { if(!gameOver) t.alive = true }, 1500);
                 }
             });
             if (b.x < 0 || b.x > canvas.width || b.hit) bullets.splice(i, 1);
@@ -188,16 +202,31 @@
     }
 
     function drawGameOver() {
-        ctx.fillStyle = "rgba(0,0,0,0.8)";
+        ctx.fillStyle = "rgba(0,0,0,0.85)";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = "#0F0";
         ctx.textAlign = "center";
         ctx.font = "40px 'Courier New'";
-        ctx.fillText("FIM DE JOGO", canvas.width/2, canvas.height/2 - 20);
-        ctx.font = "20px 'Courier New'";
-        ctx.fillText(score1 >= 10 ? "JOGADOR 1 VENCEU!" : "JOGADOR 2 VENCEU!", canvas.width/2, canvas.height/2 + 20);
+        ctx.fillText("FIM DE TEMPO", canvas.width/2, canvas.height/2 - 40);
+        
+        ctx.font = "22px 'Courier New'";
+        let finalMsg = "";
+        
+        if (score1 > score2) {
+            finalMsg = "JOGADOR 1 VENCEU!";
+        } else if (score2 > score1) {
+            finalMsg = "JOGADOR 2 VENCEU!";
+        } else {
+            // Escolhe uma frase irônica aleatória
+            finalMsg = ironias[Math.floor(Math.random() * ironias.length)];
+            ctx.fillStyle = "#FF0"; // Cor amarela para o empate irônico
+        }
+        
+        ctx.fillText(finalMsg, canvas.width/2, canvas.height/2 + 10);
+        
         ctx.fillStyle = "#FFF";
-        ctx.fillText("CLIQUE OU APERTE 'A' PARA REINICIAR", canvas.width/2, canvas.height/2 + 60);
+        ctx.font = "16px 'Courier New'";
+        ctx.fillText("CLIQUE PARA REINICIAR", canvas.width/2, canvas.height/2 + 70);
     }
 
     canvas.addEventListener('mousedown', () => {
@@ -205,7 +234,6 @@
         if (gameOver) resetGame();
     });
 
-    // Listener para reiniciar pelo controle
     window.addEventListener("gamepadconnected", () => {
         if (audioCtx.state === 'suspended') audioCtx.resume();
     });
