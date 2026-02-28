@@ -325,6 +325,34 @@
     }
 
     function drawGameOver() {
+
+async function enviarPontuacao(vencedor, pontos) {
+    try {
+        const resposta = await fetch('/api/save-score', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nome: vencedor, pontos: pontos })
+        });
+        const top5 = await resposta.json();
+        console.log("Top 5 Líderes:", top5);
+        
+        // Aqui você poderia exibir o ranking na tela
+        alert(`Ranking Atualizado!\n1º lugar: ${top5[0].nome} com ${top5[0].pontos} pontos`);
+    } catch (e) {
+        console.error("Erro ao salvar no backend Python:", e);
+    }
+}
+
+// Chame isso dentro do drawGameOver() quando houver um vencedor claro
+if (score1 > score2) {
+    enviarPontuacao("Jogador 1", score1);
+} else if (score2 > score1) {
+    enviarPontuacao("Jogador 2", score2);
+}
+
+
+
+        
         ctx.fillStyle = "rgba(0,0,0,0.85)";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = "#0F0";
@@ -364,3 +392,4 @@
 </script>
 </body>
 </html>
+
