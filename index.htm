@@ -225,6 +225,24 @@
     </style>
 </head>
 <body class="min-h-screen p-4 relative">
+
+<h2>Testando Python no Backend</h2>
+    <input type="text" id="nome" placeholder="Seu nome">
+    <button onclick="chamarPython()">Receber Elogio</button>
+    <p id="resultado" style="color: #0F0; font-family: monospace;"></p>
+
+    <script>
+        async function chamarPython() {
+            const nome = document.getElementById('nome').value;
+            const res = await fetch(`/api/elogio?nome=${nome}`);
+            const data = await res.json();
+            
+            document.getElementById('resultado').innerText = 
+                `${data.mensagem} (${data.origem})`;
+        }
+    </script>
+
+    
     <div id="robot-container"> 
         <img src="robo-zim.png" alt="ZIM AI Robot" class="robot-img">
     </div>
