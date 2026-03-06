@@ -13,17 +13,15 @@
         body {
             font-family: 'Inter', sans-serif;
             background-color: #0d1a2b;
-            overflow-x: hidden;
             background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0.05));
             background-size: 400% 400%;
             animation: ripple 20s ease infinite;
-            position: relative; 
+            color: white;
+            min-height: 100vh;
         }
 
-        /* Animações */
         @keyframes ripple { 0% { background-position: 0% 0%; } 50% { background-position: 100% 100%; } 100% { background-position: 0% 0%; } }
-        @keyframes slideIn { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
-        
+
         /* SIDEBARS */
         .sidebar {
             position: fixed;
@@ -31,205 +29,249 @@
             width: 260px; 
             height: 100vh;
             z-index: 40; 
-            background-color: rgba(26, 39, 57, 0.98); 
-            backdrop-filter: blur(10px); 
-            padding: 60px 15px 20px 15px; 
+            background-color: rgba(13, 26, 43, 0.95); 
+            backdrop-filter: blur(12px); 
+            padding: 70px 15px 20px 15px; 
             display: flex;
             flex-direction: column; 
-            gap: 15px; 
-            overflow-y: auto;
+            gap: 20px; 
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            border-color: rgba(0, 191, 255, 0.3);
+            border-style: solid;
+            border-color: rgba(0, 191, 255, 0.2);
         }
 
-        #sidebar-context { left: 0; border-right-width: 1px; }
-        #sidebar-utility { right: 0; border-left-width: 1px; }
+        #sidebar-left { left: 0; border-right-width: 1px; }
+        #sidebar-right { right: 0; border-left-width: 1px; }
 
         /* Estados Fechados */
         .sidebar.closed-left { transform: translateX(-100%); opacity: 0; }
         .sidebar.closed-right { transform: translateX(100%); opacity: 0; }
 
-        /* Área de Conteúdo Adaptável */
+        /* Ajuste do Conteúdo */
         .content-area {
-            transition: padding 0.4s ease;
-            padding-left: 280px;
-            padding-right: 280px;
+            transition: all 0.4s ease;
+            padding: 40px 280px;
+            width: 100%;
         }
-        .content-area.no-left { padding-left: 60px; }
-        .content-area.no-right { padding-right: 60px; }
+        .content-area.no-left { padding-left: 80px; }
+        .content-area.no-right { padding-right: 80px; }
 
-        /* Botões de Toggle */
+        /* Botões Toggle */
         .toggle-btn {
             position: fixed;
             top: 15px;
             z-index: 50;
-            background: rgba(0, 191, 255, 0.2);
+            background: rgba(0, 191, 255, 0.1);
             color: #00bfff;
-            border: 1px solid #00bfff;
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
+            border: 1px solid rgba(0, 191, 255, 0.5);
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.3s;
         }
-        .toggle-btn:hover { background: #00bfff; color: #0d1a2b; }
+        .toggle-btn:hover { background: #00bfff; color: #0d1a2b; box-shadow: 0 0 15px rgba(0, 191, 255, 0.4); }
         #btn-left { left: 15px; }
         #btn-right { right: 15px; }
 
-        /* Widgets */
-        .utility-widget {
-            padding: 12px;
-            border-radius: 8px;
-            background-color: rgba(30, 41, 59, 0.5);
-            border-top: 3px solid #333;
-            color: white;
+        /* Widgets Estilizados */
+        .widget-box {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        /* Calculadora Minimalista */
-        .calc-btn {
-            background: rgba(255,255,255,0.05);
-            border-radius: 4px;
-            padding: 8px;
-            font-size: 0.8rem;
-            transition: background 0.2s;
+        .calc-display {
+            background: rgba(0, 0, 0, 0.3);
+            color: #00ffcc;
+            font-family: 'Courier New', monospace;
+            text-align: right;
+            padding: 10px;
+            font-size: 1.25rem;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            min-height: 45px;
         }
-        .calc-btn:hover { background: rgba(0, 191, 255, 0.3); }
-        
-        /* Robô e Greeting */
-        #robot-container { position: absolute; top: 1%; left: 35%; transform: translateX(-50%); z-index: 30; width: 120px; transition: opacity 0.3s; }
-        .robot-img { width: 100%; height: auto; animation: float 3s ease-in-out infinite; }
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+        .calc-grid button {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            transition: 0.2s;
+        }
+        .calc-grid button:hover { background: rgba(0, 191, 255, 0.2); }
     </style>
 </head>
-
 <body>
 
-    <button id="btn-left" class="toggle-btn" onclick="toggleLeft()"><i class="fas fa-bars"></i></button>
-    <button id="btn-right" class="toggle-btn" onclick="toggleRight()"><i class="fas fa-cog"></i></button>
+    <button id="btn-left" class="toggle-btn" onclick="toggleL()"><i class="fas fa-bars"></i></button>
+    <button id="btn-right" class="toggle-btn" onclick="toggleR()"><i class="fas fa-cog"></i></button>
 
-    <aside id="sidebar-context" class="sidebar">
-        <h2 class="text-sm font-bold text-cyan-400 uppercase tracking-widest border-b border-cyan-900 pb-2 mb-2">Contexto</h2>
+    <aside id="sidebar-left" class="sidebar">
+        <div class="text-cyan-400 text-xs font-bold uppercase tracking-widest mb-2 px-2">Painel de Controle</div>
         
-        <div id="relogio-widget" class="text-2xl font-mono text-center text-cyan-400 py-2 bg-black/20 rounded">00:00:00</div>
-
-        <div class="utility-widget" style="border-top-color: #00bfff;">
-            <div id="calc-display" class="bg-black/40 p-2 text-right font-mono text-lg text-emerald-400 mb-2 rounded truncate">0</div>
-            <div class="grid grid-cols-4 gap-1">
-                <button onclick="cClear()" class="calc-btn text-red-400">C</button>
-                <button onclick="cIn('/')" class="calc-btn">/</button>
-                <button onclick="cIn('*')" class="calc-btn">×</button>
-                <button onclick="cIn('-')" class="calc-btn">-</button>
-                <button onclick="cIn('7')" class="calc-btn">7</button>
-                <button onclick="cIn('8')" class="calc-btn">8</button>
-                <button onclick="cIn('9')" class="calc-btn">9</button>
-                <button onclick="cIn('+')" class="calc-btn">+</button>
-                <button onclick="cIn('4')" class="calc-btn">4</button>
-                <button onclick="cIn('5')" class="calc-btn">5</button>
-                <button onclick="cIn('6')" class="calc-btn">6</button>
-                <button onclick="cResult()" class="calc-btn bg-cyan-600/20 row-span-2">=</button>
-                <button onclick="cIn('1')" class="calc-btn">1</button>
-                <button onclick="cIn('2')" class="calc-btn">2</button>
-                <button onclick="cIn('3')" class="calc-btn">3</button>
-                <button onclick="cIn('0')" class="calc-btn col-span-2">0</button>
-                <button onclick="cIn('.')" class="calc-btn">.</button>
-            </div>
+        <div class="widget-box">
+            <div id="relogio" class="text-2xl font-mono text-center text-cyan-400">00:00:00</div>
+            <div id="data-atual" class="text-[10px] text-center text-gray-500 mt-1 uppercase">A carregar...</div>
         </div>
 
-        <div id="calendar-widget" class="utility-widget" style="border-top-color: #a3e635;">
-            <div class="text-[10px] text-center text-gray-400 uppercase mb-2" id="current-month-year"></div>
-            <div id="calendar-grid" class="grid grid-cols-7 gap-1 text-[10px] text-center"></div>
+        <div class="widget-box border-t-2 border-cyan-500">
+            <div class="text-[10px] text-gray-400 mb-2 font-bold uppercase">Calculadora Auxiliar</div>
+            <div id="display" class="calc-display">0</div>
+            <div class="grid grid-cols-4 gap-1 calc-grid">
+                <button onclick="cClear()" class="col-span-2 text-red-400">C</button>
+                <button onclick="cIn('/')">/</button>
+                <button onclick="cIn('*')">×</button>
+                <button onclick="cIn('7')">7</button>
+                <button onclick="cIn('8')">8</button>
+                <button onclick="cIn('9')">9</button>
+                <button onclick="cIn('-')">-</button>
+                <button onclick="cIn('4')">4</button>
+                <button onclick="cIn('5')">5</button>
+                <button onclick="cIn('6')">6</button>
+                <button onclick="cIn('+')">+</button>
+                <button onclick="cIn('1')">1</button>
+                <button onclick="cIn('2')">2</button>
+                <button onclick="cIn('3')">3</button>
+                <button onclick="cRes()" class="bg-cyan-600/30 row-span-2">=</button>
+                <button onclick="cIn('0')" class="col-span-2">0</button>
+                <button onclick="cIn('.')" >.</button>
+            </div>
         </div>
     </aside>
 
-    <main class="content-area pt-10" id="main-content">
-        <header class="text-center mb-12">
-            <h1 class="text-4xl font-black text-white tracking-tighter">
+    <main id="main-content" class="content-area">
+        <header class="text-center mb-16">
+            <h1 class="text-5xl font-black tracking-tighter text-white">
                 <span class="text-cyan-400">GEM</span> SYSTEMS
             </h1>
-            <p class="text-gray-500 text-sm">Naturally Smart Solutions</p>
+            <p class="text-gray-500 text-sm mt-2">Logistics & Intelligent Management</p>
         </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <a href="#" class="bg-gray-800/40 p-4 rounded-xl border border-gray-700 hover:border-cyan-500 transition-all group">
-                <i class="fas fa-ship text-cyan-400 mb-2"></i>
-                <h3 class="text-white font-bold">Porto Sem Papel</h3>
-                <p class="text-gray-500 text-xs">Acessar Concentrador PSP</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <a href="https://psp.portosempapel.gov.br/" target="_blank" class="widget-box flex items-center gap-4 hover:border-cyan-500 transition-all group">
+                <div class="w-14 h-14 bg-cyan-900/20 rounded-xl flex items-center justify-center text-cyan-400 group-hover:scale-110 transition-transform">
+                    <i class="fas fa-ship fa-xl"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold">Porto Sem Papel</h3>
+                    <p class="text-gray-500 text-xs">Acessar Sistema PSP</p>
+                </div>
             </a>
-            </div>
+
+            <a href="https://www4.receita.fazenda.gov.br/siscarga/" target="_blank" class="widget-box flex items-center gap-4 hover:border-blue-500 transition-all group">
+                <div class="w-14 h-14 bg-blue-900/20 rounded-xl flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
+                    <i class="fas fa-box fa-xl"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold">Siscarga</h3>
+                    <p class="text-gray-500 text-xs">Receita Federal</p>
+                </div>
+            </a>
+
+            <a href="https://www.mercante.transportes.gov.br/" target="_blank" class="widget-box flex items-center gap-4 hover:border-emerald-500 transition-all group">
+                <div class="w-14 h-14 bg-emerald-900/20 rounded-xl flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
+                    <i class="fas fa-anchor fa-xl"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold">Mercante</h3>
+                    <p class="text-gray-500 text-xs">Controle de Carga</p>
+                </div>
+            </a>
+
+            <a href="https://www.gov.br/pt-br/servicos/acessar-a-janela-unica-aquaviaria" target="_blank" class="widget-box flex items-center gap-4 hover:border-purple-500 transition-all group">
+                <div class="w-14 h-14 bg-purple-900/20 rounded-xl flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
+                    <i class="fas fa-window-restore fa-xl"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold">Janela Única</h3>
+                    <p class="text-gray-500 text-xs">Portal Aquaviário</p>
+                </div>
+            </a>
+
+            <a href="#" class="widget-box flex items-center gap-4 hover:border-orange-500 transition-all group">
+                <div class="w-14 h-14 bg-orange-900/20 rounded-xl flex items-center justify-center text-orange-400 group-hover:scale-110 transition-transform">
+                    <i class="fas fa-calendar-alt fa-xl"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold">VTE / Agendamento</h3>
+                    <p class="text-gray-500 text-xs">Gestão de Veículos</p>
+                </div>
+            </a>
+
+            <a href="#" class="widget-box flex items-center gap-4 hover:border-red-500 transition-all group">
+                <div class="w-14 h-14 bg-red-900/20 rounded-xl flex items-center justify-center text-red-400 group-hover:scale-110 transition-transform">
+                    <i class="fas fa-map-marker-alt fa-xl"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold">Rastreamento</h3>
+                    <p class="text-gray-500 text-xs">Monitorização Real-Time</p>
+                </div>
+            </a>
+        </div>
     </main>
 
-    <aside id="sidebar-utility" class="sidebar">
-        <h2 class="text-sm font-bold text-orange-400 uppercase tracking-widest border-b border-orange-900 pb-2 mb-2">Utilidades</h2>
+    <aside id="sidebar-right" class="sidebar">
+        <div class="text-orange-400 text-xs font-bold uppercase tracking-widest mb-2 px-2">Utilidades</div>
         
-        <div class="utility-widget" style="border-top-color: #f59e0b;">
-            <p class="text-xs font-bold mb-2">Notas Rápidas</p>
-            <textarea id="quick-note" class="w-full h-32 bg-black/20 border-none rounded p-2 text-xs text-gray-300 resize-none focus:ring-1 focus:ring-orange-500" placeholder="Anotar algo..."></textarea>
+        <div class="widget-box border-t-2 border-orange-500">
+            <p class="text-[10px] text-gray-400 mb-2 uppercase font-bold">Bloco de Notas</p>
+            <textarea id="notes" class="w-full h-40 bg-black/30 border-none rounded-lg p-3 text-xs text-gray-300 resize-none focus:ring-1 focus:ring-orange-500 outline-none" placeholder="Escreva as suas notas aqui..."></textarea>
+            <p class="text-[8px] text-gray-600 mt-2 text-center italic">Guardado localmente</p>
         </div>
 
-        <div class="utility-widget" style="border-top-color: #ef4444;">
-            <p class="text-[10px] text-gray-500 uppercase">Sessão ID</p>
-            <p id="session-id" class="text-[9px] font-mono text-gray-400 break-all">---</p>
+        <div class="widget-box">
+            <p class="text-[10px] text-gray-400 mb-1 uppercase font-bold">Status do Sistema</p>
+            <div class="flex items-center gap-2">
+                <div class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                <span class="text-[10px] text-emerald-400">Servidores Online</span>
+            </div>
         </div>
     </aside>
 
     <script>
-        // --- Controle das Sidebars ---
-        function toggleLeft() {
-            const sb = document.getElementById('sidebar-context');
-            const main = document.getElementById('main-content');
-            sb.classList.toggle('closed-left');
-            main.classList.toggle('no-left');
+        // Controles de Interface
+        function toggleL() {
+            document.getElementById('sidebar-left').classList.toggle('closed-left');
+            document.getElementById('main-content').classList.toggle('no-left');
         }
 
-        function toggleRight() {
-            const sb = document.getElementById('sidebar-utility');
-            const main = document.getElementById('main-content');
-            sb.classList.toggle('closed-right');
-            main.classList.toggle('no-right');
+        function toggleR() {
+            document.getElementById('sidebar-right').classList.toggle('closed-right');
+            document.getElementById('main-content').classList.toggle('no-right');
         }
 
-        // --- Lógica da Calculadora ---
-        const display = document.getElementById('calc-display');
-        function cIn(v) { 
-            if(display.innerText === '0') display.innerText = v;
-            else display.innerText += v;
-        }
-        function cClear() { display.innerText = '0'; }
-        function cResult() {
-            try { 
-                // Uso de Function é uma alternativa mais segura que eval direto
-                display.innerText = new Function('return ' + display.innerText)(); 
-            } catch { 
-                display.innerText = 'Erro'; 
-                setTimeout(cClear, 1000);
-            }
+        // Calculadora
+        const d = document.getElementById('display');
+        function cIn(v) { d.innerText === '0' ? d.innerText = v : d.innerText += v; }
+        function cClear() { d.innerText = '0'; }
+        function cRes() {
+            try { d.innerText = eval(d.innerText); } 
+            catch { d.innerText = "Erro"; setTimeout(cClear, 1000); }
         }
 
-        // --- Relógio ---
+        // Relógio e Data
         function updateTime() {
-            const now = new Date();
-            document.getElementById('relogio-widget').innerText = now.toLocaleTimeString('pt-BR');
+            const agora = new Date();
+            document.getElementById('relogio').innerText = agora.toLocaleTimeString('pt-BR');
+            const opcoes = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('data-atual').innerText = agora.toLocaleDateString('pt-BR', opcoes);
         }
         setInterval(updateTime, 1000);
 
-        // --- Inicialização ---
-        window.onload = () => {
-            updateTime();
-            document.getElementById('session-id').innerText = crypto.randomUUID();
-            // Renderizar calendário básico
-            const grid = document.getElementById('calendar-grid');
-            const now = new Date();
-            document.getElementById('current-month-year').innerText = now.toLocaleString('pt-BR', {month:'long', year:'numeric'});
-            for(let i=1; i<=31; i++) {
-                const d = document.createElement('div');
-                d.innerText = i;
-                d.className = (i === now.getDate()) ? "text-cyan-400 font-bold" : "text-gray-600";
-                grid.appendChild(d);
-            }
-        };
+        // Persistência de Notas
+        const notesArea = document.getElementById('notes');
+        notesArea.value = localStorage.getItem('gem_notes') || "";
+        notesArea.addEventListener('input', () => {
+            localStorage.setItem('gem_notes', notesArea.value);
+        });
+
+        window.onload = updateTime;
     </script>
 </body>
 </html>
