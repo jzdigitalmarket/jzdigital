@@ -221,6 +221,55 @@
         #note-status { margin-top: 5px; font-size: 0.75rem; color: #a3e635; }
         
         .line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+
+
+.calc-sidebar {
+    position: fixed;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 200px;
+    background-color: #222;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    z-index: 1000;
+    font-family: sans-serif;
+}
+
+.calc-display {
+    background: #444;
+    color: #fff;
+    text-align: right;
+    padding: 10px;
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.calc-buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 5px;
+}
+
+button {
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background: #555;
+    color: white;
+    cursor: pointer;
+}
+
+button:hover { background: #777; }
+
+.btn-equal { background: #28a745; grid-row: span 2; }
+.btn-clear { background: #dc3545; grid-column: span 2; }
+.btn-zero { grid-column: span 2; }
+
+
         
     </style>
 </head>
@@ -454,6 +503,28 @@
             <div id="calendar-grid" class="grid grid-cols-7 gap-1 text-sm">
                 </div>
             <p class="text-xs text-gray-400 mt-4"><span class="text-orange-400">•</span> Clique data para nota.</p>
+
+           <div class="calc-buttons">
+        <button onclick="clearDisplay()" class="btn-clear">C</button>
+        <button onclick="appendToDisplay('/')">/</button>
+        <button onclick="appendToDisplay('*')">×</button>
+        <button onclick="appendToDisplay('7')">7</button>
+        <button onclick="appendToDisplay('8')">8</button>
+        <button onclick="appendToDisplay('9')">9</button>
+        <button onclick="appendToDisplay('-')">-</button>
+        <button onclick="appendToDisplay('4')">4</button>
+        <button onclick="appendToDisplay('5')">5</button>
+        <button onclick="appendToDisplay('6')">6</button>
+        <button onclick="appendToDisplay('+')">+</button>
+        <button onclick="appendToDisplay('1')">1</button>
+        <button onclick="appendToDisplay('2')">2</button>
+        <button onclick="appendToDisplay('3')">3</button>
+        <button onclick="calculate()" class="btn-equal">=</button>
+        <button onclick="appendToDisplay('0')" class="btn-zero">0</button>
+        <button onclick="appendToDisplay('.')">.</button>
+    </div>
+</div>
+            
             <a href="/robotwar.html">robot</a>
         </div>
         
@@ -934,6 +1005,32 @@ s0.parentNode.insertBefore(s1,s0);
             }
         }
         setInterval(checarLembrete, 1000);
+
+const display = document.getElementById('display');
+
+function appendToDisplay(input) {
+    if (display.innerText === '0') {
+        display.innerText = input;
+    } else {
+        display.innerText += input;
+    }
+}
+
+function clearDisplay() {
+    display.innerText = '0';
+}
+
+function calculate() {
+    try {
+        // eval é usado aqui para simplicidade em uma calculadora básica
+        display.innerText = eval(display.innerText);
+    } catch (error) {
+        display.innerText = "Erro";
+        setTimeout(clearDisplay, 1500);
+    }
+}
+
+        
     </script>
 </body>
 </html>
