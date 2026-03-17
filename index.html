@@ -959,11 +959,10 @@ s0.parentNode.insertBefore(s1,s0);
         }
         
        function toggleChatbot() {
-    const isClosed = chatbotWidget.classList.contains('scale-0');
     const arkanoid = document.getElementById('arkanoid-widget');
+    const jogoAberto = arkanoid.style.display === 'block';
 
-    if (isClosed) {
-        // Mostra o jogo na sidebar em vez do chatbot
+    if (!jogoAberto) {
         arkanoid.style.display = 'block';
         robotContainer.style.opacity = '0';
         robotContainer.style.pointerEvents = 'none';
@@ -975,7 +974,6 @@ s0.parentNode.insertBefore(s1,s0);
         robotContainer.style.pointerEvents = 'auto';
         stopArkanoid();
     }
-    // mantém o chatbot fechado (removemos o toggle dele)
 }
 
         window.onload = function() {
