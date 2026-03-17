@@ -1034,7 +1034,23 @@ function calculate() {
         setTimeout(clearDisplay, 1500);
     }
 }
-
+document.addEventListener('keydown', function(e) {
+    if ('0123456789'.includes(e.key)) appendToDisplay(e.key);
+    else if (e.key === '+') appendToDisplay('+');
+    else if (e.key === '-') appendToDisplay('-');
+    else if (e.key === '*') appendToDisplay('*');
+    else if (e.key === '/') { e.preventDefault(); appendToDisplay('/'); }
+    else if (e.key === '.') appendToDisplay('.');
+    else if (e.key === 'Enter' || e.key === '=') calculate();
+    else if (e.key === 'Backspace') {
+        if (display.innerText.length > 1) {
+            display.innerText = display.innerText.slice(0, -1);
+        } else {
+            display.innerText = '0';
+        }
+    }
+    else if (e.key === 'Escape') clearDisplay();
+});
         
     </script>
 </body>
