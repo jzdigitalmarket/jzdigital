@@ -1,21 +1,28 @@
 /* ================================================
    ARKANOID — GEM SYSTEMS
    Arquivo separado: arkanoid.js
-   Inclua no HTML com:
-   <script src="arkanoid.js"></script>
    ================================================ */
 
-let arkanoidLoop = null;
+// Declarado globalmente apenas aqui (remova do HTML se houver duplicata)
+if (typeof arkanoidLoop === 'undefined') {
+    var arkanoidLoop = null;
+}
 
 function initArkanoid() {
     const canvas = document.getElementById('arkanoid-canvas');
     const ctx    = canvas.getContext('2d');
+
+    // Ajusta o canvas para a largura real da sidebar
+    const sidebarW = canvas.parentElement ? canvas.parentElement.offsetWidth - 20 : 210;
+    canvas.width  = Math.max(210, sidebarW);
+    canvas.height = 280;
+
     const W = canvas.width, H = canvas.height;
 
     /* ---------- ESTADO ---------- */
-    let paddleX = W / 2 - 25;
-    let paddleW = 50;
-    const paddleH = 6;
+    let paddleX = W / 2 - 30;
+    let paddleW = 60;
+    const paddleH = 7;
     const ballR   = 5;
     let score = 0, lives = 3, level = 1, running = false;
 
@@ -25,38 +32,17 @@ function initArkanoid() {
     let wideTimer = 0, slowTimer = 0;
     const keys   = {};
 
-    /* ---------- POWER-UPS ---------- */
-    const PU_TYPES = [
-        { type: 'wide',      color: '#00bfff', label: '▬'  },
-        { type: 'multiball', color: '#f97316', label: '●●' },
-        { type: 'slow',      color: '#a3e635', label: '↓'  },
-        { type: 'life',      color: '#f43f5e', label: '♥'  },
-    ];
-
-    function applyPowerup(type) {
-        const msg = document.getElementById('arkanoid-msg');
-        if (type === 'wide') {
-            paddleW = 80; wideTimer = 300;
-            msg.textContent = '▬ Barra Maior!';
-        } else if (type === 'multiball') {
-            const b = balls[0] || { x: W / 2, y: H - 40 };
-            balls.push({ x: b.x, y: b.y, dx: -2.5, dy: -2.5 });
-            balls.push({ x: b.x, y: b.y, dx:  2.5, dy: -2.0 });
-            msg.textContent = '●● Multi-bola!';
-        } else if (type === 'slow') {
-            slowTimer = 300;
-            msg.textContent = '↓ Bola Lenta!';
-        } else if (type === 'life') {
-            lives = Math.min(lives + 1, 5);
-            msg.textContent = '♥ +1 Vida!';
-        }
-        setTimeout(() => { msg.textContent = '← → mover  |  ENTER iniciar'; }, 2000);
-    }
-
     /* ---------- TIJOLOS ---------- */
-    const cols     = 6, rows = 4;
-    const brickW   = 28, brickH = 10, brickPad = 3;
-    const brickOffX = 4, brickOffY = 22;
+    const cols    = 6, rows = 4;
+    const brickPad = 3;
+    const brickH  = 11;
+    const brickOffY = 24;
+
+    // Calcula brickW dinamicamente para preencher a largura
+    const totalPad = (cols - 1) * brickPad;
+    const brickOffX = 5;
+    const brickW = Math.floor((W - brickOffX * 2 - totalPad) / cols);
+
     const brickColors = ['#ef4444', '#f97316', '#facc15', '#4ade80'];
 
     function resetBricks() {
@@ -75,16 +61,44 @@ function initArkanoid() {
 
     function resetBalls() {
         balls = [{
-            x: W / 2, y: H - 40,
-            dx: 2 * (Math.random() > 0.5 ? 1 : -1),
-            dy: -2.5,
+            x: W / 2, y: H - 50,
+            dx: 2.2 * (Math.random() > 0.5 ? 1 : -1),
+            dy: -2.8,
         }];
+    }
+
+    /* ---------- POWER-UPS ---------- */
+    const PU_TYPES = [
+        { type: 'wide',      color: '#00bfff', label: '▬'  },
+        { type: 'multiball', color: '#f97316', label: '●●' },
+        { type: 'slow',      color: '#a3e635', label: '↓'  },
+        { type: 'life',      color: '#f43f5e', label: '♥'  },
+    ];
+
+    function applyPowerup(type) {
+        const msg = document.getElementById('arkanoid-msg');
+        if (type === 'wide') {
+            paddleW = 90; wideTimer = 300;
+            msg.textContent = '▬ Barra Maior!';
+        } else if (type === 'multiball') {
+            const b = balls[0] || { x: W / 2, y: H - 50 };
+            balls.push({ x: b.x, y: b.y, dx: -2.5, dy: -2.5 });
+            balls.push({ x: b.x, y: b.y, dx:  2.5, dy: -2.0 });
+            msg.textContent = '●● Multi-bola!';
+        } else if (type === 'slow') {
+            slowTimer = 300;
+            msg.textContent = '↓ Bola Lenta!';
+        } else if (type === 'life') {
+            lives = Math.min(lives + 1, 5);
+            msg.textContent = '♥ +1 Vida!';
+        }
+        setTimeout(() => { msg.textContent = '← → mover  |  ENTER iniciar'; }, 2000);
     }
 
     /* ---------- TECLADO ---------- */
     function onKeyDown(e) {
         keys[e.key] = true;
-        if (e.key === 'Enter') running = true;
+        if (e.key === 'Enter') { running = true; }
         if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') e.preventDefault();
     }
     function onKeyUp(e) { keys[e.key] = false; }
@@ -96,20 +110,43 @@ function initArkanoid() {
         paddleX = Math.min(W - paddleW, Math.max(0, e.clientX - rect.left - paddleW / 2));
     });
 
+    // Suporte a toque (mobile)
+    canvas.addEventListener('touchmove', function (e) {
+        e.preventDefault();
+        const rect = canvas.getBoundingClientRect();
+        paddleX = Math.min(W - paddleW, Math.max(0, e.touches[0].clientX - rect.left - paddleW / 2));
+    }, { passive: false });
+
+    canvas.addEventListener('touchstart', function () {
+        running = true;
+    });
+
     /* ---------- DESENHO ---------- */
     function draw() {
-        ctx.clearRect(0, 0, W, H);
+        // Fundo gradiente
+        const grad = ctx.createLinearGradient(0, 0, 0, H);
+        grad.addColorStop(0, '#0d1a2b');
+        grad.addColorStop(1, '#1a2744');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, W, H);
 
         /* Tijolos */
         bricks.forEach((b, i) => {
             if (!b.alive) return;
             const col = brickColors[Math.floor(i / cols) % brickColors.length];
             ctx.fillStyle = b.hits === 2 ? '#ffffff' : col;
-            ctx.beginPath(); ctx.roundRect(b.x, b.y, brickW, brickH, 2); ctx.fill();
+            ctx.beginPath();
+            ctx.roundRect(b.x, b.y, brickW, brickH, 2);
+            ctx.fill();
             if (b.hits === 2) {
                 ctx.fillStyle = col;
-                ctx.beginPath(); ctx.roundRect(b.x + 2, b.y + 2, brickW - 4, brickH - 4, 1); ctx.fill();
+                ctx.beginPath();
+                ctx.roundRect(b.x + 2, b.y + 2, brickW - 4, brickH - 4, 1);
+                ctx.fill();
             }
+            // Brilho no topo do tijolo
+            ctx.fillStyle = 'rgba(255,255,255,0.2)';
+            ctx.fillRect(b.x + 2, b.y + 1, brickW - 4, 2);
         });
 
         /* Power-ups */
@@ -124,18 +161,30 @@ function initArkanoid() {
         });
 
         /* Paddle */
-        ctx.fillStyle = wideTimer > 0 ? '#00bfff' : '#4488ff';
-        ctx.beginPath(); ctx.roundRect(paddleX, H - paddleH - 5, paddleW, paddleH, 3); ctx.fill();
+        const paddleGrad = ctx.createLinearGradient(paddleX, 0, paddleX + paddleW, 0);
+        paddleGrad.addColorStop(0, wideTimer > 0 ? '#0080ff' : '#2255cc');
+        paddleGrad.addColorStop(0.5, wideTimer > 0 ? '#00dfff' : '#5599ff');
+        paddleGrad.addColorStop(1, wideTimer > 0 ? '#0080ff' : '#2255cc');
+        ctx.fillStyle = paddleGrad;
+        ctx.beginPath();
+        ctx.roundRect(paddleX, H - paddleH - 6, paddleW, paddleH, 4);
+        ctx.fill();
+        // Brilho paddle
+        ctx.fillStyle = 'rgba(255,255,255,0.4)';
+        ctx.fillRect(paddleX + 4, H - paddleH - 5, paddleW - 8, 2);
 
         /* Bolas */
         balls.forEach(b => {
-            ctx.fillStyle = slowTimer > 0 ? '#a3e635' : '#ffffff';
+            const ballGrad = ctx.createRadialGradient(b.x - 1, b.y - 1, 1, b.x, b.y, ballR);
+            ballGrad.addColorStop(0, '#ffffff');
+            ballGrad.addColorStop(1, slowTimer > 0 ? '#a3e635' : '#aaccff');
+            ctx.fillStyle = ballGrad;
             ctx.beginPath(); ctx.arc(b.x, b.y, ballR, 0, Math.PI * 2); ctx.fill();
         });
 
-        /* HUD fixo no topo */
-        ctx.fillStyle = 'rgba(0,0,0,0.6)';
-        ctx.fillRect(0, 0, W, 16);
+        /* HUD no topo */
+        ctx.fillStyle = 'rgba(0,0,0,0.7)';
+        ctx.fillRect(0, 0, W, 18);
 
         const best = parseInt(localStorage.getItem('arkanoid_best') || '0');
         if (score > best) localStorage.setItem('arkanoid_best', score);
@@ -143,38 +192,38 @@ function initArkanoid() {
         ctx.font = 'bold 9px monospace';
         ctx.textAlign = 'left';
         ctx.fillStyle = '#facc15';
-        ctx.fillText(`PTS: ${score}`, 4, 11);
+        ctx.fillText(`${score}pts`, 4, 12);
 
-        ctx.fillStyle = '#aaa';
-        ctx.fillText(`REC: ${Math.max(score, best)}`, 65, 11);
+        ctx.fillStyle = '#888';
+        ctx.fillText(`rec:${Math.max(score, best)}`, 55, 12);
 
         ctx.fillStyle = '#00bfff';
         ctx.textAlign = 'center';
-        ctx.fillText(`Nv${level}`, W / 2, 11);
+        ctx.fillText(`Nv${level}`, W / 2, 12);
 
         ctx.textAlign = 'right';
         ctx.fillStyle = '#f43f5e';
-        ctx.fillText('♥'.repeat(lives), W - 4, 11);
+        ctx.fillText('♥'.repeat(lives), W - 4, 12);
         ctx.textAlign = 'left';
 
-        /* Barras de efeito ativo */
+        /* Barras de efeito */
         if (wideTimer > 0) {
-            ctx.fillStyle = '#00bfff';
-            ctx.fillRect(4, H - 3, (wideTimer / 300) * 60, 2);
+            ctx.fillStyle = 'rgba(0,191,255,0.3)';
+            ctx.fillRect(4, H - 4, (wideTimer / 300) * 70, 3);
         }
         if (slowTimer > 0) {
-            ctx.fillStyle = '#a3e635';
-            ctx.fillRect(70, H - 3, (slowTimer / 300) * 60, 2);
+            ctx.fillStyle = 'rgba(163,230,53,0.3)';
+            ctx.fillRect(80, H - 4, (slowTimer / 300) * 70, 3);
         }
 
-        /* Tela de pausa / game over */
+        /* Overlay pausa */
         if (!running) {
-            ctx.fillStyle = 'rgba(0,0,0,0.55)';
-            ctx.fillRect(0, H / 2 - 18, W, 32);
+            ctx.fillStyle = 'rgba(0,0,0,0.6)';
+            ctx.fillRect(0, H / 2 - 20, W, 36);
             ctx.fillStyle = '#a3e635';
             ctx.font = 'bold 11px monospace';
             ctx.textAlign = 'center';
-            ctx.fillText('ENTER para iniciar', W / 2, H / 2 + 4);
+            ctx.fillText('ENTER para iniciar', W / 2, H / 2 + 5);
             ctx.textAlign = 'left';
         }
     }
@@ -183,20 +232,18 @@ function initArkanoid() {
     function update() {
         if (!running) return;
 
-        /* Movimento suave da paddle pelo teclado */
         if (keys['ArrowLeft'])  paddleX = Math.max(0, paddleX - 5);
         if (keys['ArrowRight']) paddleX = Math.min(W - paddleW, paddleX + 5);
 
-        /* Timers de efeito */
-        if (wideTimer > 0) { wideTimer--; if (wideTimer === 0) paddleW = 50; }
+        if (wideTimer > 0) { wideTimer--; if (wideTimer === 0) paddleW = 60; }
         if (slowTimer > 0)   slowTimer--;
         const speed = slowTimer > 0 ? 0.6 : 1;
 
-        /* Power-ups caindo */
+        /* Power-ups */
         for (let pi = powerups.length - 1; pi >= 0; pi--) {
             const p = powerups[pi];
             p.y += 1.5;
-            if (p.y + 8 >= H - paddleH - 5 && p.y - 8 <= H - 5 &&
+            if (p.y + 8 >= H - paddleH - 6 && p.y - 8 <= H - 6 &&
                 p.x >= paddleX && p.x <= paddleX + paddleW) {
                 applyPowerup(p.type);
                 powerups.splice(pi, 1);
@@ -212,16 +259,18 @@ function initArkanoid() {
             ball.x += ball.dx * speed;
             ball.y += ball.dy * speed;
 
-            /* Paredes */
-            if (ball.x - ballR < 0 || ball.x + ballR > W) ball.dx *= -1;
-            if (ball.y - ballR < 0) ball.dy *= -1;
+            if (ball.x - ballR < 0) { ball.dx = Math.abs(ball.dx); }
+            if (ball.x + ballR > W) { ball.dx = -Math.abs(ball.dx); }
+            if (ball.y - ballR < 18) { ball.dy = Math.abs(ball.dy); } // respeita HUD
 
             /* Paddle */
-            if (ball.y + ballR >= H - paddleH - 5 && ball.y + ballR <= H &&
+            if (ball.y + ballR >= H - paddleH - 6 &&
+                ball.y + ballR <= H - 2 &&
                 ball.x >= paddleX && ball.x <= paddleX + paddleW) {
                 ball.dy = -Math.abs(ball.dy);
-                ball.dx += ((ball.x - (paddleX + paddleW / 2)) / (paddleW / 2)) * 1.2;
-                ball.dx = Math.max(-4, Math.min(4, ball.dx));
+                const relHit = (ball.x - (paddleX + paddleW / 2)) / (paddleW / 2);
+                ball.dx += relHit * 1.5;
+                ball.dx = Math.max(-4.5, Math.min(4.5, ball.dx));
             }
 
             /* Bola perdida */
@@ -232,11 +281,11 @@ function initArkanoid() {
                     const msg = document.getElementById('arkanoid-msg');
                     if (lives <= 0) {
                         running = false; lives = 3; score = 0; level = 1;
-                        resetBricks(); resetBalls(); powerups = []; paddleW = 50;
+                        resetBricks(); resetBalls(); powerups = []; paddleW = 60;
                         msg.textContent = 'Game Over! ENTER reiniciar';
                     } else {
                         resetBalls(); running = false;
-                        msg.textContent = `♥ ${lives} vidas restantes — ENTER`;
+                        msg.textContent = `♥ ${lives} vidas — ENTER continuar`;
                     }
                 }
                 continue;
@@ -245,8 +294,8 @@ function initArkanoid() {
             /* Colisão com tijolos */
             for (const b of bricks) {
                 if (!b.alive) continue;
-                if (ball.x > b.x && ball.x < b.x + brickW &&
-                    ball.y - ballR < b.y + brickH && ball.y + ballR > b.y) {
+                if (ball.x + ballR > b.x && ball.x - ballR < b.x + brickW &&
+                    ball.y + ballR > b.y && ball.y - ballR < b.y + brickH) {
                     b.hits--;
                     score += b.hits <= 0 ? 10 : 5;
                     if (b.hits <= 0) {
@@ -256,14 +305,22 @@ function initArkanoid() {
                             powerups.push({ x: b.x + brickW / 2, y: b.y + brickH, ...pu });
                         }
                     }
-                    ball.dy *= -1;
+                    // Detecta lado da colisão
+                    const overlapL = ball.x + ballR - b.x;
+                    const overlapR = b.x + brickW - (ball.x - ballR);
+                    const overlapT = ball.y + ballR - b.y;
+                    const overlapB = b.y + brickH - (ball.y - ballR);
+                    const minH = Math.min(overlapL, overlapR);
+                    const minV = Math.min(overlapT, overlapB);
+                    if (minH < minV) ball.dx *= -1;
+                    else             ball.dy *= -1;
                     break;
                 }
             }
         }
 
-        /* Venceu fase */
-        if (bricks.every(b => !b.alive)) {
+        /* Fase vencida */
+        if (bricks.length > 0 && bricks.every(b => !b.alive)) {
             level++;
             resetBricks(); resetBalls(); powerups = []; running = false;
             document.getElementById('arkanoid-msg').textContent = `🏆 Fase ${level}! ENTER continuar`;
@@ -276,7 +333,6 @@ function initArkanoid() {
 
     if (arkanoidLoop) cancelAnimationFrame(arkanoidLoop);
 
-    /* Guarda referência para limpeza ao fechar */
     canvas._cleanup = function () {
         document.removeEventListener('keydown', onKeyDown);
         document.removeEventListener('keyup',   onKeyUp);
