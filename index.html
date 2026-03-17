@@ -958,22 +958,25 @@ s0.parentNode.insertBefore(s1,s0);
             setTimeout(() => { robotGreeting.style.opacity = '0'; }, 4000);
         }
         
-        function toggleChatbot() {
-            const isClosed = chatbotWidget.classList.contains('scale-0');
+       function toggleChatbot() {
+    const isClosed = chatbotWidget.classList.contains('scale-0');
+    const arkanoid = document.getElementById('arkanoid-widget');
 
-            if (isClosed) {
-                chatbotWidget.classList.remove('scale-0', 'opacity-0', 'pointer-events-none');
-                chatbotWidget.classList.add('scale-100', 'opacity-100', 'pointer-events-auto');
-                robotContainer.style.opacity = '0'; 
-                robotContainer.style.pointerEvents = 'none'; 
-                robotGreeting.style.opacity = '0'; 
-            } else {
-                chatbotWidget.classList.remove('scale-100', 'opacity-100', 'pointer-events-auto');
-                chatbotWidget.classList.add('scale-0', 'opacity-0', 'pointer-events-none');
-                robotContainer.style.opacity = '1'; 
-                robotContainer.style.pointerEvents = 'auto'; 
-            }
-        }
+    if (isClosed) {
+        // Mostra o jogo na sidebar em vez do chatbot
+        arkanoid.style.display = 'block';
+        robotContainer.style.opacity = '0';
+        robotContainer.style.pointerEvents = 'none';
+        robotGreeting.style.opacity = '0';
+        initArkanoid();
+    } else {
+        arkanoid.style.display = 'none';
+        robotContainer.style.opacity = '1';
+        robotContainer.style.pointerEvents = 'auto';
+        stopArkanoid();
+    }
+    // mantém o chatbot fechado (removemos o toggle dele)
+}
 
         window.onload = function() {
             generateUniqueCode();
@@ -1061,7 +1064,136 @@ document.addEventListener('keydown', function(e) {
     }
     else if (e.key === 'Escape') clearDisplay();
 });
+
+
+let arkanoidLoop = null;
+
+function initArkanoid() {
+    const canvas = document.getElementById('arkanoid-canvas');
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+
+    let paddleX = W / 2 - 25;
+    const paddleW = 50, paddleH = 6;
+    let ballX = W / 2, ballY = H - 40;
+    let ballDX = 2, ballDY = -2.5;
+    const ballR = 5;
+    let score = 0, lives = 3, running = false;
+
+    const cols = 6, rows = 4;
+    const brickW = 28, brickH = 10, brickPad = 3, brickOffX = 4, brickOffY = 20;
+    let bricks = [];
+    const brickColors = ['#ef4444','#f97316','#facc15','#4ade80'];
+
+    function resetBricks() {
+        bricks = [];
+        for (let r = 0; r < rows; r++)
+            for (let c = 0; c < cols; c++)
+                bricks.push({ x: brickOffX + c*(brickW+brickPad), y: brickOffY + r*(brickH+brickPad), alive: true });
+    }
+
+    function resetBall() {
+        ballX = W/2; ballY = H-40;
+        ballDX = 2 * (Math.random() > 0.5 ? 1 : -1);
+        ballDY = -2.5;
+    }
+
+    resetBricks();
+
+    document.addEventListener('keydown', function onKey(e) {
+        if (e.key === 'Enter') { running = true; }
+        if (e.key === 'ArrowLeft')  paddleX = Math.max(0, paddleX - 18);
+        if (e.key === 'ArrowRight') paddleX = Math.min(W - paddleW, paddleX + 18);
+    });
+
+    canvas.addEventListener('mousemove', function(e) {
+        const rect = canvas.getBoundingClientRect();
+        paddleX = Math.min(W - paddleW, Math.max(0, e.clientX - rect.left - paddleW/2));
+    });
+
+    function draw() {
+        ctx.clearRect(0, 0, W, H);
+
+        // bricks
+        bricks.forEach((b, i) => {
+            if (!b.alive) return;
+            ctx.fillStyle = brickColors[Math.floor(i / cols) % brickColors.length];
+            ctx.beginPath(); ctx.roundRect(b.x, b.y, brickW, brickH, 2); ctx.fill();
+        });
+
+        // paddle
+        ctx.fillStyle = '#00bfff';
+        ctx.beginPath(); ctx.roundRect(paddleX, H - paddleH - 5, paddleW, paddleH, 3); ctx.fill();
+
+        // ball
+        ctx.fillStyle = '#fff';
+        ctx.beginPath(); ctx.arc(ballX, ballY, ballR, 0, Math.PI*2); ctx.fill();
+
+        // score / lives
+        ctx.fillStyle = '#aaa';
+        ctx.font = '10px monospace';
+        ctx.fillText(`${score}pts  ♥${lives}`, 5, 13);
+
+        if (!running) {
+            ctx.fillStyle = 'rgba(0,0,0,0.5)';
+            ctx.fillRect(0, H/2-18, W, 32);
+            ctx.fillStyle = '#a3e635';
+            ctx.font = 'bold 11px monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText('ENTER para iniciar', W/2, H/2);
+            ctx.textAlign = 'left';
+        }
+    }
+
+    function update() {
+        if (!running) return;
+
+        ballX += ballDX; ballY += ballDY;
+
+        if (ballX - ballR < 0 || ballX + ballR > W) ballDX *= -1;
+        if (ballY - ballR < 0) ballDY *= -1;
+
+        // paddle
+        if (ballY + ballR >= H - paddleH - 5 && ballY + ballR <= H - 2 &&
+            ballX >= paddleX && ballX <= paddleX + paddleW) {
+            ballDY = -Math.abs(ballDY);
+            ballDX += ((ballX - (paddleX + paddleW/2)) / (paddleW/2)) * 1.5;
+        }
+
+        // perdeu bola
+        if (ballY + ballR > H) {
+            lives--;
+            if (lives <= 0) {
+                running = false; lives = 3; score = 0; resetBricks(); resetBall();
+                document.getElementById('arkanoid-msg').textContent = 'Game Over! ENTER reiniciar';
+            } else { resetBall(); running = false; }
+        }
+
+        // bricks
+        bricks.forEach(b => {
+            if (!b.alive) return;
+            if (ballX > b.x && ballX < b.x+brickW && ballY-ballR < b.y+brickH && ballY+ballR > b.y) {
+                b.alive = false; ballDY *= -1; score += 10;
+            }
+        });
+
+        // venceu
+        if (bricks.every(b => !b.alive)) {
+            resetBricks(); resetBall(); running = false;
+            document.getElementById('arkanoid-msg').textContent = '🏆 Venceu! ENTER continuar';
+        }
+    }
+
+    if (arkanoidLoop) cancelAnimationFrame(arkanoidLoop);
+    function gameLoop() { update(); draw(); arkanoidLoop = requestAnimationFrame(gameLoop); }
+    gameLoop();
+}
+
+function stopArkanoid() {
+    if (arkanoidLoop) { cancelAnimationFrame(arkanoidLoop); arkanoidLoop = null; }
+}
         
     </script>
+    
 </body>
 </html>
