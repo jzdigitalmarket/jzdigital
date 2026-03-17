@@ -9,14 +9,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
     <style>
-        /* ************************************** */
-        /* *** INÍCIO DO ESTILO CSS (INTERNO) *** */
-        /* ************************************** */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
         
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #0d1a2b; /* Azul-Marinho Profundo */
+            background-color: #0d1a2b;
             overflow-x: hidden;
             overflow-y: scroll; 
             background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0.05));
@@ -46,14 +43,12 @@
         @keyframes staggerText { 0% { opacity: 0; transform: translateX(-50px) scale(1.5); } 100% { opacity: 1; transform: translateX(0) scale(1); } }
         .char { display: inline-block; opacity: 0; animation-name: staggerText; animation-duration: 0.6s; animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94); animation-fill-mode: forwards; }
         
-        /* --- NOVO CSS DO ROBÔ COM IMAGEM E ANIMAÇÃO DE BALANÇO --- */
-        
         @keyframes robotFlyIn { 0% { transform: translate(-100vw, -100vh) rotate(-30deg) scale(0.5); opacity: 0; } 50% { transform: translate(20px, 20px) rotate(10deg) scale(0.8); opacity: 1; } 85% { transform: translate(0, 0) rotate(0deg) scale(1.2); opacity: 1; } 100% { transform: translate(0, 0) rotate(0deg) scale(1); opacity: 1; } }
         
         @keyframes robotFloatAndSway {
             0% { transform: translateY(0px) rotate(0deg); }
-            25% { transform: translateY(-8px) rotate(-3deg); } /* Sobe e vira esq */
-            75% { transform: translateY(-4px) rotate(3deg); }  /* Desce e vira dir */
+            25% { transform: translateY(-8px) rotate(-3deg); }
+            75% { transform: translateY(-4px) rotate(3deg); }
             100% { transform: translateY(0px) rotate(0deg); }
         }
 
@@ -64,28 +59,25 @@
             transform: translateX(-50%); 
             z-index: 30; 
             cursor: pointer; 
-            width: 175px; /* Tamanho ajustado para a imagem */
+            width: 175px;
             animation: robotFlyIn 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards; 
         }
 
         .robot-img {
             width: 100%;
             height: auto;
-            filter: drop-shadow(0 0 15px rgba(0, 191, 255, 0.6)); /* Brilho Neon Azul */
-            animation: robotFloatAndSway 3s ease-in-out infinite; /* Animação de "vida" */
+            filter: drop-shadow(0 0 15px rgba(0, 191, 255, 0.6));
+            animation: robotFloatAndSway 3s ease-in-out infinite;
         }
         
         #robot-container:hover .robot-img {
-            filter: drop-shadow(0 0 25px rgba(163, 230, 53, 0.8)); /* Brilho Verde no Hover */
+            filter: drop-shadow(0 0 25px rgba(163, 230, 53, 0.8));
             transform: scale(1.1);
             transition: all 0.3s ease;
         }
 
-        /* --------------------------------------------------------- */
-
         .card-glow:hover { box-shadow: 0 0 20px rgba(0, 191, 255, 1), 0 0 10px rgba(0, 191, 255, 0.6); transform: translateY(-2px) scale(1.01); } 
         
-        /* Ícone reduzido para menu compacto */
         .icon { width: 28px; height: 28px; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none; }
         
         .scale-0 { transform: scale(0); }
@@ -110,7 +102,6 @@
             animation: blink-note 1.2s infinite alternate;
         }
 
-        /* SIDEBARS */
         .sidebar {
             position: fixed;
             top: 0;
@@ -175,9 +166,6 @@
         
         #relogio-widget { font-size: 2.2rem; font-weight: 700; color: #00bfff; font-family: monospace; border-top: 4px solid #00bfff; }
         #data-widget { font-size: 1.1rem; font-weight: 500; color: #a3e635; }
-        
-        '#clima-widget { border-top: 4px solid #f97316; } 
-        '.clima-icon { font-size: 2.5rem; margin-bottom: 5px; color: #fcd34d; }
 
         #calendar-widget { border-top: 4px solid #a3e635; }
         
@@ -222,56 +210,47 @@
         
         .line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
 
+        /* CALCULADORA */
+        .calc-display {
+            background: #444;
+            color: #fff;
+            text-align: right;
+            padding: 10px;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            min-height: 42px;
+            word-break: break-all;
+        }
 
-.calc-sidebar {
-    position: fixed;
-    left: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 200px;
-    background-color: #222;
-    border-radius: 10px;
-    padding: 15px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-    z-index: 1000;
-    font-family: sans-serif;
-}
+        .calc-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 5px;
+        }
 
-.calc-display {
-    background: #444;
-    color: #fff;
-    text-align: right;
-    padding: 10px;
-    font-size: 1.2rem;
-    margin-bottom: 10px;
-    border-radius: 5px;
-    min-height: 42px;
-    word-break: break-all;
-}
+        button {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background: #555;
+            color: white;
+            cursor: pointer;
+        }
 
-.calc-buttons {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 5px;
-}
+        button:hover { background: #777; }
 
-button {
-    padding: 10px;
-    border: none;
-    border-radius: 5px;
-    background: #555;
-    color: white;
-    cursor: pointer;
-}
+        .btn-equal { background: #28a745; grid-row: span 2; }
+        .btn-clear { background: #dc3545; grid-column: span 2; }
+        .btn-zero { grid-column: span 2; }
 
-button:hover { background: #777; }
-
-.btn-equal { background: #28a745; grid-row: span 2; }
-.btn-clear { background: #dc3545; grid-column: span 2; }
-.btn-zero { grid-column: span 2; }
-
-
-        
+        /* ARKANOID WIDGET */
+        #arkanoid-widget {
+            padding: 8px;
+            border-radius: 8px;
+            background-color: rgba(30, 41, 59, 0.9);
+            border-top: 4px solid #00bfff;
+        }
     </style>
 </head>
 <body class="min-h-screen p-4 relative">
@@ -286,13 +265,10 @@ button:hover { background: #777; }
             const nome = document.getElementById('nome').value;
             const res = await fetch(`/api/elogio?nome=${nome}`);
             const data = await res.json();
-            
-            document.getElementById('resultado').innerText = 
-                `${data.mensagem} (${data.origem})`;
+            document.getElementById('resultado').innerText = `${data.mensagem} (${data.origem})`;
         }
     </script>
 
-    
     <div id="robot-container"> 
         <img src="robo-zim.png" alt="ZIM AI Robot" class="robot-img">
     </div>
@@ -435,7 +411,8 @@ button:hover { background: #777; }
                     </div>
                 </div>
             </a>
-             <a href="https://consultadanfe.com/#" target="_blank" class="animated-menu-item card-glow transition duration-300 ease-in-out block bg-gray-800/90 p-3 rounded-lg border-t-2 border-orange-500 hover:bg-gray-700/90 shadow-lg backdrop-blur-sm">
+
+            <a href="https://consultadanfe.com/#" target="_blank" class="animated-menu-item card-glow transition duration-300 ease-in-out block bg-gray-800/90 p-3 rounded-lg border-t-2 border-orange-500 hover:bg-gray-700/90 shadow-lg backdrop-blur-sm">
                 <div class="flex items-center space-x-2">
                     <div class="text-orange-400 p-1.5 rounded-full bg-orange-900/50 flex-shrink-0">
                         <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/><path d="M14 3v5h5M12 18v-6M9 15h6"/></svg>
@@ -447,8 +424,7 @@ button:hover { background: #777; }
                 </div>
             </a>
 
-
-             <a href="https://portoitajai.com.br/2026" target="_blank" class="animated-menu-item card-glow transition duration-300 ease-in-out block bg-gray-800/90 p-3 rounded-lg border-t-2 border-orange-500 hover:bg-gray-700/90 shadow-lg backdrop-blur-sm">
+            <a href="https://portoitajai.com.br/2026" target="_blank" class="animated-menu-item card-glow transition duration-300 ease-in-out block bg-gray-800/90 p-3 rounded-lg border-t-2 border-orange-500 hover:bg-gray-700/90 shadow-lg backdrop-blur-sm">
                 <div class="flex items-center space-x-2">
                     <div class="text-orange-400 p-1.5 rounded-full bg-orange-900/50 flex-shrink-0">
                         <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/><path d="M14 3v5h5M12 18v-6M9 15h6"/></svg>
@@ -459,12 +435,9 @@ button:hover { background: #777; }
                     </div>
                 </div>
             </a>
-            
-
-            
         </div>
 
-       <footer class="mt-8 text-center text-gray-500 text-sm animated-menu-item" id="footer">
+        <footer class="mt-8 text-center text-gray-500 text-sm animated-menu-item" id="footer">
             <p>Menu de Acessos | Ambiente Portuário & Logística</p>
             <br>
             <p>Powered by Gemini</p>      
@@ -472,26 +445,26 @@ button:hover { background: #777; }
     </div>
 
 
+    <!-- ===================== SIDEBAR ESQUERDA ===================== -->
     <div id="sidebar-context" class="sidebar">
         <h2 class="text-xl font-bold text-white mb-2 text-center border-b border-cyan-500/50 pb-2">
             Contexto
         </h2>
 
-
-<div id="lembrete-container">
-    <label for="horarioLembrete" class="text-gray-300 text-xs">Definir Lembrete (HH:MM):</label>
-    <div class="flex gap-2 mt-1">
-        <input type="time" id="horarioLembrete" value="22:45" class="bg-gray-700 text-white rounded p-1 text-sm border border-gray-600">
-        <button onclick="definirLembrete()" class="bg-cyan-600 text-white px-2 py-1 rounded text-xs hover:bg-cyan-500">Definir</button>
-    </div>
-    <p id="statusLembrete" style="margin-top: 5px; font-size: 0.75rem; color: #a3e635;"></p>
-</div>
-
+        <div id="lembrete-container">
+            <label for="horarioLembrete" class="text-gray-300 text-xs">Definir Lembrete (HH:MM):</label>
+            <div class="flex gap-2 mt-1">
+                <input type="time" id="horarioLembrete" value="22:45" class="bg-gray-700 text-white rounded p-1 text-sm border border-gray-600">
+                <button onclick="definirLembrete()" class="bg-cyan-600 text-white px-2 py-1 rounded text-xs hover:bg-cyan-500">Definir</button>
+            </div>
+            <p id="statusLembrete" style="margin-top: 5px; font-size: 0.75rem; color: #a3e635;"></p>
+        </div>
 
         <div id="relogio-widget" class="utility-widget">
             --:--:--
         </div>
 
+        <!-- CALENDÁRIO -->
         <div id="calendar-widget" class="utility-widget">
             <div class="flex justify-between items-center mb-2">
                 <button id="prev-month" class="text-cyan-400 hover:text-white transition duration-200 p-1 rounded-full"><i class="fas fa-chevron-left"></i></button>
@@ -501,64 +474,62 @@ button:hover { background: #777; }
             <div id="calendar-days-header" class="grid grid-cols-7 text-xs font-bold text-gray-400 mb-1">
                 <span>Dom</span><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span>
             </div>
-            <div id="calendar-grid" class="grid grid-cols-7 gap-1 text-sm">
-                </div>
+            <div id="calendar-grid" class="grid grid-cols-7 gap-1 text-sm"></div>
             <p class="text-xs text-gray-400 mt-4"><span class="text-orange-400">•</span> Clique data para nota.</p>
+        </div>
+        <!-- FIM CALENDÁRIO -->
 
-
+        <!-- CALCULADORA -->
+        <div class="utility-widget" style="border-top: 4px solid #6366f1;">
             <div id="display" class="calc-display">0</div>
- 
-           
             <div class="calc-buttons">
-        <button onclick="clearDisplay()" class="btn-clear">C</button>
-        <button onclick="appendToDisplay('/')">/</button>
-        <button onclick="appendToDisplay('*')">×</button>
-        <button onclick="appendToDisplay('7')">7</button>
-        <button onclick="appendToDisplay('8')">8</button>
-        <button onclick="appendToDisplay('9')">9</button>
-        <button onclick="appendToDisplay('-')">-</button>
-        <button onclick="appendToDisplay('4')">4</button>
-        <button onclick="appendToDisplay('5')">5</button>
-        <button onclick="appendToDisplay('6')">6</button>
-        <button onclick="appendToDisplay('+')">+</button>
-        <button onclick="appendToDisplay('1')">1</button>
-        <button onclick="appendToDisplay('2')">2</button>
-        <button onclick="appendToDisplay('3')">3</button>
-        <button onclick="calculate()" class="btn-equal">=</button>
-        <button onclick="appendToDisplay('0')" class="btn-zero">0</button>
-        <button onclick="appendToDisplay('.')">.</button>
-    </div>
-</div>
-            
-            <a href="/robotwar.html">robot</a>
-        
-<div id="arkanoid-widget" style="display:none;">
-  <canvas id="arkanoid-canvas" width="190" height="220" 
-    style="background:#111; border-radius:6px; display:block; margin:0 auto; cursor:none;">
-  </canvas>
-  <p id="arkanoid-msg" style="text-align:center; font-size:0.7rem; color:#a3e635; margin-top:4px;">
-    ← → mover | ENTER iniciar
-  </p>
-</div>
-</div> 
-            
-        <!--<div id="clima-widget" class="utility-widget">
-            <p class="text-gray-300 font-semibold mb-1">Itajaí/SC</p>
-            <div id="clima-info">
-                <i class="fas fa-sync-alt fa-spin text-cyan-400 clima-icon"></i>
-                <p class="text-2xl text-yellow-300">...</p> 
+                <button onclick="clearDisplay()" class="btn-clear">C</button>
+                <button onclick="appendToDisplay('/')">/</button>
+                <button onclick="appendToDisplay('*')">×</button>
+                <button onclick="appendToDisplay('7')">7</button>
+                <button onclick="appendToDisplay('8')">8</button>
+                <button onclick="appendToDisplay('9')">9</button>
+                <button onclick="appendToDisplay('-')">-</button>
+                <button onclick="appendToDisplay('4')">4</button>
+                <button onclick="appendToDisplay('5')">5</button>
+                <button onclick="appendToDisplay('6')">6</button>
+                <button onclick="appendToDisplay('+')">+</button>
+                <button onclick="appendToDisplay('1')">1</button>
+                <button onclick="appendToDisplay('2')">2</button>
+                <button onclick="appendToDisplay('3')">3</button>
+                <button onclick="calculate()" class="btn-equal">=</button>
+                <button onclick="appendToDisplay('0')" class="btn-zero">0</button>
+                <button onclick="appendToDisplay('.')">.</button>
             </div>
-            <p class="text-xs text-gray-400 mt-1" id="clima-descricao">Aguardando API.</p>
-        </div>-->
+        </div>
+        <!-- FIM CALCULADORA -->
+
+        <a href="/robotwar.html" class="text-cyan-400 text-xs text-center hover:underline">robot</a>
+
+        <!-- ✅ ARKANOID WIDGET — FORA do calendar-widget, aqui na sidebar -->
+        <div id="arkanoid-widget" style="display:none;">
+            <canvas id="arkanoid-canvas" width="210" height="280"
+                style="background:#0d1a2b; border-radius:8px; border:1px solid rgba(0,191,255,0.3);
+                       display:block; margin:0 auto; cursor:none; max-width:100%;">
+            </canvas>
+            <p id="arkanoid-msg"
+               style="text-align:center; font-size:0.7rem; color:#a3e635; margin-top:4px;">
+                ← → mover | ENTER iniciar
+            </p>
+        </div>
+        <!-- FIM ARKANOID -->
 
     </div>
+    <!-- ===================== FIM SIDEBAR ESQUERDA ===================== -->
+
+
+    <!-- ===================== SIDEBAR DIREITA ===================== -->
     <div id="sidebar-utility" class="sidebar">
         <h2 class="text-xl font-bold text-white mb-2 text-center border-b border-cyan-500/50 pb-2">
             Utilidades
         </h2>
 
-        <div id="kpi-grid" class="utility-widget">
-            </div>
+        <div id="kpi-grid" class="utility-widget"></div>
 
         <div id="agenda-cargas-widget" class="utility-widget p-0">
             <h3 class="font-bold text-white text-sm pt-2">Agenda (Simulada)</h3>
@@ -571,8 +542,7 @@ button:hover { background: #777; }
                             <th>St</th>
                         </tr>
                     </thead>
-                    <tbody id="tabela-cargas-body">
-                        </tbody>
+                    <tbody id="tabela-cargas-body"></tbody>
                 </table>
             </div>
         </div>
@@ -580,18 +550,19 @@ button:hover { background: #777; }
         <div id="notes-widget" class="utility-widget">
             <p class="font-bold text-white mb-1">Notas Rápidas</p>
             <textarea id="quick-note-text" placeholder="Digite uma nota..." title="Bloco de Notas Rápido"></textarea>
-            <button id="save-note-btn" class="w-full text-sm">
-                Salvar
-            </button>
+            <button id="save-note-btn" class="w-full text-sm">Salvar</button>
             <div id="note-status"></div>
         </div>
         
         <div class="utility-widget" style="border-top: 4px solid #ef4444;">
             <p class="text-cyan-400 font-semibold mb-1 text-xs">ID Sessão</p>
             <p class="text-[10px] text-gray-400 break-all leading-tight" id="session-display">...</p>
-            
         </div>
     </div>
+    <!-- ===================== FIM SIDEBAR DIREITA ===================== -->
+
+
+    <!-- CHATBOT WIDGET -->
     <div id="chatbot-widget" class="fixed bottom-4 right-4 z-50 transition-all duration-300 transform scale-0 opacity-0 pointer-events-none bg-gray-900 border border-cyan-500 rounded-lg shadow-2xl" style="width: 350px; height: 450px; transform-origin: bottom right;">
         <div class="p-3 bg-cyan-600/80 rounded-t-lg text-white flex justify-between items-center">
             <h3 class="font-bold text-lg">ZIM AI Assistant</h3>
@@ -601,43 +572,34 @@ button:hover { background: #777; }
                 </svg>
             </button>
         </div>
-        
         <div class="p-2 text-white overflow-y-auto h-[calc(100%-48px)]">  
             <div id="ai-agent-embed-area" class="w-full h-full flex items-center justify-center">
                 <p class="text-sm text-gray-400 p-4 text-center">
-
-
-                  
                     <!--Start of Tawk.to Script-->
-<script type="text/javascript">
-var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-(function(){
-var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-s1.async=true;
-s1.src='https://embed.tawk.to/6938269ded8dee197d0ec158/1jc1ldmb1';
-s1.charset='UTF-8';
-s1.setAttribute('crossorigin','*');
-s0.parentNode.insertBefore(s1,s0);
-})();
-</script>
-<!--End of Tawk.to Script-->                </p>
-           
+                    <script type="text/javascript">
+                    var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+                    (function(){
+                    var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+                    s1.async=true;
+                    s1.src='https://embed.tawk.to/6938269ded8dee197d0ec158/1jc1ldmb1';
+                    s1.charset='UTF-8';
+                    s1.setAttribute('crossorigin','*');
+                    s0.parentNode.insertBefore(s1,s0);
+                    })();
+                    </script>
+                    <!--End of Tawk.to Script-->
+                </p>
             </div>
         </div>
     </div>
     
     <script>
-
-        
-        // ******************************************************** // *** 1. CONFIGURAÇÃO DE CLIMA (ALTERE A CHAVE AQUI!) ***
-        // ********************************************************
+        // *** 1. CLIMA ***
         const API_KEY = ""; 
         const LATITUDE = -26.9079; 
         const LONGITUDE = -48.6659; 
 
-        // ******************************************************** // *** 2. FUNÇÕES DE UTILIDADE (RELÓGIO, DATA, UUID) ***
-        // ********************************************************
-        
+        // *** 2. RELÓGIO ***
         function atualizarRelogioEData() {
             const agora = new Date();
             const horas = String(agora.getHours()).padStart(2, '0');
@@ -661,9 +623,7 @@ s0.parentNode.insertBefore(s1,s0);
             return uniqueSessionID;
         }
 
-        // ******************************************************** // *** 3. LÓGICA DO CALENDÁRIO (COM ANOTAÇÕES) ***
-        // ********************************************************
-
+        // *** 3. CALENDÁRIO ***
         let currentCalendarDate = new Date(); 
         let calendarNotes = {};
         
@@ -676,12 +636,8 @@ s0.parentNode.insertBefore(s1,s0);
 
         function loadNotesFromLocalStorage() {
             const storedNotes = localStorage.getItem('calendarNotes');
-            try {
-                calendarNotes = storedNotes ? JSON.parse(storedNotes) : {};
-            } catch (e) {
-                console.error("Erro ao carregar notas:", e);
-                calendarNotes = {};
-            }
+            try { calendarNotes = storedNotes ? JSON.parse(storedNotes) : {}; }
+            catch (e) { calendarNotes = {}; }
         }
 
         function saveNotesToLocalStorage() {
@@ -691,44 +647,34 @@ s0.parentNode.insertBefore(s1,s0);
         function renderCalendar() {
             const grid = document.getElementById('calendar-grid');
             const monthYearDisplay = document.getElementById('current-month-year');
-            
             grid.innerHTML = ''; 
             loadNotesFromLocalStorage(); 
-
             const viewYear = currentCalendarDate.getFullYear();
             const viewMonth = currentCalendarDate.getMonth(); 
-            
             const today = new Date();
             const isTodayMonth = today.getFullYear() === viewYear && today.getMonth() === viewMonth;
             const todayDay = today.getDate();
-
-            const monthNames = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+            const monthNames = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
             monthYearDisplay.textContent = `${monthNames[viewMonth]} ${viewYear}`;
-
             const firstDayOfMonth = new Date(viewYear, viewMonth, 1).getDay(); 
             const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
-            
             for (let i = 0; i < firstDayOfMonth; i++) {
                 const dayCell = document.createElement('div');
                 dayCell.classList.add('day', 'empty', 'other-month');
                 grid.appendChild(dayCell);
             }
-
             for (let day = 1; day <= daysInMonth; day++) {
                 const date = new Date(viewYear, viewMonth, day);
                 const dateKey = formatDateToKey(date); 
-                
                 const dayCell = document.createElement('div');
                 dayCell.classList.add('day');
                 dayCell.textContent = day;
                 dayCell.setAttribute('data-full-date', dateKey); 
-
                 if (isTodayMonth && day === todayDay) {
                     dayCell.classList.add('current-day');
                 } else {
                     dayCell.classList.add('text-white', 'hover:bg-cyan-600/50'); 
                 }
-                
                 const noteContent = calendarNotes[dateKey];
                 if (noteContent) {
                     dayCell.classList.add('has-note');
@@ -736,17 +682,13 @@ s0.parentNode.insertBefore(s1,s0);
                 } else {
                     dayCell.setAttribute('title', 'Clique para adicionar nota.');
                 }
-                
                 dayCell.addEventListener('click', handleDayClick);
                 grid.appendChild(dayCell);
             }
-            
             const totalCells = firstDayOfMonth + daysInMonth;
             const requiredRows = Math.ceil(totalCells / 7);
-            const cellsToFill = requiredRows * 7;
-            const actualRemainingCells = cellsToFill - totalCells;
-
-            for (let i = 0; i < actualRemainingCells; i++) {
+            const remainingCells = requiredRows * 7 - totalCells;
+            for (let i = 0; i < remainingCells; i++) {
                 const dayCell = document.createElement('div');
                 dayCell.classList.add('day', 'empty', 'other-month');
                 grid.appendChild(dayCell);
@@ -761,37 +703,23 @@ s0.parentNode.insertBefore(s1,s0);
         function handleDayClick(event) {
             const dayCell = event.currentTarget;
             if (dayCell.classList.contains('empty')) return; 
-
             const dateKey = dayCell.getAttribute('data-full-date');
             const existingNote = calendarNotes[dateKey] || '';
             const friendlyDate = new Date(dateKey + 'T00:00:00').toLocaleDateString('pt-BR', { weekday: 'short', day: 'numeric', month: 'short' });
-            
             const promptMessage = existingNote 
                 ? `NOTA (${friendlyDate}):\n${existingNote}\n\n[OK p/ Editar | Limpe p/ Excluir]`
                 : `NOVA NOTA para ${friendlyDate}:`;
-            
             const userNote = prompt(promptMessage, existingNote);
-
             if (userNote !== null) { 
                 const trimmedNote = userNote.trim();
-                
-                if (trimmedNote === "") {
-                    if (calendarNotes[dateKey]) {
-                        delete calendarNotes[dateKey];
-                    }
-                } else {
-                    calendarNotes[dateKey] = trimmedNote;
-                }
-
+                if (trimmedNote === "") { delete calendarNotes[dateKey]; }
+                else { calendarNotes[dateKey] = trimmedNote; }
                 saveNotesToLocalStorage();
                 renderCalendar(); 
             }
         }
 
-
-        // ******************************************************** // *** 4. LÓGICA DA TABELA DE CARGAS ***
-        // ********************************************************
-
+        // *** 4. CARGAS ***
         const dadosSimuladosCargas = [
             { bl: 'BRSS-871', prazo: '06/11', status: 'Pronto', cssClass: 'status-pronto' },
             { bl: 'BRSS-872', prazo: '06/11', status: 'Atraso', cssClass: 'status-atraso' },
@@ -806,22 +734,14 @@ s0.parentNode.insertBefore(s1,s0);
         function renderTabelaCargas() {
             const tbody = document.getElementById('tabela-cargas-body');
             tbody.innerHTML = ''; 
-
             dadosSimuladosCargas.forEach(item => {
                 const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td class="font-mono text-xs">${item.bl}</td>
-                    <td class="text-xs">${item.prazo}</td>
-                    <td class="${item.cssClass} text-xs">${item.status}</td>
-                `;
+                row.innerHTML = `<td class="font-mono text-xs">${item.bl}</td><td class="text-xs">${item.prazo}</td><td class="${item.cssClass} text-xs">${item.status}</td>`;
                 tbody.appendChild(row);
             });
         }
 
-
-        // ******************************************************** // *** 5. LÓGICA DOS KPI CARDS ***
-        // ********************************************************
-        
+        // *** 5. KPIs ***
         const dadosKPIs = [
             { id: 'total-processos', label: 'Proc. Dia', value: 85, unit: 'un', cssClass: 'kpi-success' },
             { id: 'em-atraso', label: 'Atraso', value: 3, unit: 'un', cssClass: 'kpi-danger' },
@@ -832,124 +752,62 @@ s0.parentNode.insertBefore(s1,s0);
         function renderKPIs() {
             const kpiGrid = document.getElementById('kpi-grid');
             kpiGrid.innerHTML = ''; 
-
             dadosKPIs.forEach(kpi => {
                 const card = document.createElement('div');
                 card.id = kpi.id;
                 card.classList.add('kpi-card', kpi.cssClass);
-                
                 const displayValue = kpi.unit === '%' ? `${kpi.value}%` : kpi.value;
-                const displayLabel = kpi.label; 
-                
-                card.innerHTML = `
-                    <div class="value">${displayValue}</div>
-                    <div class="label" style="font-size: 0.65rem;">${displayLabel}</div>
-                `;
+                card.innerHTML = `<div class="value">${displayValue}</div><div class="label" style="font-size:0.65rem;">${kpi.label}</div>`;
                 kpiGrid.appendChild(card);
             });
         }
         
-        // ******************************************************** // *** 6. LÓGICA DO BLOCO DE NOTAS ***
-        // ********************************************************
-
+        // *** 6. NOTAS ***
         let savedNoteContent = localStorage.getItem('quickNote') || "";
-        let savedNoteTitle = localStorage.getItem('quickNoteTitle') || "Nota Rápida";
-        
         const noteTextarea = document.getElementById('quick-note-text');
         const noteStatus = document.getElementById('note-status');
 
-        function loadQuickNote() {
-            noteTextarea.value = savedNoteContent;
-        }
+        function loadQuickNote() { noteTextarea.value = savedNoteContent; }
 
         function saveQuickNote() {
             const content = noteTextarea.value.trim();
-            
             if (content === "") {
                 noteStatus.textContent = "Nota vazia.";
                 noteStatus.style.color = '#f87171'; 
                 return;
             }
-
-            const now = new Date();
-            const title = `Nota ${now.toLocaleTimeString()}`;
-            
             savedNoteContent = content;
-            savedNoteTitle = title;
             localStorage.setItem('quickNote', content);
-            localStorage.setItem('quickNoteTitle', title);
-            
             noteStatus.textContent = `Salvo!`;
             noteStatus.style.color = '#a3e635'; 
-            
-            setTimeout(() => {
-                noteStatus.textContent = ""; 
-            }, 3000);
+            setTimeout(() => { noteStatus.textContent = ""; }, 3000);
         }
 
-        // ******************************************************** // *** 7. LÓGICA DO CLIMA (FETCH API) ***
-        // ********************************************************
-
-        const iconMap = {
-            '01d': 'fas fa-sun', '01n': 'fas fa-moon', '02d': 'fas fa-cloud-sun', '02n': 'fas fa-cloud-moon',   
-            '03d': 'fas fa-cloud', '03n': 'fas fa-cloud', '04d': 'fas fa-cloud-meatball', '04n': 'fas fa-cloud-meatball',
-            '09d': 'fas fa-cloud-showers-heavy', '09n': 'fas fa-cloud-showers-heavy', '10d': 'fas fa-cloud-sun-rain', '10n': 'fas fa-cloud-moon-rain',
-            '11d': 'fas fa-bolt', '11n': 'fas fa-bolt', '13d': 'fas fa-snowflake', '13n': 'fas fa-snowflake',
-            '50d': 'fas fa-smog', '50n': 'fas fa-smog',
-        };
-
+        // *** 7. CLIMA ***
         async function buscarClima() {
-            const climaInfoDiv = document.getElementById('clima-info');
-            const climaDescricaoP = document.getElementById('clima-descricao');
-
-            if (API_KEY === 'SUA_CHAVE_DE_API_OPENWEATHER_AQUI') {
-                climaInfoDiv.innerHTML = '<i class="fas fa-exclamation-triangle text-red-500 clima-icon" style="font-size:1.5rem"></i>';
-                climaDescricaoP.textContent = 'Sem API Key.';
-                return;
-            }
-
+            if (!API_KEY) return;
             const url = `https://api.openweathermap.org/data/2.5/weather?lat=${LATITUDE}&lon=${LONGITUDE}&appid=${API_KEY}&units=metric&lang=pt_br`;
-
             try {
                 const response = await fetch(url);
                 const data = await response.json();
-
                 if (response.ok) {
                     const temperatura = Math.round(data.main.temp);
                     const descricao = data.weather[0].description;
-                    const icone = data.weather[0].icon;
-                    const iconeFa = iconMap[icone] || 'fas fa-question-circle'; 
-                    
-                    climaInfoDiv.innerHTML = `
-                        <i class="${iconeFa} text-2xl text-yellow-300 clima-icon" style="margin-bottom:0"></i>
-                        <span class="text-2xl font-bold ml-2">${temperatura}°</span>
-                    `;
-                    climaDescricaoP.textContent = descricao.charAt(0).toUpperCase() + descricao.slice(1); 
-                } else {
-                    climaInfoDiv.innerHTML = 'Erro';
+                    console.log(`Clima: ${temperatura}° - ${descricao}`);
                 }
-            } catch (error) {
-                console.error('Erro clima:', error);
-            }
+            } catch (error) { console.error('Erro clima:', error); }
         }
 
-
-        // ******************************************************** // *** 8. LÓGICA CHATBOT E INICIALIZAÇÃO ***
-        // ********************************************************
-        
+        // *** 8. CHATBOT / ARKANOID ***
         const robotContainer = document.getElementById('robot-container');
-        const chatbotWidget = document.getElementById('chatbot-widget');
         const closeChatBtn = document.getElementById('close-chat-btn');
         const robotGreeting = document.getElementById('robot-greeting');
         const saveNoteBtn = document.getElementById('save-note-btn'); 
 
         const greetings = [
-            "Sistema ZIM ativo.",
-            "Olá! Precisa de ajuda?",
-            "Conexão estável.",
-            "IA pronta para uso.",
-            "Processando dados...",
-            "Tudo em ordem por aqui."
+            "Sistema ZIM ativo.", "Olá! Precisa de ajuda?",
+            "Conexão estável.", "IA pronta para uso.",
+            "Processando dados...", "Tudo em ordem por aqui."
         ];
 
         function showRandomGreeting() {
@@ -959,23 +817,22 @@ s0.parentNode.insertBefore(s1,s0);
             setTimeout(() => { robotGreeting.style.opacity = '0'; }, 4000);
         }
         
-      function toggleChatbot() {
-    const arkanoid = document.getElementById('arkanoid-widget');
-    const jogoAberto = arkanoid.style.display === 'block';
-
-    if (!jogoAberto) {
-        arkanoid.style.display = 'block';
-        robotContainer.style.opacity = '0';
-        robotContainer.style.pointerEvents = 'none';
-        robotGreeting.style.opacity = '0';
-        initArkanoid();
-    } else {
-        arkanoid.style.display = 'none';
-        robotContainer.style.opacity = '1';
-        robotContainer.style.pointerEvents = 'auto';
-        stopArkanoid();
-    }
-}
+        function toggleChatbot() {
+            const arkanoid = document.getElementById('arkanoid-widget');
+            const jogoAberto = arkanoid.style.display === 'block';
+            if (!jogoAberto) {
+                arkanoid.style.display = 'block';
+                robotContainer.style.opacity = '0';
+                robotContainer.style.pointerEvents = 'none';
+                robotGreeting.style.opacity = '0';
+                initArkanoid();
+            } else {
+                arkanoid.style.display = 'none';
+                robotContainer.style.opacity = '1';
+                robotContainer.style.pointerEvents = 'auto';
+                stopArkanoid();
+            }
+        }
 
         window.onload = function() {
             generateUniqueCode();
@@ -998,6 +855,7 @@ s0.parentNode.insertBefore(s1,s0);
         robotContainer.addEventListener('click', toggleChatbot);
         closeChatBtn.addEventListener('click', toggleChatbot);
 
+        // *** LEMBRETE ***
         let lembreteHorario = null;
         let lembreteAtivo = false;
 
@@ -1023,47 +881,42 @@ s0.parentNode.insertBefore(s1,s0);
         }
         setInterval(checarLembrete, 1000);
 
-const display = document.getElementById('display');
+        // *** CALCULADORA ***
+        const display = document.getElementById('display');
 
-function appendToDisplay(input) {
-    if (display.innerText === '0') {
-        display.innerText = input;
-    } else {
-        display.innerText += input;
-    }
-}
-
-function clearDisplay() {
-    display.innerText = '0';
-}
-
-function calculate() {
-    try {
-        // eval é usado aqui para simplicidade em uma calculadora básica
-        display.innerText = eval(display.innerText);
-    } catch (error) {
-        display.innerText = "Erro";
-        setTimeout(clearDisplay, 1500);
-    }
-}
-document.addEventListener('keydown', function(e) {
-    if ('0123456789'.includes(e.key)) appendToDisplay(e.key);
-    else if (e.key === '+') appendToDisplay('+');
-    else if (e.key === '-') appendToDisplay('-');
-    else if (e.key === '*') appendToDisplay('*');
-    else if (e.key === '/') { e.preventDefault(); appendToDisplay('/'); }
-    else if (e.key === '.') appendToDisplay('.');
-    else if (e.key === 'Enter' || e.key === '=') calculate();
-    else if (e.key === 'Backspace') {
-        if (display.innerText.length > 1) {
-            display.innerText = display.innerText.slice(0, -1);
-        } else {
-            display.innerText = '0';
+        function appendToDisplay(input) {
+            if (display.innerText === '0') { display.innerText = input; }
+            else { display.innerText += input; }
         }
-    }
-    else if (e.key === 'Escape') clearDisplay();
-});
+
+        function clearDisplay() { display.innerText = '0'; }
+
+        function calculate() {
+            try { display.innerText = eval(display.innerText); }
+            catch (error) { display.innerText = "Erro"; setTimeout(clearDisplay, 1500); }
+        }
+
+        document.addEventListener('keydown', function(e) {
+            // Não interfere quando o arkanoid está aberto (usa as setas para mover)
+            const arkanoidAberto = document.getElementById('arkanoid-widget').style.display === 'block';
+            if (arkanoidAberto && (e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'Enter')) return;
+
+            if ('0123456789'.includes(e.key)) appendToDisplay(e.key);
+            else if (e.key === '+') appendToDisplay('+');
+            else if (e.key === '-') appendToDisplay('-');
+            else if (e.key === '*') appendToDisplay('*');
+            else if (e.key === '/') { e.preventDefault(); appendToDisplay('/'); }
+            else if (e.key === '.') appendToDisplay('.');
+            else if (e.key === 'Enter' || e.key === '=') calculate();
+            else if (e.key === 'Backspace') {
+                if (display.innerText.length > 1) { display.innerText = display.innerText.slice(0, -1); }
+                else { display.innerText = '0'; }
+            }
+            else if (e.key === 'Escape') clearDisplay();
+        });
     </script>
-   <script src="arkanoid.js"></script>
+
+    <!-- ✅ arkanoid.js carregado uma única vez aqui -->
+    <script src="arkanoid.js"></script>
 </body>
 </html>
