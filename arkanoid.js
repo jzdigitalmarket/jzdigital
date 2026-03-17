@@ -154,7 +154,7 @@ function initArkanoid() {
             ctx.fillStyle = p.color;
             ctx.beginPath(); ctx.roundRect(p.x - 12, p.y - 8, 24, 14, 4); ctx.fill();
             ctx.fillStyle = '#000';
-            ctx.font = 'bold 8px monospace';
+            ctx.font = 'bold 12px monospace';
             ctx.textAlign = 'center';
             ctx.fillText(p.label, p.x, p.y + 2);
             ctx.textAlign = 'left';
@@ -189,7 +189,7 @@ function initArkanoid() {
         const best = parseInt(localStorage.getItem('arkanoid_best') || '0');
         if (score > best) localStorage.setItem('arkanoid_best', score);
 
-        ctx.font = 'bold 9px monospace';
+        ctx.font = 'bold 12px monospace';
         ctx.textAlign = 'left';
         ctx.fillStyle = '#facc15';
         ctx.fillText(`${score}pts`, 4, 12);
@@ -221,7 +221,7 @@ function initArkanoid() {
             ctx.fillStyle = 'rgba(0,0,0,0.6)';
             ctx.fillRect(0, H / 2 - 20, W, 36);
             ctx.fillStyle = '#a3e635';
-            ctx.font = 'bold 11px monospace';
+            ctx.font = 'bold 12px monospace';
             ctx.textAlign = 'center';
             ctx.fillText('ENTER para iniciar', W / 2, H / 2 + 5);
             ctx.textAlign = 'left';
