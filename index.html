@@ -245,7 +245,8 @@
     font-size: 1.2rem;
     margin-bottom: 10px;
     border-radius: 5px;
-    overflow: hidden;
+    min-height: 42px;
+    word-break: break-all;
 }
 
 .calc-buttons {
@@ -504,7 +505,11 @@ button:hover { background: #777; }
                 </div>
             <p class="text-xs text-gray-400 mt-4"><span class="text-orange-400">•</span> Clique data para nota.</p>
 
-           <div class="calc-buttons">
+
+            <div id="display" class="calc-display">0</div>
+ 
+           
+            <div class="calc-buttons">
         <button onclick="clearDisplay()" class="btn-clear">C</button>
         <button onclick="appendToDisplay('/')">/</button>
         <button onclick="appendToDisplay('*')">×</button>
