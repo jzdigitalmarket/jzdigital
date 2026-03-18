@@ -105,7 +105,7 @@
         .sidebar {
             position: fixed;
             top: 0;
-            width: 250px; 
+            width: 300px; 
             height: 100vh;
             z-index: 40; 
             background-color: rgba(26, 39, 57, 0.95); 
@@ -124,8 +124,8 @@
         #sidebar-utility { right: 0; border-left: 1px solid rgba(0, 191, 255, 0.3); }
 
         .content-area {
-            padding-left: 270px;
-            padding-right: 270px;
+            padding-left: 320px;
+            padding-right: 320px;
         }
 
         .utility-widget {
@@ -211,39 +211,93 @@
         .line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
 
         /* CALCULADORA */
-        .calc-display {
-            background: #444;
-            color: #fff;
-            text-align: right;
-            padding: 10px;
-            font-size: 1.2rem;
-            margin-bottom: 10px;
-            border-radius: 5px;
-            min-height: 42px;
-            word-break: break-all;
-        }
+       /* CALCULADORA */
+.calc-display {
+    background: #1e1e2e;
+    color: #f0f0f0;
+    text-align: right;
+    padding: 10px 12px;
+    font-size: 1.1rem;
+    font-family: monospace;
+    margin-bottom: 12px;
+    border-radius: 8px;
+    min-height: 42px;
+    word-break: break-all;
+}
 
-        .calc-buttons {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 5px;
-        }
+.calc-expr {
+    font-size: 0.7rem;
+    color: #8888aa;
+    min-height: 14px;
+    text-align: right;
+}
 
-        button {
-            padding: 10px;
-            border: none;
-            border-radius: 5px;
-            background: #555;
-            color: white;
-            cursor: pointer;
-        }
+.calc-mem {
+    font-size: 0.7rem;
+    color: #a78bfa;
+    min-height: 14px;
+    text-align: left;
+}
 
-        button:hover { background: #777; }
+.calc-buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 7px;
+}
 
-        .btn-equal { background: #28a745; grid-row: span 2; }
-        .btn-clear { background: #dc3545; grid-column: span 2; }
-        .btn-zero { grid-column: span 2; }
+.calc-buttons button {
+    padding: 0;
+    height: 52px;
+    border: none;
+    border-radius: 10px;
+    font-size: 17px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 80ms, box-shadow 80ms;
+}
 
+.calc-buttons button.btn-num {
+    background: #e0e0ea;
+    color: #333355;
+    box-shadow: 4px 4px 8px #b0b0c0, -3px -3px 7px #ffffff;
+}
+
+.calc-buttons button.btn-op {
+    background: #3a7bd5;
+    color: #ffffff;
+    font-size: 20px;
+    box-shadow: 4px 4px 8px #2255aa, -2px -2px 6px #6aabff;
+}
+
+.calc-buttons button.btn-equal {
+    background: #e63950;
+    color: #ffffff;
+    font-size: 20px;
+    box-shadow: 4px 4px 8px #aa1a30, -2px -2px 6px #ff7088;
+}
+
+.calc-buttons button.btn-clear {
+    background: #27ae60;
+    color: #ffffff;
+    box-shadow: 4px 4px 8px #1a7a40, -2px -2px 6px #55dd88;
+    grid-column: span 2;
+}
+
+.calc-buttons button.btn-mem {
+    background: #8e44ad;
+    color: #ffffff;
+    font-size: 13px;
+    box-shadow: 4px 4px 8px #5a2070, -2px -2px 6px #cc77ff;
+}
+
+.calc-buttons button.btn-zero {
+    grid-column: span 2;
+}
+
+.calc-buttons button:active {
+    transform: scale(0.94) translateY(2px);
+    box-shadow: 1px 1px 3px rgba(0,0,0,0.4) !important;
+}
         /* ARKANOID WIDGET */
         #arkanoid-widget {
             padding: 8px;
@@ -480,28 +534,36 @@
         <!-- FIM CALENDÁRIO -->
 
         <!-- CALCULADORA -->
-        <div class="utility-widget" style="border-top: 4px solid #6366f1;">
-            <div id="display" class="calc-display">0</div>
-            <div class="calc-buttons">
-                <button onclick="clearDisplay()" class="btn-clear">C</button>
-                <button onclick="appendToDisplay('/')">/</button>
-                <button onclick="appendToDisplay('*')">×</button>
-                <button onclick="appendToDisplay('7')">7</button>
-                <button onclick="appendToDisplay('8')">8</button>
-                <button onclick="appendToDisplay('9')">9</button>
-                <button onclick="appendToDisplay('-')">-</button>
-                <button onclick="appendToDisplay('4')">4</button>
-                <button onclick="appendToDisplay('5')">5</button>
-                <button onclick="appendToDisplay('6')">6</button>
-                <button onclick="appendToDisplay('+')">+</button>
-                <button onclick="appendToDisplay('1')">1</button>
-                <button onclick="appendToDisplay('2')">2</button>
-                <button onclick="appendToDisplay('3')">3</button>
-                <button onclick="calculate()" class="btn-equal">=</button>
-                <button onclick="appendToDisplay('0')" class="btn-zero">0</button>
-                <button onclick="appendToDisplay('.')">.</button>
-            </div>
-        </div>
+       <!-- CALCULADORA -->
+<div class="utility-widget" style="border-top: 4px solid #6366f1;">
+    <div class="calc-display">
+        <div class="calc-mem" id="calc-mem-ind"></div>
+        <div class="calc-expr" id="calc-expr"></div>
+        <div id="display">0</div>
+    </div>
+    <div class="calc-buttons">
+        <button class="btn-clear" onclick="calcClear()">C</button>
+        <button class="btn-mem" onclick="calcMemSave()">M</button>
+        <button class="btn-mem" onclick="calcMemRecall()">MR</button>
+        <button class="btn-op" onclick="calcAppend('/')">÷</button>
+        <button class="btn-num" onclick="calcAppend('7')">7</button>
+        <button class="btn-num" onclick="calcAppend('8')">8</button>
+        <button class="btn-num" onclick="calcAppend('9')">9</button>
+        <button class="btn-op" onclick="calcAppend('*')">×</button>
+        <button class="btn-num" onclick="calcAppend('4')">4</button>
+        <button class="btn-num" onclick="calcAppend('5')">5</button>
+        <button class="btn-num" onclick="calcAppend('6')">6</button>
+        <button class="btn-op" onclick="calcAppend('-')">−</button>
+        <button class="btn-num" onclick="calcAppend('1')">1</button>
+        <button class="btn-num" onclick="calcAppend('2')">2</button>
+        <button class="btn-num" onclick="calcAppend('3')">3</button>
+        <button class="btn-op" onclick="calcAppend('+')">+</button>
+        <button class="btn-num btn-zero" onclick="calcAppend('0')">0</button>
+        <button class="btn-num" onclick="calcAppend('.')">.</button>
+        <button class="btn-equal" onclick="calcExecute()">=</button>
+    </div>
+</div>
+<!-- FIM CALCULADORA -->
         <!-- FIM CALCULADORA -->
 
         <a href="/robotwar.html" class="text-cyan-400 text-xs text-center hover:underline">robot</a>
