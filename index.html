@@ -763,24 +763,31 @@
         }
         
         function handleDayClick(event) {
-            const dayCell = event.currentTarget;
-            if (dayCell.classList.contains('empty')) return; 
-            const dateKey = dayCell.getAttribute('data-full-date');
-            const existingNote = calendarNotes[dateKey] || '';
-            const friendlyDate = new Date(dateKey + 'T00:00:00').toLocaleDateString('pt-BR', { weekday: 'short', day: 'numeric', month: 'short' });
-            const promptMessage = existingNote 
-                ? `NOTA (${friendlyDate}):\n${existingNote}\n\n[OK p/ Editar | Limpe p/ Excluir]`
-                : `NOVA NOTA para ${friendlyDate}:`;
-            const userNote = prompt(promptMessage, existingNote);
-            if (userNote !== null) { 
-                const trimmedNote = userNote.trim();
-                if (trimmedNote === "") { delete calendarNotes[dateKey]; }
-                else { calendarNotes[dateKey] = trimmedNote; }
-                saveNotesToLocalStorage();
-                renderCalendar(); 
+    const dayCell = event.currentTarget;
+    if (dayCell.classList.contains('empty')) return;
+    const dateKey = dayCell.getAttribute('data-full-date');
+    const existingNote = calendarNotes[dateKey] || '';
+    const friendlyDate = new Date(dateKey + 'T00:00:00').toLocaleDateString('pt-BR', { weekday: 'short', day: 'numeric', month: 'short' });
+    const promptMessage = existingNote
+        ? `NOTA (${friendlyDate}):\n${existingNote}\n\n[OK p/ Editar | Limpe p/ Excluir]`
+        : `NOVA NOTA para ${friendlyDate}:`;
+    const userNote = prompt(promptMessage, existingNote);
+    if (userNote !== null) {
+        const trimmedNote = userNote.trim();
+        if (trimmedNote === "") { delete calendarNotes[dateKey]; }
+        else {
+            calendarNotes[dateKey] = trimmedNote;
+            // Pergunta se quer compartilhar no WhatsApp
+            const compartilhar = confirm(`✅ Nota salva!\n\nDeseja compartilhar no WhatsApp?\n\n📅 ${friendlyDate}\n📝 ${trimmedNote}`);
+            if (compartilhar) {
+                const texto = encodeURIComponent(`📅 *${friendlyDate}*\n📝 ${trimmedNote}`);
+                window.open(`https://wa.me/?text=${texto}`, '_blank');
             }
         }
-
+        saveNotesToLocalStorage();
+        renderCalendar();
+    }
+}
         // *** 4. CARGAS ***
         const dadosSimuladosCargas = [
             { bl: 'BRSS-871', prazo: '06/11', status: 'Pronto', cssClass: 'status-pronto' },
