@@ -613,6 +613,10 @@
             <p class="font-bold text-white mb-1">Notas Rápidas</p>
             <textarea id="quick-note-text" placeholder="Digite uma nota..." title="Bloco de Notas Rápido"></textarea>
             <button id="save-note-btn" class="w-full text-sm">Salvar</button>
+            <button id="whatsapp-note-btn" 
+    style="background-color:#25D366; color:white; font-weight:bold; padding:6px 12px; border-radius:4px; width:100%; margin-top:6px; font-size:0.875rem;">
+    <i class="fab fa-whatsapp"></i> Enviar no WhatsApp
+</button>
             <div id="note-status"></div>
         </div>
         
@@ -919,6 +923,13 @@
             setInterval(buscarClima, 600000); 
             setTimeout(showRandomGreeting, 1700); 
             setInterval(showRandomGreeting, 60000); 
+
+            document.getElementById('whatsapp-note-btn').addEventListener('click', function() {
+    const content = document.getElementById('quick-note-text').value.trim();
+    if (!content) { alert('Digite uma nota antes de enviar!'); return; }
+    const texto = encodeURIComponent(`📝 *Nota Rápida - GEM Systems*\n\n${content}`);
+    window.open(`https://wa.me/?text=${texto}`, '_blank');
+});
         };
         
         robotContainer.addEventListener('click', toggleChatbot);
