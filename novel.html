@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Visual Novel Simples</title>
+    <style>
+        body {
+            margin: 0;
+            background: #222;
+            font-family: 'Verdana', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        #vn-container {
+            width: 800px;
+            height: 600px;
+            background: #000;
+            position: relative;
+            border: 4px solid #444;
+            overflow: hidden;
+        }
+        /* Fundo da Cena */
+        #background {
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            transition: background 0.5s;
+        }
+        /* Caixa de Diálogo */
+        #dialogue-box {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #fff;
+            padding: 20px;
+            color: #fff;
+            min-height: 100px;
+            box-sizing: border-box;
+        }
+        #speaker-name {
+            font-weight: bold;
+            color: #ffcc00;
+            margin-bottom: 5px;
+        }
+        /* Botões de Escolha */
+        #options-container {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        button {
+            background: #444;
+            color: white;
+            border: 1px solid #fff;
+            padding: 8px 15px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        button:hover {
+            background: #666;
+        }
+    </style>
+</head>
+<body>
+
+<div id="vn-container">
+    <div id="background"></div>
+    <div id="dialogue-box">
+        <div id="speaker-name"></div>
+        <div id="text-content"></div>
+        <div id="options-container"></div>
+    </div>
+</div>
+
+<script>
+    // Banco de dados das cenas
+    const scenes = {
+        inicio: {
+            text: "Você acorda em uma floresta estranha. O ar está frio.",
+            speaker: "Narrador",
+            bg: "linear-gradient(to bottom, #1e3c72, #2a5298)", // Simulando imagem com degradê
+            options: [
+                { text: "Explorar a trilha", next: "trilha" },
+                { text: "Gritar por ajuda", next: "grito" }
+            ]
+        },
+        trilha: {
+            text: "Você caminha por 10 minutos e encontra uma cabana de madeira.",
+            speaker: "Narrador",
+            bg: "linear-gradient(to bottom, #2c5e1a, #1a2a1a)",
+            options: [
+                { text: "Bater na porta", next: "cabana" },
+                { text: "Voltar", next: "inicio" }
+            ]
+        },
+        grito: {
+            text: "Você grita, mas apenas o eco responde. Algo parece ter ouvido você ao longe...",
+            speaker: "Narrador",
+            bg: "linear-gradient(to bottom, #4b1212, #1a0505)",
+            options: [
+                { text: "Tentar se esconder", next: "esconder" },
+                { text: "Correr", next: "trilha" }
+            ]
+        },
+        cabana: {
+            text: "Uma senhora abre a porta e sorri. 'Eu estava esperando por você'.",
+            speaker: "Senhora Misteriosa",
+            bg: "linear-gradient(to bottom, #6d4c41, #3e2723)",
+            options: [
+                { text: "Recomeçar", next: "inicio" }
+            ]
+        },
+        esconder: {
+            text: "Você se esconde atrás de uma árvore grossa e o perigo passa. Sorte a sua.",
+            speaker: "Narrador",
+            bg: "linear-gradient(to bottom, #000, #222)",
+            options: [
+                { text: "Voltar ao início", next: "inicio" }
+            ]
+        }
+    };
+
+    function loadScene(sceneId) {
+        const scene = scenes[sceneId];
+        
+        // Atualiza visual
+        document.getElementById('background').style.background = scene.bg;
+        document.getElementById('speaker-name').textContent = scene.speaker;
+        document.getElementById('text-content').textContent = scene.text;
+        
+        // Limpa e cria botões
+        const container = document.getElementById('options-container');
+        container.innerHTML = '';
+        
+        scene.options.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.textContent = opt.text;
+            btn.onclick = () => loadScene(opt.next);
+            container.appendChild(btn);
+        });
+    }
+
+    // Começar o jogo
+    loadScene('inicio');
+</script>
+
+</body>
+</html>
