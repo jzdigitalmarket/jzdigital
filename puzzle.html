@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sliding Puzzle - Jogo do 15</title>
+    <style>
+        :root {
+            --bg-color: #f0f2f5;
+            --tile-color: #ffffff;
+            --tile-text: #333;
+            --empty-color: #cbd5e0;
+            --accent-color: #4a90e2;
+            --success-color: #48bb78;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        h1 { color: var(--tile-text); margin-bottom: 10px; }
+
+        .stats {
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        /* Grade do Jogo */
+        .puzzle-board {
+            display: grid;
+            grid-template-columns: repeat(4, 80px);
+            grid-template-rows: repeat(4, 80px);
+            gap: 10px;
+            background-color: #a0aec0;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        /* Peças */
+        .tile {
+            width: 80px;
+            height: 80px;
+            background-color: var(--tile-color);
+            color: var(--tile-text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            user-select: none;
+            transition: transform 0.1s, background-color 0.2s;
+        }
+
+        .tile:hover {
+            background-color: #edf2f7;
+            transform: scale(1.02);
+        }
+
+        .tile.empty {
+            background-color: var(--empty-color);
+            cursor: default;
+        }
+
+        .tile.empty:hover {
+            transform: none;
+        }
+
+        /* Botão */
+        .controls {
+            margin-top: 30px;
+        }
+
+        button {
+            padding: 10px 25px;
+            font-size: 1rem;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background-color: #357abd;
+        }
+
+        .win-message {
+            margin-top: 15px;
+            color: var(--success-color);
+            font-weight: bold;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Sliding Puzzle</h1>
+    
+    <div class="stats">Movimentos: <span id="move-count">0</span></div>
+
+    <div class="puzzle-board" id="board"></div>
+
+    <div class="win-message" id="win-text">Parabéns! Você resolveu o puzzle!</div>
+
+    <div class="controls">
+        <button onclick="shuffleGame()">Novo Jogo / Embaralhar</button>
+    </div>
+
+    <script>
+        const boardElement = document.getElementById('board');
+        const moveDisplay = document.getElementById('move-count');
+        const winDisplay = document.getElementById('win-text');
+        
+        let tiles = []; // Array para guardar a ordem atual
+        let moves = 0;
+        const size = 4; // 4x4
+
+        // Inicializa o tabuleiro na ordem correta
+        function initGame() {
+            tiles = [...Array(size * size).keys()].map(x => x + 1);
+            tiles[tiles.length - 1] = null; // O 16º elemento é o espaço vazio
+            render();
+        }
+
+        // Desenha o tabuleiro no HTML
+        function render() {
+            boardElement.innerHTML = '';
+            tiles.forEach((tile, index) => {
+                const tileDiv = document.createElement('div');
+                tileDiv.classList.add('tile');
+                if (tile === null) {
+                    tileDiv.classList.add('empty');
+                    tileDiv.textContent = '';
+                } else {
+                    tileDiv.textContent = tile;
+                    tileDiv.addEventListener('click', () => moveTile(index));
+                }
+                boardElement.appendChild(tileDiv);
+            });
+        }
+
+        // Lógica de movimentação
+        function moveTile(index) {
+            const emptyIndex = tiles.indexOf(null);
+            const row = Math.floor(index / size);
+            const col = index % size;
+            const emptyRow = Math.floor(emptyIndex / size);
+            const emptyCol = emptyIndex % size;
+
+            // Verifica se está na mesma linha ou coluna e se é adjacente
+            const isAdjacent = Math.abs(row - emptyRow) + Math.abs(col - emptyCol) === 1;
+
+            if (isAdjacent) {
+                // Troca a posição no array
+                [tiles[index], tiles[emptyIndex]] = [tiles[emptyIndex], tiles[index]];
+                moves++;
+                moveDisplay.textContent = moves;
+                render();
+                checkWin();
+            }
+        }
+
+        // Verifica se o array está ordenado
+        function checkWin() {
+            const isWin = tiles.slice(0, -1).every((tile, i) => tile === i + 1);
+            if (isWin && tiles[tiles.length - 1] === null) {
+                winDisplay.style.display = 'block';
+            }
+        }
+
+        // Embaralha fazendo movimentos válidos para garantir que seja resolvível
+        function shuffleGame() {
+            initGame();
+            moves = 0;
+            moveDisplay.textContent = moves;
+            winDisplay.style.display = 'none';
+
+            let shuffleSteps = 200;
+            while (shuffleSteps > 0) {
+                const emptyIndex = tiles.indexOf(null);
+                const neighbors = getNeighbors(emptyIndex);
+                const randomNeighbor = neighbors[Math.floor(Math.random() * neighbors.length)];
+                
+                [tiles[emptyIndex], tiles[randomNeighbor]] = [tiles[randomNeighbor], tiles[emptyIndex]];
+                shuffleSteps--;
+            }
+            render();
+        }
+
+        function getNeighbors(index) {
+            const row = Math.floor(index / size);
+            const col = index % size;
+            const neighbors = [];
+
+            if (row > 0) neighbors.push(index - size); // Topo
+            if (row < size - 1) neighbors.push(index + size); // Baixo
+            if (col > 0) neighbors.push(index - 1); // Esquerda
+            if (col < size - 1) neighbors.push(index + 1); // Direita
+
+            return neighbors;
+        }
+
+        // Começar
+        initGame();
+    </script>
+</body>
+</html>
