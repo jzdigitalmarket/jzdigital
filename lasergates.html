@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Laser Gates Remastered</title>
+    <style>
+        body { background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; margin: 0; color: #0f0; font-family: 'Courier New', Courier, monospace; }
+        #container { position: relative; border: 4px solid #333; }
+        canvas { background: #000; display: block; }
+        /* Efeito de TV Antiga (Scanlines) */
+        #container::after {
+            content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 4px, 3px 100%; pointer-events: none;
+        }
+        .ui { position: absolute; top: 10px; left: 10px; pointer-events: none; }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div class="ui">
+            <div>ENERGIA: <span id="energyTxt">100</span>%</div>
+            <div>SCORE: <span id="scoreTxt">0</span></div>
+        </div>
+        <canvas id="gameCanvas" width="800" height="450"></canvas>
+    </div>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let ship = { x: 80, y: 225, w: 40, h: 20, energy: 100, score: 0 };
+    let keys = {};
+    let stars = Array.from({length: 50}, () => ({ x: Math.random()*800, y: Math.random()*450, s: Math.random()*2 }));
+    let gates = [];
+    let energyCells = [];
+    let frame = 0;
+
+    function createGate(x) {
+        let gapSize = 140;
+        let top = Math.random() * (canvas.height - gapSize - 100) + 50;
+        return { x, gapTop: top, gapBottom: top + gapSize, w: 50, passed: false };
+    }
+
+    function createEnergy(x) {
+        return { x, y: Math.random() * 350 + 50, w: 20, h: 20, collected: false };
+    }
+
+    // Inicializar portões
+    for(let i=0; i<3; i++) gates.push(createGate(600 + i*400));
+
+    function update() {
+        if (keys['ArrowUp'] && ship.y > 5) ship.y -= 4;
+        if (keys['ArrowDown'] && ship.y < canvas.height - 25) ship.y += 4;
+
+        // Background Parallax
+        stars.forEach(s => {
+            s.x -= s.s;
+            if(s.x < 0) s.x = 800;
+        });
+
+        // Gerenciar Portões
+        gates.forEach(g => {
+            g.x -= 3;
+            if(g.x + g.w < 0) {
+                Object.assign(g, createGate(1000));
+                g.passed = false;
+            }
+            // Colisão Paredes
+            if(ship.x + ship.w > g.x && ship.x < g.x + g.w) {
+                if(ship.y < g.gapTop || ship.y + ship.h > g.gapBottom) ship.energy -= 2;
+            }
+            // Colisão Laser (Intermitente)
+            if(Math.floor(frame/40) % 2 === 0) {
+                if(ship.x + ship.w > g.x+15 && ship.x < g.x+35 && ship.y > g.gapTop && ship.y < g.gapBottom) {
+                    ship.energy -= 1.5;
+                }
+            }
+        });
+
+        // Gerenciar Energia (Itens "E")
+        if(frame % 300 === 0) energyCells.push(createEnergy(850));
+        energyCells.forEach((c, i) => {
+            c.x -= 3;
+            if(ship.x < c.x + c.w && ship.x + ship.w > c.x && ship.y < c.y + c.h && ship.y + ship.h > c.y) {
+                ship.energy = Math.min(100, ship.energy + 20);
+                energyCells.splice(i, 1);
+            }
+        });
+
+        ship.energy -= 0.05; // Dreno constante
+        ship.score++;
+        frame++;
+
+        if(ship.energy <= 0) reset();
+    }
+
+    function draw() {
+        ctx.fillStyle = "#000";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Estrelas
+        ctx.fillStyle = "#fff";
+        stars.forEach(s => ctx.fillRect(s.x, s.y, s.s, s.s));
+
+        // Portões e Lasers
+        gates.forEach(g => {
+            ctx.fillStyle = "#555"; // Metal do portão
+            ctx.fillRect(g.x, 0, g.w, g.gapTop);
+            ctx.fillRect(g.x, g.gapBottom, g.w, canvas.height);
+            
+            if(Math.floor(frame/40) % 2 === 0) {
+                ctx.fillStyle = "#f00";
+                ctx.fillRect(g.x + 20, g.gapTop, 10, g.gapBottom - g.gapTop); // Feixe laser
+                ctx.shadowBlur = 15; ctx.shadowColor = "red";
+            }
+            ctx.shadowBlur = 0;
+        });
+
+        // Células de Energia
+        ctx.fillStyle = "#ff0";
+        energyCells.forEach(c => {
+            ctx.fillRect(c.x, c.y, c.w, c.h);
+            ctx.fillStyle = "#000";
+            ctx.fillText("E", c.x+5, c.y+15);
+            ctx.fillStyle = "#ff0";
+        });
+
+        // Nave
+        ctx.fillStyle = "#aaa";
+        ctx.fillRect(ship.x, ship.y, ship.w, ship.h); // Corpo
+        ctx.fillStyle = "#0ff";
+        ctx.fillRect(ship.x + 25, ship.y + 5, 10, 5); // Cabine
+
+        // UI Update
+        document.getElementById('energyTxt').innerText = Math.floor(ship.energy);
+        document.getElementById('scoreTxt').innerText = ship.score;
+
+        update();
+        requestAnimationFrame(draw);
+    }
+
+    function reset() {
+        alert("GAME OVER! Sua pontuação: " + ship.score);
+        ship = { x: 80, y: 225, w: 40, h: 20, energy: 100, score: 0 };
+        gates = [];
+        for(let i=0; i<3; i++) gates.push(createGate(600 + i*400));
+        energyCells = [];
+    }
+
+    window.addEventListener('keydown', e => keys[e.key] = true);
+    window.addEventListener('keyup', e => keys[e.key] = false);
+    draw();
+</script>
+</body>
+</html>
