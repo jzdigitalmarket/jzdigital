@@ -3,125 +3,311 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JZ Digital | Soluções Inteligentes</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;800&display=swap" rel="stylesheet">
+    <title>JZ Digital | Portfolio & Hub Tecnológico</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
     <style>
         :root {
             --primary: #0066ff;
-            --dark: #1a1a1a;
-            --light: #f8f9fa;
-            --text: #333;
+            --primary-hover: #0052cc;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --text-main: #334155;
+            --text-muted: #64748b;
+            --white: #ffffff;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
             font-family: 'Inter', sans-serif;
-            margin: 0;
             background-color: var(--light);
-            color: var(--text);
+            color: var(--text-main);
             line-height: 1.6;
         }
 
-        /* Header "Glassmorphism" */
+        /* --- NAVEGAÇÃO --- */
         header {
-            position: sticky;
+            position: fixed;
             top: 0;
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(10px);
-            display: flex;
-            justify-content: space-between;
-            padding: 1.5rem 10%;
-            align-items: center;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
             z-index: 1000;
             border-bottom: 1px solid rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 5%;
         }
 
-        .logo { font-weight: 800; font-size: 1.4rem; letter-spacing: -1px; }
+        .logo {
+            font-weight: 800;
+            font-size: 1.4rem;
+            letter-spacing: -1px;
+            color: var(--dark);
+            text-decoration: none;
+        }
+
         .logo span { color: var(--primary); }
 
-        /* Hero Section */
-        .hero {
-            padding: 100px 10% 60px;
-            text-align: center;
-            background: white;
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 20px;
+            align-items: center;
         }
 
-        .hero h1 { font-size: 3rem; font-weight: 800; margin-bottom: 10px; }
-        .hero p { font-size: 1.2rem; color: #666; max-width: 600px; margin: 0 auto 30px; }
+        nav a {
+            text-decoration: none;
+            color: var(--text-main);
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
 
-        /* Grade de Projetos */
-        .container { padding: 60px 10%; }
+        nav a:hover { color: var(--primary); }
+
+        /* Dropdowns */
+        .dropdown { position: relative; }
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: var(--white);
+            min-width: 200px;
+            box-shadow: var(--shadow);
+            border-radius: 12px;
+            padding: 10px 0;
+            margin-top: 10px;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .dropdown-content a {
+            display: block;
+            padding: 10px 20px;
+            font-size: 0.9rem;
+        }
+
+        .dropdown-content a:hover { background: #f1f5f9; }
+        .dropdown:hover .dropdown-content { display: block; }
+
+        /* --- HERO SECTION --- */
+        .hero {
+            padding: 160px 5% 80px;
+            text-align: center;
+            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 20px;
+            letter-spacing: -2px;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            max-width: 700px;
+            margin: 0 auto 40px;
+        }
+
+        .cta-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: var(--white);
+            padding: 14px 28px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .btn-primary:hover { background: var(--primary-hover); }
+
+        .btn-outline {
+            border: 2px solid #e2e8f0;
+            color: var(--dark);
+            padding: 12px 28px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-outline:hover { background: #f1f5f9; border-color: #cbd5e1; }
+
+        /* --- GRID DE PROJETOS --- */
+        .section-title {
+            text-align: center;
+            margin-bottom: 50px;
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 80px 5%;
+        }
+
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
         }
 
         .card {
-            background: white;
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            transition: transform 0.3s ease;
-            border: 1px solid transparent;
+            background: var(--white);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
 
         .card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-10px);
+            box-shadow: var(--shadow);
             border-color: var(--primary);
         }
 
-        .card h3 { margin-top: 0; color: var(--dark); }
-        .btn {
+        .card-icon {
+            font-size: 2rem;
+            margin-bottom: 20px;
             display: inline-block;
-            padding: 10px 20px;
-            background: var(--primary);
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: 500;
-            margin-top: 15px;
         }
 
+        .card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: var(--dark);
+        }
+
+        .card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 25px;
+        }
+
+        .card-link {
+            text-decoration: none;
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* --- FOOTER --- */
+        footer {
+            text-align: center;
+            padding: 40px;
+            border-top: 1px solid #e2e8f0;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Responsividade */
         @media (max-width: 768px) {
-            .hero h1 { font-size: 2rem; }
+            nav .nav-desktop { display: none; }
+            .hero { padding-top: 120px; }
+            .cta-group { flex-direction: column; }
         }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="logo">JZ<span>DIGITAL</span></div>
+        <a href="#" class="logo">JZ<span>DIGITAL</span></a>
         <nav>
-            <a href="https://github.com/jzdigitalmarket" style="text-decoration:none; color:var(--dark); font-weight:500;">GitHub</a>
+            <ul class="nav-links">
+                <li class="nav-desktop"><a href="indexold.html">Legacy Site</a></li>
+                
+                <li class="dropdown">
+                    <a href="#">Projetos ▾</a>
+                    <div class="dropdown-content">
+                        <a href="arkanoid2.html">Arkanoid Arcade</a>
+                        <a href="lasergates.html">Laser Gates</a>
+                        <a href="robotwar.html">Robot War</a>
+                        <a href="puzzle.html">Puzzle Game</a>
+                    </div>
+                </li>
+
+                <li class="dropdown">
+                    <a href="#">Apps ▾</a>
+                    <div class="dropdown-content">
+                        <a href="calculadora.js">Calculadora JS</a>
+                        <a href="editorzinho.html">Editor Lite</a>
+                        <a href="chat2.html">Chat Messenger</a>
+                    </div>
+                </li>
+
+                <li><a href="https://github.com/jzdigitalmarket" class="btn-primary" style="padding: 8px 20px; font-size: 0.85rem;">GitHub</a></li>
+            </ul>
         </nav>
     </header>
 
-    <section class="hero">
-        <h1>Desenvolvimento & Inovação</h1>
-        <p>Explorando as fronteiras entre automação, interfaces modernas e experiências digitais.</p>
-    </section>
-
-    <div class="container">
-        <div class="grid">
-            <div class="card">
-                <h3>Laboratório de Jogos</h3>
-                <p>Experiências interativas desenvolvidas em Vanilla JS, incluindo Arkanoid e Robot War.</p>
-                <a href="arkanoid2.html" class="btn">Explorar</a>
+    <main>
+        <section class="hero">
+            <h1>Marketing & Code.</h1>
+            <p>Transformo ideias complexas em interfaces simples, limpas e altamente funcionais. Especialista em desenvolvimento web e estratégias digitais.</p>
+            <div class="cta-group">
+                <a href="#portfolio" class="btn-primary">Ver Projetos</a>
+                <a href="https://jzdigital.pages.dev/" class="btn-outline">Saber Mais</a>
             </div>
+        </section>
 
-            <div class="card">
-                <h3>Ferramentas Úteis</h3>
-                <p>Calculadoras e editores personalizados para produtividade no dia a dia.</p>
-                <a href="editorzinho.html" class="btn">Abrir</a>
-            </div>
+        <section class="container" id="portfolio">
+            <h2 class="section-title">O que eu desenvolvo</h2>
+            <div class="grid">
+                
+                <div class="card">
+                    <span class="card-icon">🎮</span>
+                    <h3>Game Development</h3>
+                    <p>Recriação de clássicos e mecânicas experimentais utilizando Canvas API e JavaScript puro.</p>
+                    <a href="arkanoid2.html" class="card-link">Jogar agora →</a>
+                </div>
 
-            <div class="card">
-                <h3>Sistemas de Chat</h3>
-                <p>Interface de comunicação experimental utilizando tecnologias web modernas.</p>
-                <a href="chat.html" class="btn">Ver Demo</a>
+                <div class="card">
+                    <span class="card-icon">🛠️</span>
+                    <h3>Web Utilities</h3>
+                    <p>Pequenas ferramentas focadas em produtividade, como editores de código e calculadoras dinâmicas.</p>
+                    <a href="editorzinho.html" class="card-link">Testar ferramentas →</a>
+                </div>
+
+                <div class="card">
+                    <span class="card-icon">💬</span>
+                    <h3>Interatividade</h3>
+                    <p>Interfaces de comunicação e sistemas de chat desenvolvidos para alta performance e feedback em tempo real.</p>
+                    <a href="chat.html" class="card-link">Abrir demonstração →</a>
+                </div>
+
             </div>
-        </div>
-    </div>
+        </section>
+    </main>
+
+    <footer>
+        &copy; 2026 JZ Digital Market. Itajaí, SC. <br>
+        <small>Focado em performance e design minimalista.</small>
+    </footer>
 
 </body>
 </html>
