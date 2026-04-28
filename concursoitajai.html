@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulado 30 Questões - Itajaí Lei 2960/95</title>
+    <title>Simulado Aleatório - Lei 2960/95 Itajaí</title>
     <style>
         :root {
             --primary: #1a2a3a;
@@ -16,7 +16,7 @@
         .container { max-width: 900px; margin: auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
         header { text-align: center; border-bottom: 3px solid var(--primary); margin-bottom: 20px; padding-bottom: 10px; }
         .stats-bar { display: flex; justify-content: space-around; background: var(--primary); color: white; padding: 10px; border-radius: 8px; margin-bottom: 20px; font-weight: bold; }
-        .question-box { background: #fff; border: 1px solid #ddd; padding: 20px; border-radius: 8px; }
+        .question-box { background: #fff; border: 1px solid #ddd; padding: 20px; border-radius: 8px; min-height: 300px; }
         .question-text { font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; line-height: 1.4; }
         .options-list { list-style: none; padding: 0; }
         .option { background: #f8f9fa; border: 2px solid #e9ecef; padding: 12px 15px; margin-bottom: 10px; border-radius: 6px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; }
@@ -39,15 +39,15 @@
 
 <div class="container">
     <header>
-        <h1>Simulado Intensivo: Lei 2960/95</h1>
-        <p>Regime Jurídico Único dos Servidores de Itajaí</p>
+        <h1>Simulado Dinâmico: Lei 2960/95</h1>
+        <p>A ordem das questões muda a cada acesso</p>
     </header>
 
     <div class="progress-container"><div id="progress-bar"></div></div>
 
     <div id="quiz-ui">
         <div class="stats-bar">
-            <span>Questão: <span id="q-count">1</span> / 30</span>
+            <span>Questão: <span id="q-count">1</span> / <span id="q-total"></span></span>
             <span>Acertos: <span id="q-score">0</span></span>
         </div>
 
@@ -65,199 +65,64 @@
 
     <div id="final-screen" class="final-screen">
         <h2>🔥 Simulado Finalizado!</h2>
-        <p style="font-size: 1.4rem;">Seu desempenho: <span id="final-res"></span> de 30</p>
+        <p style="font-size: 1.4rem;">Seu desempenho: <span id="final-res"></span> de <span id="final-total"></span></p>
         <p id="performance-msg"></p>
-        <button onclick="location.reload()" style="background: var(--primary); color: white; max-width: 300px;">Reiniciar Treinamento</button>
+        <button onclick="location.reload()" style="background: var(--primary); color: white; max-width: 300px;">Reiniciar (Nova Ordem)</button>
     </div>
 </div>
 
 <script>
     const questions = [
-        {
-            q: "De acordo com a Lei 2960/95, a investidura em cargo público ocorrerá com:",
-            options: ["A nomeação.", "A aprovação no concurso.", "A posse.", "O início do exercício.", "A publicação do edital."],
-            correct: 2,
-            exp: "Art. 7º. A investidura em cargo público ocorrerá com a posse."
-        },
-        {
-            q: "O prazo para o servidor empossado entrar em exercício é de:",
-            options: ["5 dias.", "10 dias.", "15 dias.", "30 dias.", "Imediato."],
-            correct: 0,
-            exp: "Art. 15. O exercício é o efetivo desempenho das atribuições do cargo. O prazo é de 5 dias contados da posse."
-        },
-        {
-            q: "A forma de provimento decorrente da invalidação da demissão de servidor estável por decisão administrativa ou judicial é a:",
-            options: ["Recondução.", "Reversão.", "Readaptação.", "Reintegração.", "Aproveitamento."],
-            correct: 3,
-            exp: "Art. 28. A reintegração é a reinvestidura do servidor estável no cargo anteriormente ocupado quando invalidada a sua demissão."
-        },
-        {
-            q: "O estágio probatório, durante o qual a aptidão e capacidade do servidor serão objeto de avaliação, tem duração de:",
-            options: ["12 meses.", "24 meses.", "36 meses.", "48 meses.", "60 meses."],
-            correct: 2,
-            exp: "Conforme a CF/88 e atualizações aplicadas ao regime municipal, o estágio probatório é de 3 anos (36 meses)."
-        },
-        {
-            q: "A vacância do cargo público decorrerá, entre outros, de:",
-            options: ["Promoção.", "Readaptação.", "Posse em outro cargo inacumulável.", "Exoneração.", "Todas as alternativas estão corretas."],
-            correct: 4,
-            exp: "Art. 35. A vacância decorre de exoneração, demissão, promoção, readaptação, aposentadoria, posse em cargo inacumulável ou falecimento."
-        },
-        {
-            q: "Ao servidor público de Itajaí é concedido, por cada quinquênio de efetivo serviço prestado ao Município, um adicional de:",
-            options: ["2%.", "3%.", "5%.", "10%.", "15%."],
-            correct: 2,
-            exp: "Art. 79. O adicional por tempo de serviço (quinquênio) é de 5% sobre o vencimento."
-        },
-        {
-            q: "A licença concedida ao servidor por motivo de doença em pessoa da família é:",
-            options: ["Sempre remunerada.", "Remunerada apenas nos primeiros 30 dias.", "Precedida de exame por médico oficial.", "Concedida por prazo indeterminado.", "Apenas para parentes de 1º grau."],
-            correct: 2,
-            exp: "Art. 106. A licença por motivo de doença em pessoa da família exige inspeção médica oficial."
-        },
-        {
-            q: "A licença-prêmio por assiduidade concede 3 meses de afastamento após cada:",
-            options: ["3 anos de serviço.", "5 anos de serviço.", "10 anos de serviço.", "15 anos de serviço.", "20 anos de serviço."],
-            correct: 1,
-            exp: "Art. 117. Após cada quinquênio (5 anos) ininterrupto, o servidor faz jus a 3 meses de licença-prêmio."
-        },
-        {
-            q: "É proibido ao servidor público municipal de Itajaí:",
-            options: ["Representar contra abuso de poder.", "Manter sigilo sobre assuntos da repartição.", "Promover manifestação de apreço ou desapreço no recinto do serviço.", "Tratar com urbanidade as pessoas.", "Zelar pela economia do material."],
-            correct: 2,
-            exp: "Art. 137, inciso II. É proibido promover manifestação de apreço ou desapreço no recinto da repartição."
-        },
-        {
-            q: "A penalidade de advertência será aplicada por escrito nos casos de:",
-            options: ["Reincidência de faltas leves.", "Insubordinação grave.", "Violação de proibição que não justifique demissão.", "Ofensa física a colega.", "Abandono de cargo."],
-            correct: 2,
-            exp: "Art. 145. A advertência aplica-se por escrito em casos de negligência ou violação de dever/proibição leve."
-        },
-        {
-            q: "A ação disciplinar prescreverá em 5 anos quanto às infrações puníveis com:",
-            options: ["Advertência.", "Suspensão.", "Demissão.", "Multa.", "Apenas cassação de aposentadoria."],
-            correct: 2,
-            exp: "Art. 153, inciso I. Prescreve em 5 anos a ação contra infração punível com demissão ou cassação de aposentadoria."
-        },
-        {
-            q: "A autoridade que tiver ciência de irregularidade no serviço público é obrigada a promover a sua apuração imediata mediante:",
-            options: ["Apenas Processo Administrativo Disciplinar (PAD).", "Sindicância ou PAD.", "Boletim de Ocorrência.", "Exoneração sumária.", "Suspensão preventiva imediata."],
-            correct: 1,
-            exp: "Art. 154. A apuração ocorre mediante sindicância ou processo administrativo disciplinar."
-        },
-        {
-            q: "O prazo para conclusão do Processo Administrativo Disciplinar (PAD) é de até:",
-            options: ["30 dias.", "60 dias.", "90 dias.", "120 dias.", "180 dias."],
-            correct: 1,
-            exp: "Art. 165. O prazo para conclusão do processo disciplinar não excederá 60 dias, admitida prorrogação por igual prazo."
-        },
-        {
-            q: "A 'Reversão' é o retorno à atividade de servidor:",
-            options: ["Demitido injustamente.", "Em disponibilidade.", "Aposentado por invalidez quando insubsistentes os motivos.", "Readaptado.", "Exonerado a pedido."],
-            correct: 2,
-            exp: "Art. 25. Reversão é o retorno à atividade de servidor aposentado."
-        },
-        {
-            q: "O servidor que, a serviço, afastar-se da sede em caráter eventual ou transitório para outro ponto do território nacional, fará jus a:",
-            options: ["Gratificação natalina.", "Adicional noturno.", "Diárias.", "Salário-família.", "Auxílio-transporte apenas."],
-            correct: 2,
-            exp: "Art. 61. O servidor que se afastar da sede em objeto de serviço fará jus a passagens e diárias."
-        },
-        {
-            q: "Qual o limite máximo de horas extras diárias permitidas pela Lei 2960/95?",
-            options: ["1 hora.", "2 horas.", "3 horas.", "4 horas.", "Não há limite."],
-            correct: 1,
-            exp: "Art. 76. O serviço extraordinário não poderá exceder a 2 horas por jornada."
-        },
-        {
-            q: "O vencimento, a remuneração e o provento não serão objeto de arresto, sequestro ou penhora, exceto nos casos de:",
-            options: ["Dívida de cartão de crédito.", "Empréstimo consignado bancário.", "Prestação de alimentos resultante de decisão judicial.", "Dívida de aluguel.", "Impostos atrasados."],
-            correct: 2,
-            exp: "Art. 51. Salvo por imposição legal ou mandado judicial, nenhum desconto incidirá... exceto prestação de alimentos."
-        },
-        {
-            q: "A remoção de servidor pode ocorrer:",
-            options: ["Apenas a pedido.", "Apenas de ofício.", "De ofício ou a pedido.", "Somente por permuta.", "Somente por motivo de saúde."],
-            correct: 2,
-            exp: "Art. 36. Remoção é o deslocamento do servidor... a pedido ou de ofício."
-        },
-        {
-            q: "A posse em cargo público deve ocorrer no prazo de quantos dias da publicação do ato de provimento?",
-            options: ["10 dias.", "15 dias.", "20 dias.", "30 dias.", "45 dias."],
-            correct: 3,
-            exp: "Art. 13, § 1º. A posse ocorrerá no prazo de 30 dias contados da publicação."
-        },
-        {
-            q: "A readaptação é a investidura do servidor em cargo de atribuições compatíveis com a limitação que tenha sofrido em sua:",
-            options: ["Escolaridade.", "Capacidade física ou mental.", "Carga horária.", "Remuneração.", "Hierarquia."],
-            correct: 1,
-            exp: "Art. 24. Readaptação é a investidura em cargo compatível com limitação física ou mental verificada em inspeção médica."
-        },
-        {
-            q: "Extinto o cargo ou declarada a sua desnecessidade, o servidor estável ficará em:",
-            options: ["Exoneração.", "Disponibilidade.", "Licença remunerada.", "Aposentadoria compulsória.", "Reintegração."],
-            correct: 1,
-            exp: "Art. 31. Extinto o cargo ou declarada sua desnecessidade, o servidor estável ficará em disponibilidade."
-        },
-        {
-            q: "As férias do servidor poderão ser acumuladas até o máximo de:",
-            options: ["Dois períodos.", "Três períodos.", "Um período apenas.", "Quatro períodos.", "Não podem ser acumuladas."],
-            correct: 0,
-            exp: "Art. 101. É vedado levar à conta de férias qualquer falta ao trabalho. Podem ser acumuladas por até 2 períodos em caso de necessidade de serviço."
-        },
-        {
-            q: "O servidor terá direito a licença para o casamento (gala) por:",
-            options: ["3 dias consecutivos.", "5 dias consecutivos.", "7 dias consecutivos.", "8 dias consecutivos.", "10 dias consecutivos."],
-            correct: 3,
-            exp: "Art. 129, inciso II. Por 8 dias consecutivos em razão de casamento."
-        },
-        {
-            q: "Em caso de falecimento de cônjuge, pais ou filhos (nojo), o servidor pode se afastar por:",
-            options: ["2 dias.", "3 dias.", "5 dias.", "8 dias.", "15 dias."],
-            correct: 3,
-            exp: "Art. 129, inciso III, alínea 'a'. Por 8 dias consecutivos em razão de falecimento de cônjuge, companheiro, pais, madrasta/padrasto, filhos, enteados ou irmãos."
-        },
-        {
-            q: "O servidor estudante que mudar de sede de ofício terá direito a matrícula em instituição de ensino local:",
-            options: ["Apenas se houver vaga.", "Mediante novo vestibular.", "Em qualquer época, independentemente de vaga.", "Somente em escolas públicas.", "Somente se cursar pós-graduação."],
-            correct: 2,
-            exp: "Art. 132. Ao servidor estudante que mudar de sede no interesse da administração é assegurada matrícula em instituição vinculada à mesma rede de ensino, em qualquer época e independente de vaga."
-        },
-        {
-            q: "O dever de 'levar ao conhecimento da autoridade superior as irregularidades de que tiver ciência em razão do cargo' é:",
-            options: ["Opcional.", "Condicionado a recompensa.", "Dever do servidor.", "Proibido para evitar intrigas.", "Apenas para chefes."],
-            correct: 2,
-            exp: "Art. 136, inciso IV. É dever levar irregularidades ao conhecimento da autoridade superior."
-        },
-        {
-            q: "A demissão será aplicada nos casos de 'Incontinência pública e conduta escandalosa, na repartição'. Esta afirmação é:",
-            options: ["Falsa.", "Verdadeira.", "Aplicável apenas a cargos comissionados.", "Punível apenas com suspensão.", "Punível apenas com advertência."],
-            correct: 1,
-            exp: "Art. 147, inciso V. A demissão será aplicada em caso de incontinência pública e conduta escandalosa na repartição."
-        },
-        {
-            q: "A suspensão preventiva de um servidor pode ser ordenada pela autoridade para que este não influencie na apuração de irregularidade, pelo prazo de até:",
-            options: ["15 dias.", "30 dias.", "60 dias.", "90 dias.", "120 dias."],
-            correct: 2,
-            exp: "Art. 162. Como medida cautelar, a autoridade poderá determinar a suspensão preventiva do servidor por até 60 dias."
-        },
-        {
-            q: "O processo disciplinar poderá ser revisto, a qualquer tempo, a pedido ou de ofício, quando:",
-            options: ["O servidor não gostar da pena.", "Surgirem fatos novos ou circunstâncias suscetíveis de justificar a inocência.", "O prefeito mudar.", "A câmara de vereadores solicitar.", "O prazo de 5 anos passar."],
-            correct: 1,
-            exp: "Art. 189. A revisão do processo ocorre quando surgirem fatos novos ou circunstâncias que provem a inocência ou inadequação da penalidade."
-        },
-        {
-            q: "O servidor ocupante de cargo em comissão que não seja titular de cargo efetivo submete-se a qual regime previdenciário?",
-            options: ["Regime Próprio do Município.", "Regime Geral de Previdência Social (INSS).", "Não tem direito a previdência.", "Fundo de Pensão Complementar.", "Regime Especial de Itajaí."],
-            correct: 1,
-            exp: "Regra constitucional aplicada ao servidor exclusivamente comissionado (Art. 40, § 13 da CF)."
-        }
+        { q: "De acordo com a Lei 2960/95, a investidura em cargo público ocorrerá com:", options: ["A nomeação.", "A aprovação no concurso.", "A posse.", "O início do exercício.", "A publicação do edital."], correct: 2, exp: "Art. 7º. A investidura em cargo público ocorrerá com a posse." },
+        { q: "O prazo para o servidor empossado entrar em exercício é de:", options: ["5 dias.", "10 dias.", "15 dias.", "30 dias.", "Imediato."], correct: 0, exp: "Art. 15. O exercício é o efetivo desempenho das atribuições do cargo. O prazo é de 5 dias contados da posse." },
+        { q: "A forma de provimento decorrente da invalidação da demissão de servidor estável por decisão administrativa ou judicial é a:", options: ["Recondução.", "Reversão.", "Readaptação.", "Reintegração.", "Aproveitamento."], correct: 3, exp: "Art. 28. A reintegração é a reinvestidura do servidor estável no cargo anteriormente ocupado quando invalidada a sua demissão." },
+        { q: "O estágio probatório, durante o qual a aptidão e capacidade do servidor serão objeto de avaliação, tem duração de:", options: ["12 meses.", "24 meses.", "36 meses.", "48 meses.", "60 meses."], correct: 2, exp: "Conforme a CF/88 e atualizações aplicadas ao regime municipal, o estágio probatório é de 3 anos (36 meses)." },
+        { q: "A vacância do cargo público decorrerá, entre outros, de:", options: ["Promoção.", "Readaptação.", "Posse em outro cargo inacumulável.", "Exoneração.", "Todas as alternativas estão corretas."], correct: 4, exp: "Art. 35. A vacância decorre de exoneração, demissão, promoção, readaptação, aposentadoria, posse em cargo inacumulável ou falecimento." },
+        { q: "Ao servidor público de Itajaí é concedido, por cada quinquênio de efetivo serviço prestado ao Município, um adicional de:", options: ["2%.", "3%.", "5%.", "10%.", "15%."], correct: 2, exp: "Art. 79. O adicional por tempo de serviço (quinquênio) é de 5% sobre o vencimento." },
+        { q: "A licença concedida ao servidor por motivo de doença em pessoa da família é:", options: ["Sempre remunerada.", "Remunerada apenas nos primeiros 30 dias.", "Precedida de exame por médico oficial.", "Concedida por prazo indeterminado.", "Apenas para parentes de 1º grau."], correct: 2, exp: "Art. 106. A licença por motivo de doença em pessoa da família exige inspeção médica oficial." },
+        { q: "A licença-prêmio por assiduidade concede 3 meses de afastamento após cada:", options: ["3 anos de serviço.", "5 anos de serviço.", "10 anos de serviço.", "15 anos de serviço.", "20 anos de serviço."], correct: 1, exp: "Art. 117. Após cada quinquênio (5 anos) ininterrupto, o servidor faz jus a 3 meses de licença-prêmio." },
+        { q: "É proibido ao servidor público municipal de Itajaí:", options: ["Representar contra abuso de poder.", "Manter sigilo sobre assuntos da repartição.", "Promover manifestação de apreço ou desapreço no recinto do serviço.", "Tratar com urbanidade as pessoas.", "Zelar pela economia do material."], correct: 2, exp: "Art. 137, inciso II. É proibido promover manifestação de apreço ou desapreço no recinto da repartição." },
+        { q: "A penalidade de advertência será aplicada por escrito nos casos de:", options: ["Reincidência de faltas leves.", "Insubordinação grave.", "Violação de proibição que não justifique demissão.", "Ofensa física a colega.", "Abandono de cargo."], correct: 2, exp: "Art. 145. A advertência aplica-se por escrito em casos de negligência ou violação de dever/proibição leve." },
+        { q: "A ação disciplinar prescreverá em 5 anos quanto às infrações puníveis com:", options: ["Advertência.", "Suspensão.", "Demissão.", "Multa.", "Apenas cassação de aposentadoria."], correct: 2, exp: "Art. 153, inciso I. Prescreve em 5 anos a ação contra infração punível com demissão ou cassação de aposentadoria." },
+        { q: "A autoridade que tiver ciência de irregularidade no serviço público é obrigada a promover a sua apuração imediata mediante:", options: ["Apenas Processo Administrativo Disciplinar (PAD).", "Sindicância ou PAD.", "Boletim de Ocorrência.", "Exoneração sumária.", "Suspensão preventiva imediata."], correct: 1, exp: "Art. 154. A apuração ocorre mediante sindicância ou processo administrativo disciplinar." },
+        { q: "O prazo para conclusão do Processo Administrativo Disciplinar (PAD) é de até:", options: ["30 dias.", "60 dias.", "90 dias.", "120 dias.", "180 dias."], correct: 1, exp: "Art. 165. O prazo para conclusão do processo disciplinar não excederá 60 dias, admitida prorrogação por igual prazo." },
+        { q: "A 'Reversão' é o retorno à atividade de servidor:", options: ["Demitido injustamente.", "Em disponibilidade.", "Aposentado por invalidez quando insubsistentes os motivos.", "Readaptado.", "Exonerado a pedido."], correct: 2, exp: "Art. 25. Reversão é o retorno à atividade de servidor aposentado." },
+        { q: "O servidor que, a serviço, afastar-se da sede em caráter eventual ou transitório para outro ponto do território nacional, fará jus a:", options: ["Gratificação natalina.", "Adicional noturno.", "Diárias.", "Salário-família.", "Auxílio-transporte apenas."], correct: 2, exp: "Art. 61. O servidor que se afastar da sede em objeto de serviço fará jus a passagens e diárias." },
+        { q: "Qual o limite máximo de horas extras diárias permitidas pela Lei 2960/95?", options: ["1 hora.", "2 horas.", "3 horas.", "4 horas.", "Não há limite."], correct: 1, exp: "Art. 76. O serviço extraordinário não poderá exceder a 2 horas por jornada." },
+        { q: "O vencimento, a remuneração e o provento não serão objeto de arresto, sequestro ou penhora, exceto nos casos de:", options: ["Dívida de cartão de crédito.", "Empréstimo consignado bancário.", "Prestação de alimentos resultante de decisão judicial.", "Dívida de aluguel.", "Impostos atrasados."], correct: 2, exp: "Art. 51. Salvo por imposição legal ou mandado judicial, nenhum desconto incidirá... exceto prestação de alimentos." },
+        { q: "A remoção de servidor pode ocorrer:", options: ["Apenas a pedido.", "Apenas de ofício.", "De ofício ou a pedido.", "Somente por permuta.", "Somente por motivo de saúde."], correct: 2, exp: "Art. 36. Remoção é o deslocamento do servidor... a pedido ou de ofício." },
+        { q: "A posse em cargo público deve ocorrer no prazo de quantos dias da publicação do ato de provimento?", options: ["10 dias.", "15 dias.", "20 dias.", "30 dias.", "45 dias."], correct: 3, exp: "Art. 13, § 1º. A posse ocorrerá no prazo de 30 dias contados da publicação." },
+        { q: "A readaptação é a investidura do servidor em cargo de atribuições compatíveis com a limitação que tenha sofrido em sua:", options: ["Escolaridade.", "Capacidade física ou mental.", "Carga horária.", "Remuneração.", "Hierarquia."], correct: 1, exp: "Art. 24. Readaptação é a investidura em cargo compatível com limitação física ou mental verificada em inspeção médica." },
+        { q: "Extinto o cargo ou declarada a sua desnecessidade, o servidor estável ficará em:", options: ["Exoneração.", "Disponibilidade.", "Licença remunerada.", "Aposentadoria compulsória.", "Reintegração."], correct: 1, exp: "Art. 31. Extinto o cargo ou declarada sua desnecessidade, o servidor estável ficará em disponibilidade." },
+        { q: "As férias do servidor poderão ser acumuladas até o máximo de:", options: ["Dois períodos.", "Três períodos.", "Um período apenas.", "Quatro períodos.", "Não podem ser acumuladas."], correct: 0, exp: "Art. 101. Podem ser acumuladas por até 2 períodos em caso de necessidade de serviço." },
+        { q: "O servidor terá direito a licença para o casamento (gala) por:", options: ["3 dias consecutivos.", "5 dias consecutivos.", "7 dias consecutivos.", "8 dias consecutivos.", "10 dias consecutivos."], correct: 3, exp: "Art. 129, inciso II. Por 8 dias consecutivos em razão de casamento." },
+        { q: "Em caso de falecimento de cônjuge, pais ou filhos (nojo), o servidor pode se afastar por:", options: ["2 dias.", "3 dias.", "5 dias.", "8 dias.", "15 dias."], correct: 3, exp: "Art. 129, inciso III, alínea 'a'. Por 8 dias consecutivos em razão de falecimento." },
+        { q: "O servidor estudante que mudar de sede de ofício terá direito a matrícula em instituição de ensino local:", options: ["Apenas se houver vaga.", "Mediante novo vestibular.", "Em qualquer época, independentemente de vaga.", "Somente em escolas públicas.", "Somente se cursar pós-graduação."], correct: 2, exp: "Art. 132. Assegurada matrícula em qualquer época e independente de vaga." },
+        { q: "O dever de 'levar ao conhecimento da autoridade superior as irregularidades' é:", options: ["Opcional.", "Condicionado a recompensa.", "Dever do servidor.", "Proibido para evitar intrigas.", "Apenas para chefes."], correct: 2, exp: "Art. 136, inciso IV. É dever levar irregularidades ao conhecimento da autoridade." },
+        { q: "A demissão será aplicada nos casos de 'Incontinência pública e conduta escandalosa'. Esta afirmação é:", options: ["Falsa.", "Verdadeira.", "Aplicável apenas a cargos comissionados.", "Punível apenas com suspensão.", "Punível apenas com advertência."], correct: 1, exp: "Art. 147, inciso V. Conduta escandalosa na repartição gera demissão." },
+        { q: "A suspensão preventiva de um servidor pode ser ordenada pelo prazo de até:", options: ["15 dias.", "30 dias.", "60 dias.", "90 dias.", "120 dias."], correct: 2, exp: "Art. 162. Suspensão preventiva por até 60 dias." },
+        { q: "O processo disciplinar poderá ser revisto quando:", options: ["O servidor não gostar da pena.", "Surgirem fatos novos que justifiquem a inocência.", "O prefeito mudar.", "A câmara solicitar.", "O prazo de 5 anos passar."], correct: 1, exp: "Art. 189. A revisão ocorre diante de fatos novos ou provas de inocência." },
+        { q: "O servidor exclusivamente comissionado submete-se a qual regime previdenciário?", options: ["Regime Próprio.", "Regime Geral (INSS).", "Nenhum.", "Fundo Complementar.", "Regime Especial."], correct: 1, exp: "Art. 40, § 13 da CF (aplicado aos municípios)." }
     ];
 
     let currentQ = 0;
     let score = 0;
     let selectedIdx = null;
+
+    // Função de embaralhamento (Fisher-Yates)
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    function initQuiz() {
+        shuffle(questions); // Embaralha as perguntas ao carregar
+        document.getElementById('q-total').innerText = questions.length;
+        document.getElementById('final-total').innerText = questions.length;
+        loadQuestion();
+    }
 
     function loadQuestion() {
         const item = questions[currentQ];
@@ -268,6 +133,7 @@
         container.innerHTML = '';
         selectedIdx = null;
 
+        // Opcional: Você também pode embaralhar as alternativas aqui se quiser nível HARD
         item.options.forEach((opt, index) => {
             const div = document.createElement('div');
             div.className = 'option';
@@ -284,7 +150,6 @@
 
     function selectOption(idx, el) {
         if (document.getElementById('btn-next').style.display === 'block') return;
-        
         const options = document.querySelectorAll('.option');
         options.forEach(o => o.classList.remove('selected'));
         el.classList.add('selected');
@@ -293,7 +158,7 @@
 
     function checkSelected() {
         if (selectedIdx === null) {
-            alert("Selecione uma opção antes de verificar!");
+            alert("Selecione uma opção!");
             return;
         }
 
@@ -310,9 +175,8 @@
             options[item.correct].classList.add('correct');
         }
 
-        feedback.innerHTML = `<strong>Explicação:</strong> ${item.exp}`;
+        feedback.innerHTML = `<strong>Fundamentação:</strong> ${item.exp}`;
         feedback.classList.add('show');
-        
         document.getElementById('btn-check').style.display = 'none';
         document.getElementById('btn-next').style.display = 'block';
     }
@@ -334,17 +198,18 @@
     function showResult() {
         document.getElementById('quiz-ui').style.display = 'none';
         document.getElementById('progress-bar').style.width = "100%";
-        const screen = document.getElementById('final-screen');
-        screen.style.display = 'block';
+        document.getElementById('final-screen').style.display = 'block';
         document.getElementById('final-res').innerText = score;
 
         const msg = document.getElementById('performance-msg');
-        if (score >= 27) msg.innerText = "Excelente! Você está no nível de aprovação imediata.";
-        else if (score >= 21) msg.innerText = "Bom desempenho, mas revise os pontos onde errou.";
-        else msg.innerText = "Precisa de mais leitura da lei seca. Não desanime!";
+        const ratio = score / questions.length;
+        if (ratio >= 0.9) msg.innerText = "Desempenho de Elite! Praticamente nomeado.";
+        else if (ratio >= 0.7) msg.innerText = "Bom ritmo. Revise os erros e repita o simulado.";
+        else msg.innerText = "Atenção! A lei seca precisa de mais leitura.";
     }
 
-    loadQuestion();
+    // Inicia o processo
+    initQuiz();
 </script>
 
 </body>
