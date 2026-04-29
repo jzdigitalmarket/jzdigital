@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Torre de Hanói</title>
+    <style>
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; background: #f0f0f0; }
+        .game-container { display: flex; justify-content: space-around; width: 600px; height: 250px; background: #fff; border-bottom: 10px solid #5d4037; padding-top: 50px; margin-top: 50px; }
+        .tower { width: 10px; height: 200px; background: #5d4037; border-radius: 5px; position: relative; display: flex; flex-direction: column-reverse; align-items: center; cursor: pointer; }
+        .tower::after { content: ''; position: absolute; bottom: -10px; width: 150px; height: 10px; background: #5d4037; }
+        .disc { height: 20px; border-radius: 10px; margin-bottom: 2px; transition: transform 0.2s; }
+        .selected { transform: translateY(-20px); border: 2px solid #000; }
+    </style>
+</head>
+<body>
+    <h1>Torre de Hanói</h1>
+    <div class="game-container" id="game">
+        <div class="tower" data-id="0"></div>
+        <div class="tower" data-id="1"></div>
+        <div class="tower" data-id="2"></div>
+    </div>
+    <p>Clique em uma torre para selecionar o disco e em outra para mover.</p>
+
+    <script>
+        const towers = document.querySelectorAll('.tower');
+        let selectedDisc = null;
+        let originTower = null;
+
+        const colors = ['#f44336', '#9c27b0', '#2196f3', '#4caf50', '#ffeb3b'];
+        
+        function init() {
+            for (let i = 5; i > 0; i--) {
+                const disc = document.createElement('div');
+                disc.className = 'disc';
+                disc.style.width = (i * 30) + 'px';
+                disc.style.backgroundColor = colors[i-1];
+                disc.dataset.size = i;
+                towers[0].appendChild(disc);
+            }
+        }
+
+        towers.forEach(tower => {
+            tower.addEventListener('click', () => {
+                if (!selectedDisc) {
+                    selectedDisc = tower.lastElementChild;
+                    if (selectedDisc) {
+                        selectedDisc.classList.add('selected');
+                        originTower = tower;
+                    }
+                } else {
+                    const topDisc = tower.lastElementChild;
+                    if (!topDisc || parseInt(selectedDisc.dataset.size) < parseInt(topDisc.dataset.size)) {
+                        tower.appendChild(selectedDisc);
+                        selectedDisc.classList.remove('selected');
+                        selectedDisc = null;
+                        checkWin();
+                    } else {
+                        selectedDisc.classList.remove('selected');
+                        selectedDisc = null;
+                    }
+                }
+            });
+        });
+
+        function checkWin() {
+            if (towers[2].childElementCount === 5) alert('Parabéns! Você venceu!');
+        }
+
+        init();
+    </script>
+</body>
+</html>
