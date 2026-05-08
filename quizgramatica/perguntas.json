@@ -2,11 +2,7 @@
     {
         "pergunta": "Qual das alternativas apresenta uma conjunção adversativa?",
         "opcoes": ["E", "Mas", "Portanto", "Porque", "Ou"],
-        "correta": 1
-    },
-    {
-        "pergunta": "Qual classe de palavra é invariável?",
-        "opcoes": ["Substantivo", "Verbo", "Adjetivo", "Preposição", "Pronome"],
-        "correta": 3
+        "correta": 1,
+        "explicacao": "A conjunção 'Mas' indica oposição ou contraste, sendo classificada como adversativa."
     }
 ]
