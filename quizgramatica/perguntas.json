@@ -1,8 +1,88 @@
 [
     {
-        "pergunta": "Qual das alternativas apresenta uma conjunção adversativa?",
-        "opcoes": ["E", "Mas", "Portanto", "Porque", "Ou"],
+        "pergunta": "Na frase: 'Nós fomos ao cinema', qual a classificação do pronome em destaque?",
+        "opcoes": ["Possessivo", "Demonstrativo", "Pessoal do Caso Reto", "Indefinito", "Interrogativo"],
+        "correta": 2,
+        "explicacao": "Os pronomes 'Eu, Tu, Ele/Ela, Nós, Vós, Eles/Elas' são pronomes pessoais do caso reto, pois exercem função de sujeito."
+    },
+    {
+        "pergunta": "Qual alternativa apresenta apenas pronomes possessivos?",
+        "opcoes": ["Meu, teu, seu", "Aquele, este, esse", "Eu, tu, ele", "Quem, qual, cujo", "Ninguém, tudo, algo"],
+        "correta": 0,
+        "explicacao": "Pronomes possessivos são aqueles que indicam posse em relação às pessoas do discurso (meu, teu, seu, nosso, vosso)."
+    },
+    {
+        "pergunta": "Em 'Este livro é meu', o pronome 'Este' indica que o objeto está:",
+        "opcoes": ["Longe de quem fala", "Perto de quem fala", "Perto de quem ouve", "Longe de ambos", "No passado distante"],
         "correta": 1,
-        "explicacao": "A conjunção 'Mas' indica oposição ou contraste, sendo classificada como adversativa."
+        "explicacao": "O pronome demonstrativo 'Este' é usado para objetos que estão próximos à pessoa que fala."
+    },
+    {
+        "pergunta": "Qual é o pronome oblíquo correspondente à 1ª pessoa do plural (Nós)?",
+        "opcoes": ["Me", "Te", "Se", "Nos", "Vos"],
+        "correta": 3,
+        "explicacao": "O pronome 'nos' é a forma oblíqua que corresponde ao pronome reto 'nós'."
+    },
+    {
+        "pergunta": "Substituindo o termo sublinhado por um pronome: 'Vou entregar o presente', teremos:",
+        "opcoes": ["Entregar-lhe", "Entregar-te", "Entregar-o", "Entregá-lo", "Entregar-me"],
+        "correta": 3,
+        "explicacao": "Quando o verbo termina em 'r', 's' ou 'z', retira-se a terminação e o pronome 'o/a' vira 'lo/la'."
+    },
+    {
+        "pergunta": "Qual frase abaixo possui um pronome de tratamento adequado para autoridades?",
+        "opcoes": ["Você quer café?", "Vossa Excelência virá?", "Tu queres ir?", "A gente vai amanhã", "Vossa Senhoria é meu amigo"],
+        "correta": 1,
+        "explicacao": "'Vossa Excelência' é o pronome de tratamento utilizado para altas autoridades, como juízes e políticos."
+    },
+    {
+        "pergunta": "Assinale a alternativa com um pronome indefinido:",
+        "opcoes": ["Aquele", "Alguém", "Teu", "Nós", "Esta"],
+        "correta": 1,
+        "explicacao": "'Alguém' é um pronome indefinido pois se refere à terceira pessoa de modo vago ou impreciso."
+    },
+    {
+        "pergunta": "Na oração 'Os moradores de Itajaí amam o porto', qual é o sujeito?",
+        "opcoes": ["Os moradores", "De Itajaí", "O porto", "Os moradores de Itajaí", "Amam"],
+        "correta": 3,
+        "explicacao": "O sujeito é o termo sobre o qual se declara algo. 'Os moradores de Itajaí' é o sujeito simples (núcleo: moradores)."
+    },
+    {
+        "pergunta": "Qual das frases abaixo apresenta um sujeito inexistente (oração sem sujeito)?",
+        "opcoes": ["Choveu canivetes ontem.", "Havia muitos navios no porto.", "Eles chegaram cedo.", "Fui à prefeitura.", "Precisa-se de serventes."],
+        "correta": 1,
+        "explicacao": "O verbo 'Haver', quando significa 'existir' ou indica tempo decorrido, é impessoal e não possui sujeito."
+    },
+    {
+        "pergunta": "Assinale a alternativa correta quanto à concordância verbal:",
+        "opcoes": ["Faziam dez anos que não o via.", "Mais de um aluno faltaram.", "Fui eu que fez o trabalho.", "Houveram muitos acidentes.", "Faz dez anos que não o via."],
+        "correta": 4,
+        "explicacao": "O verbo 'Fazer', indicando tempo decorrido, é impessoal e deve ficar sempre no singular."
+    },
+    {
+        "pergunta": "Em 'O navio atracou no píer', o termo 'no píer' exerce a função sintática de:",
+        "opcoes": ["Objeto Direto", "Objeto Indireto", "Adjunto Adverbial de Lugar", "Sujeito", "Complemento Nominal"],
+        "correta": 2,
+        "explicacao": "'No píer' indica a circunstância de lugar onde a ação ocorreu, sendo um adjunto adverbial."
+    },
+    {
+        "pergunta": "Qual frase está pontuada corretamente?",
+        "opcoes": ["O prefeito, viajou ontem.", "Os alunos, estudaram muito.", "Ontem, os funcionários limparam a praça.", "Maria comprou: pão leite e café.", "Eu gosto de ler, você de cantar."],
+        "correta": 2,
+        "explicacao": "A vírgula após 'Ontem' marca o deslocamento de um adjunto adverbial curto (opcional, mas correta)."
+    },
+    {
+        "pergunta": "Identifique a oração com verbo de ligação (predicado nominal):",
+        "opcoes": ["A criança correu muito.", "O dia está lindo.", "O pássaro voou alto.", "Comi uma maçã.", "O navio partiu cedo."],
+        "correta": 1,
+        "explicacao": "O verbo 'estar' liga o sujeito 'O dia' a uma característica (lindo), formando um predicado nominal."
+    },
+    {
+        "pergunta": "Na frase 'Comprei o livro e o li', o termo 'li' possui qual tipo de objeto?",
+        "opcoes": ["Objeto Indireto", "Objeto Direto (pronome 'o')", "Complemento Nominal", "Agente da Passiva", "Adjunto Adnominal"],
+        "correta": 1,
+        "explicacao": "O pronome oblíquo 'o' substitui 'o livro' e funciona como objeto direto do verbo ler."
     }
+]
+    
 ]
