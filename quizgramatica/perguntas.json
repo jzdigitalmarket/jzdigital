@@ -1,7 +1,7 @@
 [
     {
-        "pergunta": "Na frase: 'Nós fomos ao cinema', qual a classificação do pronome em destaque?",
-        "opcoes": ["Possessivo", "Demonstrativo", "Pessoal do Caso Reto", "Indefinito", "Interrogativo"],
+     "pergunta": "Na frase: 'Nós fomos ao cinema', qual a classificação do pronome em destaque?",
+     "opcoes": ["Possessivo", "Demonstrativo", "Pessoal do Caso Reto", "Indefinito", "Interrogativo"],
         "correta": 2,
         "explicacao": "Os pronomes 'Eu, Tu, Ele/Ela, Nós, Vós, Eles/Elas' são pronomes pessoais do caso reto, pois exercem função de sujeito."
     },
