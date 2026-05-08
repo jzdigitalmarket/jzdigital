@@ -1,0 +1,12 @@
+[
+    {
+        "pergunta": "Qual das alternativas apresenta uma conjunção adversativa?",
+        "opcoes": ["E", "Mas", "Portanto", "Porque", "Ou"],
+        "correta": 1
+    },
+    {
+        "pergunta": "Qual classe de palavra é invariável?",
+        "opcoes": ["Substantivo", "Verbo", "Adjetivo", "Preposição", "Pronome"],
+        "correta": 3
+    }
+]
