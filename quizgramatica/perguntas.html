@@ -80,25 +80,35 @@
     let tempo = 15;
     let intervalo;
 
-    async function iniciar() {
-        // Exemplo de base local. No Cloudflare, aponte para seu JSON:
-        perguntas = [
-            {
-                pergunta: "Qual o plural de 'Cidadão'?", 
-                opcoes: ["Cidadões", "Cidadãos", "Cidadães", "Cidadonistas", "Cidadon"], 
-                correta: 1, 
-                explicacao: "Substantivos terminados em 'ão' formam o plural em 'ãos' quando são paroxítonos ou alguns oxítonos específicos."
-            },
-            {
-                pergunta: "Qual destas é uma conjunção adversativa?", 
-                opcoes: ["E", "Ou", "Mas", "Porque", "Portanto"], 
-                correta: 2, 
-                explicacao: "O 'Mas' é a principal conjunção adversativa, usada para ligar orações que exprimem ideia de oposição."
-            }
-        ];
+    async function carregarPerguntas() {
+    try {
+        // Busca o arquivo JSON na mesma pasta
+        const response = await fetch('perguntas.json');
+        
+        if (!response.ok) {
+            throw new Error('Erro ao carregar o arquivo JSON');
+        }
+
+        perguntas = await response.json();
+        
+        // Verifica se o array não está vazio
+        if (perguntas.length === 0) {
+            document.getElementById('pergunta-texto').innerText = "Nenhuma pergunta encontrada no arquivo.";
+            return;
+        }
+
+        // Embaralha e inicia
         perguntas.sort(() => Math.random() - 0.5);
         mostrarPergunta();
+        
+    } catch (error) {
+        console.error("Erro detalhado:", error);
+        document.getElementById('pergunta-texto').innerText = "Erro ao carregar perguntas. Verifique o console (F12).";
     }
+}
+
+// Inicia o processo
+iniciar();
 
     function mostrarPergunta() {
         if (perguntaAtualIndex >= perguntas.length) return finalizarJogo();
