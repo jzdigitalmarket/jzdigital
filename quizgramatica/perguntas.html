@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Quiz de Gramática</title>
+    <style>
+        body { font-family: sans-serif; background: #f4f4f9; display: flex; justify-content: center; padding: 20px; }
+        #quiz-container { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 600px; width: 100%; }
+        .header { display: flex; justify-content: space-between; margin-bottom: 20px; font-weight: bold; }
+        .opcao { display: block; width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 5px; cursor: pointer; text-align: left; transition: 0.3s; }
+        .opcao:hover { background: #e0e0e0; }
+        #mensagem { margin-top: 15px; font-weight: bold; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<div id="quiz-container">
+    <div class="header">
+        <span>Pontos: <span id="score">0</span></span>
+        <span>Tempo: <span id="timer">15</span>s</span>
+    </div>
+    
+    <div id="game">
+        <h2 id="pergunta-texto">Carregando perguntas...</h2>
+        <div id="opcoes-container"></div>
+        <div id="mensagem"></div>
+    </div>
+
+    <div id="resultado" class="hidden">
+        <h2>Fim de Jogo!</h2>
+        <p>Sua pontuação final foi: <span id="final-score"></span></p>
+        <button onclick="location.reload()">Jogar Novamente</button>
+    </div>
+</div>
+
+<script>
+    let perguntas = [];
+    let perguntaAtualIndex = 0;
+    let score = 0;
+    let tempo = 15;
+    let intervalo;
+
+    // Função para buscar perguntas do arquivo JSON
+    async function carregarPerguntas() {
+        try {
+            // Em um servidor real, use: fetch('perguntas.json')
+            // Para teste local direto no navegador, simulamos a base aqui:
+            perguntas = [
+                {pergunta: "Qual conjunção indica conclusão?", opcoes: ["Mas", "Logo", "Embora", "Pois", "E"], correta: 1},
+                {pergunta: "Qual o plural de 'Cidadão'?", opcoes: ["Cidadões", "Cidadãos", "Cidadães", "Cidadonistas", "Cidadon"], correta: 1},
+                {pergunta: "A palavra 'casa' é um:", opcoes: ["Verbo", "Adjetivo", "Substantivo", "Advérbio", "Conjunção"], correta: 2}
+            ];
+            
+            // Embaralhar perguntas ao carregar
+            perguntas.sort(() => Math.random() - 0.5);
+            mostrarPergunta();
+        } catch (e) { console.error("Erro ao carregar perguntas", e); }
+    }
+
+    function iniciarTimer() {
+        tempo = 15;
+        document.getElementById('timer').innerText = tempo;
+        clearInterval(intervalo);
+        intervalo = setInterval(() => {
+            tempo--;
+            document.getElementById('timer').innerText = tempo;
+            if (tempo <= 0) {
+                verificarResposta(-1); // Tempo esgotado
+            }
+        }, 1000);
+    }
+
+    function mostrarPergunta() {
+        if (perguntaAtualIndex >= perguntas.length) {
+            finalizarJogo();
+            return;
+        }
+
+        iniciarTimer();
+        const p = perguntas[perguntaAtualIndex];
+        document.getElementById('pergunta-texto').innerText = p.pergunta;
+        const container = document.getElementById('opcoes-container');
+        container.innerHTML = '';
+        document.getElementById('mensagem').innerText = '';
+
+        p.opcoes.forEach((opcao, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'opcao';
+            btn.innerText = opcao;
+            btn.onclick = () => verificarResposta(index);
+            container.appendChild(btn);
+        });
+    }
+
+    function verificarResposta(index) {
+        clearInterval(intervalo);
+        const correta = perguntas[perguntaAtualIndex].correta;
+        
+        if (index === correta) {
+            score += 10;
+            document.getElementById('score').innerText = score;
+        }
+
+        perguntaAtualIndex++;
+        setTimeout(mostrarPergunta, 1000);
+    }
+
+    function finalizarJogo() {
+        document.getElementById('game').classList.add('hidden');
+        document.getElementById('resultado').classList.remove('hidden');
+        document.getElementById('final-score').innerText = score;
+    }
+
+    carregarPerguntas();
+</script>
+
+</body>
+</html>
