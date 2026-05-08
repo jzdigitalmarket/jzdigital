@@ -2,14 +2,20 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Quiz de Gramática</title>
+    <title>Quiz de Gramática Interativo</title>
     <style>
-        body { font-family: sans-serif; background: #f4f4f9; display: flex; justify-content: center; padding: 20px; }
-        #quiz-container { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 600px; width: 100%; }
-        .header { display: flex; justify-content: space-between; margin-bottom: 20px; font-weight: bold; }
-        .opcao { display: block; width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 5px; cursor: pointer; text-align: left; transition: 0.3s; }
-        .opcao:hover { background: #e0e0e0; }
-        #mensagem { margin-top: 15px; font-weight: bold; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; display: flex; justify-content: center; padding: 20px; }
+        #quiz-container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.15); max-width: 650px; width: 100%; }
+        .header { display: flex; justify-content: space-between; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .opcao { display: block; width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer; text-align: left; font-size: 16px; transition: 0.2s; }
+        .opcao:hover { border-color: #007bff; background: #f8f9ff; }
+        .correta { background: #d4edda !important; border-color: #28a745 !important; }
+        .errada { background: #f8d7da !important; border-color: #dc3545 !important; }
+        #area-feedback { margin-top: 20px; padding: 15px; border-radius: 8px; background: #e9ecef; display: none; }
+        .controles { display: flex; gap: 10px; margin-top: 15px; }
+        button.acao { flex: 1; padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; color: white; }
+        .btn-continuar { background: #28a745; }
+        .btn-parar { background: #dc3545; }
         .hidden { display: none; }
     </style>
 </head>
@@ -21,16 +27,25 @@
         <span>Tempo: <span id="timer">15</span>s</span>
     </div>
     
-    <div id="game">
-        <h2 id="pergunta-texto">Carregando perguntas...</h2>
+    <div id="game-screen">
+        <h2 id="pergunta-texto">Carregando...</h2>
         <div id="opcoes-container"></div>
-        <div id="mensagem"></div>
+        
+        <div id="area-feedback">
+            <p id="texto-feedback"></p>
+            <hr>
+            <p><strong>Explicação:</strong> <span id="texto-explicacao"></span></p>
+            <div class="controles">
+                <button class="acao btn-continuar" onclick="proximaPergunta()">Continuar</button>
+                <button class="acao btn-parar" onclick="finalizarJogo()">Parar e Ver Placar</button>
+            </div>
+        </div>
     </div>
 
-    <div id="resultado" class="hidden">
-        <h2>Fim de Jogo!</h2>
-        <p>Sua pontuação final foi: <span id="final-score"></span></p>
-        <button onclick="location.reload()">Jogar Novamente</button>
+    <div id="resultado-screen" class="hidden">
+        <h2>Desempenho Final</h2>
+        <p>Você acumulou <span id="final-score"></span> pontos.</p>
+        <button class="acao btn-continuar" style="width: auto" onclick="location.reload()">Reiniciar</button>
     </div>
 </div>
 
@@ -41,79 +56,98 @@
     let tempo = 15;
     let intervalo;
 
-    // Função para buscar perguntas do arquivo JSON
-    async function carregarPerguntas() {
-        try {
-            // Em um servidor real, use: fetch('perguntas.json')
-            // Para teste local direto no navegador, simulamos a base aqui:
-            perguntas = [
-                {pergunta: "Qual conjunção indica conclusão?", opcoes: ["Mas", "Logo", "Embora", "Pois", "E"], correta: 1},
-                {pergunta: "Qual o plural de 'Cidadão'?", opcoes: ["Cidadões", "Cidadãos", "Cidadães", "Cidadonistas", "Cidadon"], correta: 1},
-                {pergunta: "A palavra 'casa' é um:", opcoes: ["Verbo", "Adjetivo", "Substantivo", "Advérbio", "Conjunção"], correta: 2}
-            ];
-            
-            // Embaralhar perguntas ao carregar
-            perguntas.sort(() => Math.random() - 0.5);
-            mostrarPergunta();
-        } catch (e) { console.error("Erro ao carregar perguntas", e); }
+    async function iniciar() {
+        // Exemplo de base local. No Cloudflare, aponte para seu JSON:
+        perguntas = [
+            {
+                pergunta: "Qual o plural de 'Cidadão'?", 
+                opcoes: ["Cidadões", "Cidadãos", "Cidadães", "Cidadonistas", "Cidadon"], 
+                correta: 1, 
+                explicacao: "Substantivos terminados em 'ão' formam o plural em 'ãos' quando são paroxítonos ou alguns oxítonos específicos."
+            },
+            {
+                pergunta: "Qual destas é uma conjunção adversativa?", 
+                opcoes: ["E", "Ou", "Mas", "Porque", "Portanto"], 
+                correta: 2, 
+                explicacao: "O 'Mas' é a principal conjunção adversativa, usada para ligar orações que exprimem ideia de oposição."
+            }
+        ];
+        perguntas.sort(() => Math.random() - 0.5);
+        mostrarPergunta();
+    }
+
+    function mostrarPergunta() {
+        if (perguntaAtualIndex >= perguntas.length) return finalizarJogo();
+        
+        document.getElementById('area-feedback').style.display = 'none';
+        document.getElementById('opcoes-container').classList.remove('hidden');
+        
+        const p = perguntas[perguntaAtualIndex];
+        document.getElementById('pergunta-texto').innerText = p.pergunta;
+        
+        const container = document.getElementById('opcoes-container');
+        container.innerHTML = '';
+        
+        p.opcoes.forEach((opcao, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'opcao';
+            btn.innerText = opcao;
+            btn.onclick = () => validar(index, btn);
+            container.appendChild(btn);
+        });
+
+        tempo = 15;
+        iniciarTimer();
     }
 
     function iniciarTimer() {
-        tempo = 15;
         document.getElementById('timer').innerText = tempo;
         clearInterval(intervalo);
         intervalo = setInterval(() => {
             tempo--;
             document.getElementById('timer').innerText = tempo;
-            if (tempo <= 0) {
-                verificarResposta(-1); // Tempo esgotado
-            }
+            if (tempo <= 0) validar(-1);
         }, 1000);
     }
 
-    function mostrarPergunta() {
-        if (perguntaAtualIndex >= perguntas.length) {
-            finalizarJogo();
-            return;
-        }
-
-        iniciarTimer();
-        const p = perguntas[perguntaAtualIndex];
-        document.getElementById('pergunta-texto').innerText = p.pergunta;
-        const container = document.getElementById('opcoes-container');
-        container.innerHTML = '';
-        document.getElementById('mensagem').innerText = '';
-
-        p.opcoes.forEach((opcao, index) => {
-            const btn = document.createElement('button');
-            btn.className = 'opcao';
-            btn.innerText = opcao;
-            btn.onclick = () => verificarResposta(index);
-            container.appendChild(btn);
-        });
-    }
-
-    function verificarResposta(index) {
+    function validar(index, elemento) {
         clearInterval(intervalo);
-        const correta = perguntas[perguntaAtualIndex].correta;
+        const p = perguntas[perguntaAtualIndex];
+        const feedback = document.getElementById('area-feedback');
+        const textoF = document.getElementById('texto-feedback');
         
-        if (index === correta) {
+        // Bloquear novos cliques nas opções
+        const botoes = document.querySelectorAll('.opcao');
+        botoes.forEach(b => b.disabled = true);
+
+        if (index === p.correta) {
             score += 10;
             document.getElementById('score').innerText = score;
+            textoF.innerText = "✅ Resposta Correta!";
+            textoF.style.color = "green";
+            if(elemento) elemento.classList.add('correta');
+        } else {
+            textoF.innerText = "❌ Resposta Errada ou Tempo Esgotado!";
+            textoF.style.color = "red";
+            if(elemento) elemento.classList.add('errada');
         }
 
+        document.getElementById('texto-explicacao').innerText = p.explicacao;
+        feedback.style.display = 'block';
+    }
+
+    function proximaPergunta() {
         perguntaAtualIndex++;
-        setTimeout(mostrarPergunta, 1000);
+        mostrarPergunta();
     }
 
     function finalizarJogo() {
-        document.getElementById('game').classList.add('hidden');
-        document.getElementById('resultado').classList.remove('hidden');
+        document.getElementById('game-screen').classList.add('hidden');
+        document.getElementById('resultado-screen').classList.remove('hidden');
         document.getElementById('final-score').innerText = score;
     }
 
-    carregarPerguntas();
+    iniciar();
 </script>
-
 </body>
 </html>
