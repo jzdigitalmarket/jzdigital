@@ -82,31 +82,27 @@
 
     async function carregarPerguntas() {
     try {
-        // Busca o arquivo JSON na mesma pasta
-        const response = await fetch('perguntas.json');
+        // Agora busca da sua nova API no Cloudflare
+        const response = await fetch('/api/perguntas');
         
-        if (!response.ok) {
-            throw new Error('Erro ao carregar o arquivo JSON');
-        }
+        if (!response.ok) throw new Error('Erro ao carregar dados do D1');
 
-        perguntas = await response.json();
+        const dadosBrutos = await response.json();
         
-        // Verifica se o array não está vazio
-        if (perguntas.length === 0) {
-            document.getElementById('pergunta-texto').innerText = "Nenhuma pergunta encontrada no arquivo.";
-            return;
-        }
+        // Como o SQLite armazena arrays como texto, precisamos converter de volta
+        perguntas = dadosBrutos.map(p => ({
+            ...p,
+            opcoes: typeof p.opcoes === 'string' ? JSON.parse(p.opcoes) : p.opcoes
+        }));
 
-        // Embaralha e inicia
         perguntas.sort(() => Math.random() - 0.5);
         mostrarPergunta();
         
     } catch (error) {
-        console.error("Erro detalhado:", error);
-        document.getElementById('pergunta-texto').innerText = "Erro ao carregar perguntas. Verifique o console (F12).";
+        console.error("Erro:", error);
+        document.getElementById('pergunta-texto').innerText = "Erro ao conectar com o banco de dados.";
     }
 }
-
 // Inicia o processo
 carregarPerguntas();
 
