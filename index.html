@@ -575,6 +575,141 @@
 <!-- FIM CALCULADORA -->
         <!-- FIM CALCULADORA -->
 
+        <div class="consulta-portarias-container">
+    <h3>Verificar Portarias do Mês Atual</h3>
+    <p>Clique no botão abaixo para verificar se existem novas portarias publicadas no site do Porto de Itajaí neste mês.</p>
+    
+    <button id="btnConsultarPortarias" onclick="consultarPortarias()">Verificar Agora</button>
+    
+    <div id="resultadoPortarias" class="resultado-portarias-box" style="display: none;">
+        </div>
+</div>
+
+<style>
+/* Estilização básica e limpa para se adaptar à sua Home Page */
+.consulta-portarias-container {
+    background-color: #f8f9fa;
+    border: 1px solid #e3e6f0;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px 0;
+    font-family: sans-serif;
+    max-width: 600px;
+}
+
+.consulta-portarias-container h3 {
+    color: #003366; /* Azul padrão portuário */
+    margin-top: 0;
+}
+
+#btnConsultarPortarias {
+    background-color: #003366;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+#btnConsultarPortarias:hover {
+    background-color: #002244;
+}
+
+.resultado-portarias-box {
+    margin-top: 15px;
+    padding: 15px;
+    border-left: 4px solid #cc0000;
+    background-color: #fff;
+    border-radius: 0 4px 4px 0;
+}
+
+.resultado-portarias-box.sucesso {
+    border-left-color: #28a745;
+}
+
+.portaria-item {
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+.portaria-item:last-child {
+    border-bottom: none;
+}
+</style>
+
+<script>
+async function consultarPortarias() {
+    const botao = document.getElementById('btnConsultarPortarias');
+    const resultadoDiv = document.getElementById('resultadoPortarias');
+    
+    botao.disabled = true;
+    botao.innerText = "Consultando...";
+    resultadoDiv.style.display = "block";
+    resultadoDiv.className = "resultado-portarias-box"; // Reset classes
+    resultadoDiv.innerHTML = "Acessando o site do Porto de Itajaí, por favor aguarde...";
+
+    // URL alvo e Proxy para contornar bloqueio de CORS no navegador
+    const urlAlvo = 'https://portoitajai.com.br/2026';
+    const proxyUrl = 'https://cors-anywhere.herokuapp.com/'; 
+    
+    // Mapeamento de meses em português para validação
+    const meses = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
+    const mesAtualNome = meses[new Date().getMonth()]; // Pega o nome do mês corrente
+
+    try {
+        // Faz a requisição contornando o CORS
+        const response = await fetch(proxyUrl + urlAlvo);
+        if (!response.ok) throw new Error("Não foi possível acessar a página do Porto.");
+        
+        const htmlTexto = await response.text();
+        
+        // Cria um elemento temporário para parsear o HTML recebido
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(htmlTexto, 'text/html');
+        
+        // Seleciona as tags onde os títulos das portarias ficam listados (geralmente h4, h5 ou links fortes)
+        // Baseado na estrutura do site, buscamos os textos que contêm a palavra "Portaria"
+        const elementos = Array.from(doc.querySelectorAll('body *')); 
+        
+        let portariasDoMes = [];
+
+        elementos.forEach(el => {
+            // Verifica se o elemento direto possui o texto de portaria (evita pegar contêineres pais duplicados)
+            if (el.children.length === 0 && el.innerText && el.innerText.includes('Portaria nº')) {
+                const textoPortaria = el.innerText.trim();
+                
+                // Valida se a portaria pertence ao mês atual (ex: "de junho de 2026")
+                if (textoPortaria.toLowerCase().includes(`de ${mesAtualNome}`)) {
+                    // Tenta capturar a descrição que costuma vir logo no parágrafo seguinte
+                    const descricao = el.nextElementSibling ? el.nextElementSibling.innerText.trim() : '';
+                    portariasDoMes.push({ titulo: textoPortaria, resumo: descricao });
+                }
+            }
+        });
+
+        // Exibe o resultado na tela
+        if (portariasDoMes.length > 0) {
+            resultadoDiv.classList.add('sucesso');
+            let htmlResultado = `<strong>Encontradas ${portariasDoMes.length} portaria(s) de ${mesAtualNome}:</strong><br><br>`;
+            portariasDoMes.forEach(p => {
+                htmlResultado += `<div class="portaria-item"><strong>${p.titulo}</strong><br><small>${p.resumo}</small></div>`;
+            });
+            resultadoDiv.innerHTML = htmlResultado;
+        } else {
+            resultadoDiv.innerHTML = `<strong>Aviso:</strong> Não há portarias publicadas com datas de <strong>${mesAtualNome}</strong> até o momento.`;
+        }
+
+    } catch (error) {
+        console.error(error);
+        resultadoDiv.innerHTML = `<strong>Erro ao consultar:</strong> A requisição falhou devido a restrições de segurança (CORS) ou o site está instável. <br><a href="${urlAlvo}" target="_blank" style="color: #003366;">Clique aqui para tentar acessar diretamente.</a>`;
+    } finally {
+        botao.disabled = false;
+        botao.innerText = "Verificar Agora";
+    }
+}
+</script>
+
         <a href="/robotwar.html" class="text-cyan-400 text-xs text-center hover:underline">robot</a>
 
         <!-- ✅ ARKANOID WIDGET — FORA do calendar-widget, aqui na sidebar -->
