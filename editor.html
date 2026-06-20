@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Editor de Texto</title>
+<style>
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    background: #f3f3f3;
+  }
+
+  .editor-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100%;
+    background: #fff;
+    border: 1px solid #d0d0d0;
+  }
+
+  /* Barra de menu */
+  .menubar {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    background: #f0f0f0;
+    border-bottom: 1px solid #d0d0d0;
+    padding: 4px 6px;
+    flex-wrap: wrap;
+    font-size: 13px;
+    user-select: none;
+  }
+
+  .menubar button {
+    background: transparent;
+    border: 1px solid transparent;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #222;
+  }
+
+  .menubar button:hover {
+    background: #e2e2e2;
+    border-color: #cfcfcf;
+  }
+
+  .menubar button:active {
+    background: #d6d6d6;
+  }
+
+  .menubar .divider {
+    width: 1px;
+    height: 22px;
+    background: #d0d0d0;
+    margin: 0 4px;
+  }
+
+  .menubar select {
+    font-size: 13px;
+    padding: 4px 6px;
+    border-radius: 4px;
+    border: 1px solid #cfcfcf;
+    background: #fff;
+    cursor: pointer;
+  }
+
+  .filename-display {
+    margin-left: auto;
+    font-size: 12px;
+    color: #666;
+    padding: 0 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+  }
+
+  /* Área de texto */
+  .editor-area {
+    flex: 1;
+    width: 100%;
+    border: none;
+    outline: none;
+    resize: none;
+    padding: 14px 18px;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #1a1a1a;
+    background: #ffffff;
+    white-space: pre;
+    overflow: auto;
+    tab-size: 4;
+  }
+
+  .editor-area::placeholder {
+    color: #aaa;
+  }
+
+  /* Barra de status */
+  .statusbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f0f0f0;
+    border-top: 1px solid #d0d0d0;
+    padding: 4px 12px;
+    font-size: 12px;
+    color: #555;
+  }
+
+  .statusbar span {
+    white-space: nowrap;
+  }
+
+  /* Input de arquivo escondido */
+  #fileInput {
+    display: none;
+  }
+
+  /* Modo escuro opcional */
+  .dark-mode .editor-wrapper {
+    background: #1e1e1e;
+    border-color: #333;
+  }
+  .dark-mode .menubar {
+    background: #2a2a2a;
+    border-bottom-color: #3a3a3a;
+  }
+  .dark-mode .menubar button {
+    color: #ddd;
+  }
+  .dark-mode .menubar button:hover {
+    background: #3a3a3a;
+    border-color: #444;
+  }
+  .dark-mode .menubar .divider {
+    background: #3a3a3a;
+  }
+  .dark-mode .menubar select {
+    background: #2a2a2a;
+    color: #ddd;
+    border-color: #444;
+  }
+  .dark-mode .filename-display {
+    color: #999;
+  }
+  .dark-mode .editor-area {
+    background: #1e1e1e;
+    color: #e0e0e0;
+  }
+  .dark-mode .statusbar {
+    background: #2a2a2a;
+    border-top-color: #3a3a3a;
+    color: #aaa;
+  }
+
+  @media (max-width: 520px) {
+    .filename-display { display: none; }
+    .menubar button { padding: 5px 7px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="editor-wrapper" id="editorWrapper">
+
+  <div class="menubar">
+    <button id="btnNew" title="Novo (Ctrl+N)">Novo</button>
+    <button id="btnOpen" title="Abrir (Ctrl+O)">Abrir</button>
+    <button id="btnSave" title="Salvar (Ctrl+S)">Salvar</button>
+    <div class="divider"></div>
+    <button id="btnUndo" title="Desfazer (Ctrl+Z)">Desfazer</button>
+    <button id="btnRedo" title="Refazer (Ctrl+Y)">Refazer</button>
+    <div class="divider"></div>
+    <button id="btnCut" title="Recortar">Recortar</button>
+    <button id="btnCopy" title="Copiar">Copiar</button>
+    <button id="btnPaste" title="Colar">Colar</button>
+    <div class="divider"></div>
+    <select id="fontSizeSelect" title="Tamanho da fonte">
+      <option value="12">12px</option>
+      <option value="14" selected>14px</option>
+      <option value="16">16px</option>
+      <option value="18">18px</option>
+      <option value="22">22px</option>
+      <option value="28">28px</option>
+    </select>
+    <button id="btnWrap" title="Alternar quebra de linha">Quebra</button>
+    <button id="btnDark" title="Alternar tema claro/escuro">Tema</button>
+    <span class="filename-display" id="fileNameDisplay">sem-titulo.txt</span>
+  </div>
+
+  <textarea
+    id="editorArea"
+    class="editor-area"
+    placeholder="Comece a digitar..."
+    spellcheck="false"
+    autocomplete="off"
+    autocorrect="off"
+  ></textarea>
+
+  <div class="statusbar">
+    <span id="statusInfo">Linha 1, Coluna 1</span>
+    <span id="statusCount">0 caracteres, 0 palavras</span>
+  </div>
+
+</div>
+
+<input type="file" id="fileInput" accept=".txt,.md,.js,.json,.css,.html,.csv,.log,.xml,text/plain">
+
+<script>
+(function () {
+  const textarea = document.getElementById('editorArea');
+  const fileInput = document.getElementById('fileInput');
+  const fileNameDisplay = document.getElementById('fileNameDisplay');
+  const statusInfo = document.getElementById('statusInfo');
+  const statusCount = document.getElementById('statusCount');
+  const wrapper = document.getElementById('editorWrapper');
+
+  let currentFileName = 'sem-titulo.txt';
+  let wrapEnabled = false;
+
+  // ----- Persistência local (auto-save) -----
+  const STORAGE_KEY = 'simpleEditor_content';
+  const STORAGE_NAME_KEY = 'simpleEditor_filename';
+
+  function loadFromStorage() {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      const savedName = localStorage.getItem(STORAGE_NAME_KEY);
+      if (saved !== null) textarea.value = saved;
+      if (savedName) {
+        currentFileName = savedName;
+        fileNameDisplay.textContent = currentFileName;
+      }
+    } catch (e) { /* localStorage indisponível */ }
+  }
+
+  function saveToStorage() {
+    try {
+      localStorage.setItem(STORAGE_KEY, textarea.value);
+      localStorage.setItem(STORAGE_NAME_KEY, currentFileName);
+    } catch (e) { /* ignora */ }
+  }
+
+  let saveTimeout;
+  function scheduleAutoSave() {
+    clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(saveToStorage, 400);
+  }
+
+  // ----- Atualização da barra de status -----
+  function updateStatus() {
+    const text = textarea.value;
+    const cursorPos = textarea.selectionStart;
+    const upToCursor = text.substring(0, cursorPos);
+    const lines = upToCursor.split('\n');
+    const lineNumber = lines.length;
+    const colNumber = lines[lines.length - 1].length + 1;
+
+    statusInfo.textContent = `Linha ${lineNumber}, Coluna ${colNumber}`;
+
+    const charCount = text.length;
+    const wordCount = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+    statusCount.textContent = `${charCount} caracteres, ${wordCount} palavras`;
+  }
+
+  // ----- Ações de arquivo -----
+  function newFile() {
+    if (textarea.value.length > 0) {
+      const confirmNew = confirm('Criar um novo arquivo? Alterações não salvas serão perdidas.');
+      if (!confirmNew) return;
+    }
+    textarea.value = '';
+    currentFileName = 'sem-titulo.txt';
+    fileNameDisplay.textContent = currentFileName;
+    saveToStorage();
+    updateStatus();
+    textarea.focus();
+  }
+
+  function openFile() {
+    fileInput.click();
+  }
+
+  fileInput.addEventListener('change', function (e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function (evt) {
+      textarea.value = evt.target.result;
+      currentFileName = file.name;
+      fileNameDisplay.textContent = currentFileName;
+      saveToStorage();
+      updateStatus();
+    };
+    reader.readAsText(file);
+    fileInput.value = '';
+  });
+
+  function saveFile() {
+    const blob = new Blob([textarea.value], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = currentFileName || 'documento.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  // ----- Comandos de edição -----
+  function execCmd(command) {
+    textarea.focus();
+    try {
+      document.execCommand(command);
+    } catch (e) { /* navegador pode bloquear copy/cut/paste programático */ }
+  }
+
+  // ----- Eventos dos botões -----
+  document.getElementById('btnNew').addEventListener('click', newFile);
+  document.getElementById('btnOpen').addEventListener('click', openFile);
+  document.getElementById('btnSave').addEventListener('click', saveFile);
+  document.getElementById('btnUndo').addEventListener('click', () => execCmd('undo'));
+  document.getElementById('btnRedo').addEventListener('click', () => execCmd('redo'));
+  document.getElementById('btnCut').addEventListener('click', () => execCmd('cut'));
+  document.getElementById('btnCopy').addEventListener('click', () => execCmd('copy'));
+  document.getElementById('btnPaste').addEventListener('click', () => execCmd('paste'));
+
+  document.getElementById('fontSizeSelect').addEventListener('change', function () {
+    textarea.style.fontSize = this.value + 'px';
+  });
+
+  document.getElementById('btnWrap').addEventListener('click', function () {
+    wrapEnabled = !wrapEnabled;
+    textarea.style.whiteSpace = wrapEnabled ? 'pre-wrap' : 'pre';
+    this.style.background = wrapEnabled ? '#d6d6d6' : '';
+  });
+
+  document.getElementById('btnDark').addEventListener('click', function () {
+    document.body.classList.toggle('dark-mode');
+  });
+
+  // ----- Eventos do textarea -----
+  textarea.addEventListener('input', function () {
+    scheduleAutoSave();
+    updateStatus();
+  });
+  textarea.addEventListener('keyup', updateStatus);
+  textarea.addEventListener('click', updateStatus);
+  textarea.addEventListener('scroll', function () {});
+
+  // ----- Atalhos de teclado -----
+  document.addEventListener('keydown', function (e) {
+    const ctrlOrCmd = e.ctrlKey || e.metaKey;
+    if (!ctrlOrCmd) return;
+
+    if (e.key.toLowerCase() === 's') {
+      e.preventDefault();
+      saveFile();
+    } else if (e.key.toLowerCase() === 'o') {
+      e.preventDefault();
+      openFile();
+    } else if (e.key.toLowerCase() === 'n') {
+      e.preventDefault();
+      newFile();
+    }
+    // Ctrl+Z, Ctrl+Y, Ctrl+C, Ctrl+X, Ctrl+V usam o comportamento nativo do navegador
+  });
+
+  // Suporte a tecla Tab dentro do textarea (insere tabulação em vez de mudar foco)
+  textarea.addEventListener('keydown', function (e) {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const start = this.selectionStart;
+      const end = this.selectionEnd;
+      this.value = this.value.substring(0, start) + '\t' + this.value.substring(end);
+      this.selectionStart = this.selectionEnd = start + 1;
+      scheduleAutoSave();
+      updateStatus();
+    }
+  });
+
+  // Aviso antes de sair com alterações (opcional, pode remover se preferir)
+  window.addEventListener('beforeunload', function () {
+    saveToStorage();
+  });
+
+  // ----- Inicialização -----
+  loadFromStorage();
+  updateStatus();
+})();
+</script>
+
+</body>
+</html>
