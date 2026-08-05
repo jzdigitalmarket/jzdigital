@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notícias de Inteligência Artificial</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background-color: #0f172a;
+      color: #f8fafc;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    header {
+      margin-bottom: 2rem;
+      border-bottom: 1px solid #334155;
+      padding-bottom: 1rem;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      color: #38bdf8;
+      margin-bottom: 0.5rem;
+    }
+
+    .status-loading {
+      color: #94a3b8;
+      font-style: italic;
+    }
+
+    .news-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+
+    .news-card {
+      background-color: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 1.25rem;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .news-card:hover {
+      transform: translateY(-2px);
+      border-color: #38bdf8;
+    }
+
+    .news-source {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #38bdf8;
+      background-color: rgba(56, 189, 248, 0.1);
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      margin-bottom: 0.75rem;
+    }
+
+    .news-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      line-height: 1.4;
+      margin-bottom: 0.5rem;
+    }
+
+    .news-title a {
+      color: #f1f5f9;
+      text-decoration: none;
+    }
+
+    .news-title a:hover {
+      color: #38bdf8;
+    }
+
+    .news-snippet {
+      font-size: 0.95rem;
+      color: #94a3b8;
+      line-height: 1.5;
+      margin-bottom: 1rem;
+    }
+
+    .news-meta {
+      font-size: 0.8rem;
+      color: #64748b;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>Últimas Notícias sobre IA</h1>
+      <p id="status" class="status-loading">Buscando atualizações dos portais...</p>
+    </header>
+
+    <main id="news-container" class="news-grid"></main>
+  </div>
+
+  <script>
+    // Lista de feeds RSS dos portais em Português
+    const RSS_FEEDS = [
+      {
+        name: 'MIT Tech Review BR',
+        url: 'https://mittechreview.com.br/topicos/inteligencia-artificial/feed/'
+      },
+      {
+        name: 'Inovação Tecnológica',
+        url: 'https://www.inovacaotecnologica.com.br/boletim/rss_inteligencia-artificial.xml'
+      },
+      {
+        name: 'Canaltech',
+        url: 'https://canaltech.com.br/rss/inteligencia-artificial/'
+      },
+      {
+        name: 'Google News Brasil (IA)',
+        url: 'https://news.google.com/rss/search?q=Inteligencia+Artificial&hl=pt-BR&gl=BR&ceid=BR:pt-419'
+      }
+    ];
+
+    // Serviço para converter XML do RSS em JSON e evitar bloqueio de CORS
+    const RSS2JSON_ENDPOINT = 'https://api.rss2json.com/v1/api.json?rss_url=';
+
+    async function fetchSingleFeed(feed) {
+      try {
+        const response = await fetch(`${RSS2JSON_ENDPOINT}${encodeURIComponent(feed.url)}`);
+        const data = await response.json();
+
+        if (data.status === 'ok') {
+          return data.items.map(item => ({
+            source: feed.name,
+            title: item.title,
+            link: item.link,
+            pubDate: new Date(item.pubDate),
+            // Remove tags HTML das descrições para manter o layout limpo
+            snippet: item.description ? item.description.replace(/<[^>]*>?/gm, '').slice(0, 160) + '...' : ''
+          }));
+        }
+        return [];
+      } catch (error) {
+        console.warn(`Não foi possível carregar o feed: ${feed.name}`, error);
+        return [];
+      }
+    }
+
+    async function loadAllNews() {
+      const statusElement = document.getElementById('status');
+      const containerElement = document.getElementById('news-container');
+
+      // Busca todas as fontes em paralelo
+      const feedPromises = RSS_FEEDS.map(feed => fetchSingleFeed(feed));
+      const results = await Promise.all(feedPromises);
+
+      // Achata a matriz de resultados em uma única lista
+      let allArticles = results.flat();
+
+      if (allArticles.length === 0) {
+        statusElement.textContent = 'Não foi possível carregar as notícias no momento.';
+        return;
+      }
+
+      // Ordena por data mais recente (da mais nova para a mais antiga)
+      allArticles.sort((a, b) => b.pubDate - a.pubDate);
+
+      // Limita a exibição às 12 notícias mais recentes do conjunto
+      const topArticles = allArticles.slice(0, 12);
+
+      statusElement.textContent = `Atualizado às ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+
+      // Renderiza os cards
+      containerElement.innerHTML = topArticles.map(article => `
+        <article class="news-card">
+          <span class="news-source">${article.source}</span>
+          <h2 class="news-title">
+            <a href="${article.link}" target="_blank" rel="noopener noreferrer">${article.title}</a>
+          </h2>
+          <p class="news-snippet">${article.snippet}</p>
+          <div class="news-meta">
+            ${article.pubDate.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+          </div>
+        </article>
+      `).join('');
+    }
+
+    // Inicializa o carregamento ao carregar a página
+    document.addEventListener('DOMContentLoaded', loadAllNews);
+  </script>
+</body>
+</html>
