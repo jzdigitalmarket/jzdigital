@@ -1,19 +1,25 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Feed Técnico de IA & Engenharia</title>
+  <title>AI & Robotics Technical Radar</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background-color: #0f172a;
       color: #f8fafc;
       padding: 1.5rem;
     }
+
     .widget-container {
-      max-width: 800px;
+      max-width: 850px;
       margin: 0 auto;
       background-color: #1e293b;
       border: 1px solid #334155;
@@ -21,6 +27,7 @@
       padding: 1.25rem;
       box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
     }
+
     .widget-header {
       display: flex;
       justify-content: space-between;
@@ -29,35 +36,64 @@
       padding-bottom: 0.75rem;
       margin-bottom: 0.75rem;
     }
-    .widget-title { font-size: 1.25rem; color: #38bdf8; font-weight: 700; }
-    .status-meta { font-size: 0.75rem; color: #94a3b8; }
-    
+
+    .widget-title {
+      font-size: 1.25rem;
+      color: #38bdf8;
+      font-weight: 700;
+    }
+
+    .status-meta {
+      font-size: 0.75rem;
+      color: #94a3b8;
+    }
+
+    /* Scrollable Inner Container */
     .news-scroll-area {
-      max-height: 520px;
+      max-height: 540px;
       overflow-y: auto;
       padding-right: 0.5rem;
     }
-    .news-scroll-area::-webkit-scrollbar { width: 6px; }
-    .news-scroll-area::-webkit-scrollbar-track { background: #0f172a; border-radius: 4px; }
-    .news-scroll-area::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
-    .news-scroll-area::-webkit-scrollbar-thumb:hover { background: #38bdf8; }
 
+    .news-scroll-area::-webkit-scrollbar {
+      width: 6px;
+    }
+    .news-scroll-area::-webkit-scrollbar-track {
+      background: #0f172a;
+      border-radius: 4px;
+    }
+    .news-scroll-area::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+    .news-scroll-area::-webkit-scrollbar-thumb:hover {
+      background: #38bdf8;
+    }
+
+    /* Dense List Layout */
     .news-item {
       display: block;
-      padding: 0.75rem 0;
+      padding: 0.85rem 0;
       border-bottom: 1px solid #2d3748;
       text-decoration: none;
       transition: background-color 0.15s ease;
     }
-    .news-item:last-child { border-bottom: none; }
-    .news-item:hover .news-item-title { color: #38bdf8; }
-    
+
+    .news-item:last-child {
+      border-bottom: none;
+    }
+
+    .news-item:hover .news-item-title {
+      color: #38bdf8;
+    }
+
     .news-item-header {
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      margin-bottom: 0.25rem;
+      margin-bottom: 0.3rem;
     }
+
     .news-source-tag {
       font-size: 0.65rem;
       font-weight: 700;
@@ -68,12 +104,24 @@
       border-radius: 3px;
       white-space: nowrap;
     }
-    .news-date { font-size: 0.7rem; color: #64748b; }
-    .news-item-title { font-size: 0.95rem; font-weight: 600; color: #f1f5f9; line-height: 1.35; margin-bottom: 0.2rem; }
+
+    .news-date {
+      font-size: 0.7rem;
+      color: #64748b;
+    }
+
+    .news-item-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #f1f5f9;
+      line-height: 1.35;
+      margin-bottom: 0.25rem;
+    }
+
     .news-item-snippet {
       font-size: 0.8rem;
       color: #94a3b8;
-      line-height: 1.3;
+      line-height: 1.35;
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
@@ -85,42 +133,28 @@
 
   <div class="widget-container">
     <div class="widget-header">
-      <h2 class="widget-title">Radar Técnico & Engenharia de IA</h2>
-      <span id="status" class="status-meta">Carregando dados...</span>
+      <h2 class="widget-title">AI & Robotics Engineering Feed</h2>
+      <span id="status" class="status-meta">Fetching technical updates...</span>
     </div>
 
     <div class="news-scroll-area" id="news-container"></div>
   </div>
 
   <script>
-    // Feeds focados em engenharia, ciência e negócios de tecnologia
-    // A query do Google News usa operadores '-' para eliminar pautas políticas e sociais na origem
-    const GOOGLE_TECH_QUERY = encodeURIComponent(
-      '("inteligência artificial" OR "LLM" OR "semicondutores" OR "modelos de linguagem" OR "GPU") ' +
-      '-governo -politica -eleicoes -esquerda -direita -regulamentacao -projeto de lei -sindicato -stf -congresso -bias -preconceito -genero'
-    );
-
+    // Exact RSS feeds for technical sources in English
     const RSS_FEEDS = [
-      { 
-        name: 'Inovação Tecnológica', 
-        url: 'https://www.inovacaotecnologica.com.br/boletim/rss_inteligencia-artificial.xml' 
-      },
-      { 
-        name: 'TI Inside (Engenharia/Dev)', 
-        url: 'https://tiinside.com.br/category/tecnologia/inteligencia-artificial/feed/' 
-      },
-      { 
-        name: 'Google News (Filtro Técnico)', 
-        url: `https://news.google.com/rss/search?q=${GOOGLE_TECH_QUERY}&hl=pt-BR&gl=BR&ceid=BR:pt-419` 
-      }
+      { name: 'ArXiv (AI & Robotics)', url: 'https://rss.arxiv.org/rss/cs.AI+cs.RO' },
+      { name: 'IEEE Spectrum Robotics', url: 'https://spectrum.ieee.org/feeds/topic/robotics.rss' },
+      { name: 'IEEE Spectrum AI', url: 'https://spectrum.ieee.org/feeds/topic/artificial-intelligence.rss' },
+      { name: 'NVIDIA Tech Blog', url: 'https://developer.nvidia.com/blog/feed/' },
+      { name: 'Google DeepMind', url: 'https://deepmind.google/blog/rss.xml' }
     ];
 
-    // Lista de palavras proibidas para descarte de notícias no Frontend (Filtro Secundário)
+    // Banned terms filter to exclude political, legal, and social policy news
     const BANNED_TERMS = [
-      'governo', 'política', 'politica', 'eleição', 'eleicoes', 'esquerda', 'direita', 
-      'regulamentação', 'regulamentacao', 'projeto de lei', 'deputado', 'senado', 'stf', 
-      'lula', 'bolsonaro', 'congresso', 'sindicato', 'diversidade', 'inclusão', 'inclusao', 
-      'gênero', 'genero', 'racismo', 'ética', 'etica', 'direitos autorais', 'processo judicial'
+      'government', 'politics', 'election', 'congress', 'senate', 'legislation', 
+      'regulation', 'lawsuit', 'copyright', 'union', 'bias', 'diversity', 
+      'inclusion', 'ethics committee', 'biden', 'trump', 'white house', 'eu act'
     ];
 
     const RSS2JSON_ENDPOINT = 'https://api.rss2json.com/v1/api.json?rss_url=';
@@ -136,7 +170,7 @@
             title: item.title,
             link: item.link,
             pubDate: new Date(item.pubDate),
-            snippet: item.description ? item.description.replace(/<[^>]*>?/gm, '') : ''
+            snippet: item.description ? item.description.replace(/<[^>]*>?/gm, '').replace(/^Abstract:\s*/i, '').trim() : ''
           }));
         }
         return [];
@@ -145,7 +179,6 @@
       }
     }
 
-    // Função que verifica se o título ou trecho possui termos indesejados
     function isTechnicalContent(article) {
       const fullText = `${article.title} ${article.snippet}`.toLowerCase();
       return !BANNED_TERMS.some(term => fullText.includes(term));
@@ -158,27 +191,28 @@
       const results = await Promise.all(RSS_FEEDS.map(fetchSingleFeed));
       let allArticles = results.flat();
 
-      // Aplica o filtro estrito de descarte
+      // Apply political & non-technical exclusion filter
       const filteredArticles = allArticles.filter(isTechnicalContent);
 
       if (filteredArticles.length === 0) {
-        statusElement.textContent = 'Nenhuma notícia técnica encontrada no momento.';
+        statusElement.textContent = 'No technical updates available right now.';
         return;
       }
 
-      // Ordena por data
+      // Sort by newest published date
       filteredArticles.sort((a, b) => b.pubDate - a.pubDate);
 
+      // Limit display to top 30 items
       const MAX_ITEMS = 30;
       const topArticles = filteredArticles.slice(0, MAX_ITEMS);
 
-      statusElement.textContent = `${topArticles.length} notícias técnicas filtradas`;
+      statusElement.textContent = `${topArticles.length} technical papers & articles loaded`;
 
       containerElement.innerHTML = topArticles.map(article => `
         <a href="${article.link}" target="_blank" rel="noopener noreferrer" class="news-item">
           <div class="news-item-header">
             <span class="news-source-tag">${article.source}</span>
-            <span class="news-date">${article.pubDate.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>
+            <span class="news-date">${article.pubDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
           </div>
           <div class="news-item-title">${article.title}</div>
           ${article.snippet ? `<div class="news-item-snippet">${article.snippet}</div>` : ''}
