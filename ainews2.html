@@ -15,17 +15,15 @@
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
       background-color: #050811;
       
-/* Overlay escuro esmaecendo a imagem 'backai.jpg' + iluminação radial */
-      background-image: 
+      /* CORREÇÃO DO BACKGROUND: 
+         1. Adicionada imagem em camada base
+         2. Fallback de cor sólida e gradientes funcionais
+      */
+      background: 
         radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.15) 0%, transparent 70%),
         radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
-        linear-gradient(rgba(5, 8, 17, 0.85), rgba(5, 8, 17, 0.85)), 
-        url('backai.avif');
-      
-      background-repeat: no-repeat;
-      background-position: center center;
-      background-attachment: fixed;
-      background-size: cover;
+        linear-gradient(rgba(5, 8, 17, 0.85), rgba(5, 8, 17, 0.85)),
+        url('backai.avif') center/cover no-repeat fixed #050811;
 
       color: #f8fafc;
       min-height: 100vh;
@@ -47,7 +45,6 @@
       position: relative;
     }
 
-    /* Brilho futurista na borda superior */
     .widget-container::before {
       content: '';
       position: absolute;
@@ -89,7 +86,6 @@
       font-family: monospace;
     }
 
-    /* Botão de Atualizar Futurista */
     .btn-refresh {
       background: rgba(56, 189, 248, 0.1);
       border: 1px solid rgba(56, 189, 248, 0.4);
@@ -121,7 +117,6 @@
       100% { transform: rotate(360deg); }
     }
 
-    /* Scrollable Area */
     .news-scroll-area {
       max-height: 580px;
       overflow-y: auto;
@@ -145,7 +140,6 @@
       background: #38bdf8;
     }
 
-    /* Card de Notícia */
     .news-item {
       display: flex;
       gap: 1rem;
@@ -164,7 +158,6 @@
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     }
 
-    /* Miniatura (Thumbnail) */
     .news-thumb-wrapper {
       width: 90px;
       height: 90px;
@@ -265,7 +258,7 @@
   </div>
 
   <script>
-    // Lista Expandida de Fontes RSS de alta relevância técnica
+    // Lista Expandida de Fontes RSS com mais canais técnicos
     const RSS_FEEDS = [
       { name: 'ArXiv (AI & RO)', url: 'https://rss.arxiv.org/rss/cs.AI+cs.RO' },
       { name: 'IEEE Spectrum RO', url: 'https://spectrum.ieee.org/feeds/topic/robotics.rss' },
@@ -276,7 +269,12 @@
       { name: 'MIT Tech Review', url: 'https://www.technologyreview.com/feed/' },
       { name: 'TechCrunch AI', url: 'https://techcrunch.com/category/artificial-intelligence/feed/' },
       { name: 'The Robot Report', url: 'https://www.therobotreport.com/feed/' },
-      { name: 'BAIR Blog', url: 'https://bair.berkeley.edu/blog/feed.xml' }
+      { name: 'BAIR Blog', url: 'https://bair.berkeley.edu/blog/feed.xml' },
+      // Fontes Adicionadas:
+      { name: 'Robohub', url: 'https://robohub.org/feed/' },
+      { name: 'Hugging Face', url: 'https://huggingface.co/blog/feed.xml' },
+      { name: 'TechXplore RO', url: 'https://techxplore.com/rss-feed/robotics-news/' },
+      { name: 'ScienceDaily AI', url: 'https://www.sciencedaily.com/rss/computers_math/artificial_intelligence.xml' }
     ];
 
     const BANNED_TERMS = [
@@ -287,12 +285,10 @@
 
     const RSS2JSON_ENDPOINT = 'https://api.rss2json.com/v1/api.json?rss_url=';
 
-    // Extrai imagem válida da estrutura do RSS
     function extractThumbnail(item) {
       if (item.thumbnail && item.thumbnail.startsWith('http')) return item.thumbnail;
       if (item.enclosure && item.enclosure.link && item.enclosure.link.startsWith('http')) return item.enclosure.link;
       
-      // Busca tag <img> dentro da descrição caso exista
       if (item.description) {
         const imgMatch = item.description.match(/<img[^>]+src=["']([^"']+)["']/i);
         if (imgMatch && imgMatch[1]) return imgMatch[1];
@@ -348,7 +344,7 @@
 
       filteredArticles.sort((a, b) => b.pubDate - a.pubDate);
 
-      const MAX_ITEMS = 35;
+      const MAX_ITEMS = 40;
       const topArticles = filteredArticles.slice(0, MAX_ITEMS);
 
       statusElement.textContent = `${topArticles.length} signals intercepted`;
