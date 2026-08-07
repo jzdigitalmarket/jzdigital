@@ -15,7 +15,7 @@
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
       background-color: #050811;
       
-      /* Background com fallback seguro para imagem local */
+      /* Background com fallback seguro */
       background: 
         radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.15) 0%, transparent 70%),
         radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
@@ -42,7 +42,6 @@
       position: relative;
     }
 
-    /* Brilho futurista na borda superior */
     .widget-container::before {
       content: '';
       position: absolute;
@@ -125,7 +124,6 @@
       box-shadow: 0 0 10px rgba(56, 189, 248, 0.15);
     }
 
-    /* Botão de Atualizar Futurista */
     .btn-refresh {
       background: rgba(56, 189, 248, 0.1);
       border: 1px solid rgba(56, 189, 248, 0.4);
@@ -157,7 +155,7 @@
       100% { transform: rotate(360deg); }
     }
 
-    /* Áreas de Conteúdo das Abas */
+    /* Conteúdo das Abas */
     .tab-content {
       display: none;
     }
@@ -166,7 +164,6 @@
       display: block;
     }
 
-    /* Scrollable Area RSS */
     .news-scroll-area {
       max-height: 580px;
       overflow-y: auto;
@@ -190,7 +187,7 @@
       background: #38bdf8;
     }
 
-    /* Card de Notícia */
+    /* Card de Notícia Único */
     .news-item {
       display: flex;
       gap: 1rem;
@@ -209,7 +206,6 @@
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     }
 
-    /* Miniatura (Thumbnail) */
     .news-thumb-wrapper {
       width: 90px;
       height: 90px;
@@ -260,6 +256,13 @@
       border-radius: 4px;
     }
 
+    /* Tag especial para Reddit/Bluesky */
+    .news-source-tag.social {
+      color: #a855f7;
+      background-color: rgba(168, 85, 247, 0.12);
+      border-color: rgba(168, 85, 247, 0.25);
+    }
+
     .news-date {
       font-size: 0.7rem;
       color: #64748b;
@@ -287,21 +290,6 @@
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
-
-    /* Container do Widget Embutido do X */
-    .x-widget-wrapper {
-      height: 580px;
-      overflow-y: auto;
-      border-radius: 10px;
-      background: rgba(15, 23, 42, 0.4);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      padding: 0.5rem;
-    }
-
-    /* Customização para suavizar a transição do iframe */
-    .x-widget-wrapper iframe {
-      border-radius: 8px !important;
-    }
   </style>
 </head>
 <body>
@@ -313,13 +301,12 @@
         <span id="status" class="status-meta">Initializing feed scanners...</span>
       </div>
 
-      <!-- Navegação por Abas -->
       <div class="tabs-navigation">
-        <button class="tab-btn active" onclick="switchTab('rss-tab', this)">
-          <span>📡</span> Feeds RSS
+        <button class="tab-btn active" onclick="switchTab('blogs-tab', this)">
+          <span>📡</span> Blogs & Papers
         </button>
-        <button class="tab-btn" onclick="switchTab('x-tab', this)">
-          <span>𝕏</span> Feed X
+        <button class="tab-btn" onclick="switchTab('social-tab', this)">
+          <span>💬</span> Social & Reddit
         </button>
       </div>
 
@@ -332,35 +319,20 @@
       </button>
     </div>
 
-    <!-- ABA 1: RSS FEEDS -->
-    <div id="rss-tab" class="tab-content active">
-      <div class="news-scroll-area" id="news-container"></div>
+    <!-- ABA 1: RSS BLOGS & PAPERS -->
+    <div id="blogs-tab" class="tab-content active">
+      <div class="news-scroll-area" id="blogs-container"></div>
     </div>
 
-    <!-- ABA 2: X (TWITTER) TIMELINE EMBED -->
-    <div id="x-tab" class="tab-content">
-      <div class="x-widget-wrapper">
-        <!-- 
-          Substitua o atributo 'href' abaixo pela conta, lista ou busca desejada do X.
-          Exemplo com a conta da OpenAI: https://twitter.com/OpenAI
-        -->
-        <a class="twitter-timeline" 
-           data-height="560" 
-           data-theme="dark" 
-           data-chrome="noheader nofooter transparent noscrollbar"
-           href="https://twitter.com/OpenAI?ref_src=twsrc%5Etfw">
-           Carregando atualizações do X...
-        </a>
-      </div>
+    <!-- ABA 2: BLUESKY & REDDIT -->
+    <div id="social-tab" class="tab-content">
+      <div class="news-scroll-area" id="social-container"></div>
     </div>
   </div>
 
-  <!-- Script Oficial do X (Twitter) para renderizar a timeline -->
-  <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-
   <script>
-    // Lista Expandida de Fontes RSS de alta relevância técnica
-    const RSS_FEEDS = [
+    // Feeds de Artigos, Blogs e Pesquisas
+    const BLOG_FEEDS = [
       { name: 'ArXiv (AI & RO)', url: 'https://rss.arxiv.org/rss/cs.AI+cs.RO' },
       { name: 'IEEE Spectrum RO', url: 'https://spectrum.ieee.org/feeds/topic/robotics.rss' },
       { name: 'IEEE Spectrum AI', url: 'https://spectrum.ieee.org/feeds/topic/artificial-intelligence.rss' },
@@ -368,13 +340,18 @@
       { name: 'Google DeepMind', url: 'https://deepmind.google/blog/rss.xml' },
       { name: 'OpenAI Blog', url: 'https://openai.com/news/rss.xml' },
       { name: 'MIT Tech Review', url: 'https://www.technologyreview.com/feed/' },
-      { name: 'TechCrunch AI', url: 'https://techcrunch.com/category/artificial-intelligence/feed/' },
       { name: 'The Robot Report', url: 'https://www.therobotreport.com/feed/' },
-      { name: 'BAIR Blog', url: 'https://bair.berkeley.edu/blog/feed.xml' },
-      { name: 'Robohub', url: 'https://robohub.org/feed/' },
       { name: 'Hugging Face', url: 'https://huggingface.co/blog/feed.xml' },
-      { name: 'TechXplore RO', url: 'https://techxplore.com/rss-feed/robotics-news/' },
-      { name: 'ScienceDaily AI', url: 'https://www.sciencedaily.com/rss/computers_math/artificial_intelligence.xml' }
+      { name: 'Robohub', url: 'https://robohub.org/feed/' }
+    ];
+
+    // Feeds do Bluesky e Subreddits
+    const SOCIAL_FEEDS = [
+      { name: 'r/robotics', url: 'https://www.reddit.com/r/robotics/.rss' },
+      { name: 'r/MachineLearning', url: 'https://www.reddit.com/r/MachineLearning/.rss' },
+      { name: 'r/ArtificialInteligence', url: 'https://www.reddit.com/r/ArtificialInteligence/.rss' },
+      // Bluesky Feed RSS Nativo (Exemplo: Feed da conta bsky.app)
+      { name: 'Bluesky AI', url: 'https://bsky.app/profile/did:plc:z72i7hdynmk6p2gophli36tl/rss' }
     ];
 
     const BANNED_TERMS = [
@@ -384,32 +361,17 @@
     ];
 
     const RSS2JSON_ENDPOINT = 'https://api.rss2json.com/v1/api.json?rss_url=';
+    let currentTab = 'blogs-tab';
 
-    // Gerenciador de Abas
     function switchTab(tabId, btnElement) {
       document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
 
       document.getElementById(tabId).classList.add('active');
       btnElement.classList.add('active');
-
-      const refreshBtn = document.getElementById('refresh-btn');
-      const statusElement = document.getElementById('status');
-
-      if (tabId === 'x-tab') {
-        refreshBtn.style.display = 'none';
-        statusElement.textContent = 'Live stream connected to X';
-        // Recarrega os widgets do X caso a renderização inicial estivesse oculta
-        if (window.twttr && window.twttr.widgets) {
-          window.twttr.widgets.load();
-        }
-      } else {
-        refreshBtn.style.display = 'flex';
-        statusElement.textContent = 'Feeds synced and operational';
-      }
+      currentTab = tabId;
     }
 
-    // Extrai imagem válida da estrutura do RSS
     function extractThumbnail(item) {
       if (item.thumbnail && item.thumbnail.startsWith('http')) return item.thumbnail;
       if (item.enclosure && item.enclosure.link && item.enclosure.link.startsWith('http')) return item.enclosure.link;
@@ -421,7 +383,7 @@
       return null;
     }
 
-    async function fetchSingleFeed(feed) {
+    async function fetchSingleFeed(feed, isSocial = false) {
       try {
         const response = await fetch(`${RSS2JSON_ENDPOINT}${encodeURIComponent(feed.url)}`);
         const data = await response.json();
@@ -433,7 +395,8 @@
             link: item.link,
             pubDate: new Date(item.pubDate),
             snippet: item.description ? item.description.replace(/<[^>]*>?/gm, '').replace(/^Abstract:\s*/i, '').trim() : '',
-            thumbnail: extractThumbnail(item)
+            thumbnail: extractThumbnail(item),
+            isSocial: isSocial
           }));
         }
         return [];
@@ -447,46 +410,26 @@
       return !BANNED_TERMS.some(term => fullText.includes(term));
     }
 
-    async function loadAllNews() {
-      const statusElement = document.getElementById('status');
-      const containerElement = document.getElementById('news-container');
-      const refreshBtn = document.getElementById('refresh-btn');
-
-      refreshBtn.classList.add('spin');
-      statusElement.textContent = 'Syncing feeds...';
-
-      const results = await Promise.all(RSS_FEEDS.map(fetchSingleFeed));
-      let allArticles = results.flat();
-
-      const filteredArticles = allArticles.filter(isTechnicalContent);
-
-      refreshBtn.classList.remove('spin');
-
-      if (filteredArticles.length === 0) {
-        statusElement.textContent = 'No technical updates available.';
+    function renderArticles(articles, containerId) {
+      const container = document.getElementById(containerId);
+      if (articles.length === 0) {
+        container.innerHTML = '<div style="color: #64748b; padding: 1rem; text-align: center;">No updates found.</div>';
         return;
       }
 
-      filteredArticles.sort((a, b) => b.pubDate - a.pubDate);
-
-      const MAX_ITEMS = 40;
-      const topArticles = filteredArticles.slice(0, MAX_ITEMS);
-
-      statusElement.textContent = `${topArticles.length} signals intercepted`;
-
-      containerElement.innerHTML = topArticles.map(article => `
+      container.innerHTML = articles.map(article => `
         <a href="${article.link}" target="_blank" rel="noopener noreferrer" class="news-item">
           <div class="news-thumb-wrapper">
             ${article.thumbnail 
               ? `<img src="${article.thumbnail}" class="news-thumb" alt="Thumbnail" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                 <div class="news-thumb-placeholder" style="display:none;">⚡</div>`
-              : `<div class="news-thumb-placeholder">⚡</div>`
+                 <div class="news-thumb-placeholder" style="display:none;">${article.isSocial ? '💬' : '⚡'}</div>`
+              : `<div class="news-thumb-placeholder">${article.isSocial ? '💬' : '⚡'}</div>`
             }
           </div>
           <div class="news-content">
             <div>
               <div class="news-item-header">
-                <span class="news-source-tag">${article.source}</span>
+                <span class="news-source-tag ${article.isSocial ? 'social' : ''}">${article.source}</span>
                 <span class="news-date">${article.pubDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
               </div>
               <div class="news-item-title">${article.title}</div>
@@ -495,6 +438,29 @@
           </div>
         </a>
       `).join('');
+    }
+
+    async function loadAllNews() {
+      const statusElement = document.getElementById('status');
+      const refreshBtn = document.getElementById('refresh-btn');
+
+      refreshBtn.classList.add('spin');
+      statusElement.textContent = 'Syncing network feeds...';
+
+      // Carrega Blogs e Social em paralelo
+      const [blogResults, socialResults] = await Promise.all([
+        Promise.all(BLOG_FEEDS.map(f => fetchSingleFeed(f, false))),
+        Promise.all(SOCIAL_FEEDS.map(f => fetchSingleFeed(f, true)))
+      ]);
+
+      const filteredBlogs = blogResults.flat().filter(isTechnicalContent).sort((a, b) => b.pubDate - a.pubDate).slice(0, 35);
+      const filteredSocial = socialResults.flat().filter(isTechnicalContent).sort((a, b) => b.pubDate - a.pubDate).slice(0, 35);
+
+      renderArticles(filteredBlogs, 'blogs-container');
+      renderArticles(filteredSocial, 'social-container');
+
+      refreshBtn.classList.remove('spin');
+      statusElement.textContent = `${filteredBlogs.length + filteredSocial.length} signals active`;
     }
 
     document.addEventListener('DOMContentLoaded', loadAllNews);
