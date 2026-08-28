@@ -1257,46 +1257,199 @@ async function carregarMovimentacaoNavios() {
         '<i class="fas fa-spinner fa-spin"></i> Atualizando...';
 
     atualizacao.textContent =
-        'Consultando dados atualizados da Praticagem ZP21...';
+        'Consultando Praticagem ZP21...';
 
     try {
 
-        const resposta = await fetch('/api/movimentacao-navios', {
+        const resposta = await fetch('/api/movimentacao-navios?nocache=' + Date.now(), {
             method: 'GET',
-            cache: 'no-store'
+            cache: 'no-store',
+            headers: {
+                'Accept': 'application/json'
+            }
         });
+
+        const textoResposta = await resposta.text();
+
+        console.log('Resposta recebida da API:', textoResposta);
 
         if (!resposta.ok) {
             throw new Error(
-                'Erro HTTP ' + resposta.status
+                'Erro HTTP ' + resposta.status + ': ' + textoResposta.substring(0, 200)
             );
         }
 
-        const dados = await resposta.json();
+        let dados;
 
-        console.log('Dados recebidos da API:', dados);
+        try {
+            dados = JSON.parse(textoResposta);
+        } catch (erroJSON) {
 
-        if (!dados || !Array.isArray(dados.registros)) {
+            console.error(
+                'A API não retornou JSON:',
+                textoResposta
+            );
+
             throw new Error(
-                'A API respondeu, mas não encontrou o campo "registros".'
+                'A API retornou conteúdo que não é JSON.'
             );
         }
 
-        const registros = dados.registros;
+        console.log('Objeto JSON:', dados);
+
 
         /*
-         * Transformamos cada registro em um objeto
-         * mais fácil de trabalhar.
+         * ACEITA DIFERENTES FORMATOS
+         *
+         * Formato esperado:
+         *
+         * {
+         *   sucesso: true,
+         *   fonte: "...",
+         *   atualizadoEm: "...",
+         *   registros: [...]
+         * }
+         */
+
+        let registros = null;
+
+
+        if (Array.isArray(dados.registros)) {
+
+            registros = dados.registros;
+
+        }
+
+        /*
+         * Alguns endpoints podem devolver os dados
+         * dentro de "data".
+         */
+
+        else if (Array.isArray(dados.data)) {
+
+            registros = dados.data;
+
+        }
+
+        /*
+         * Ou diretamente como array.
+         */
+
+        else if (Array.isArray(dados)) {
+
+            registros = dados;
+
+        }
+
+
+        /*
+         * Se não encontrou registros,
+         * mostramos no console exatamente o que chegou.
+         */
+
+        if (!registros) {
+
+            console.error(
+                'Estrutura recebida:',
+                dados
+            );
+
+            throw new Error(
+                'A API respondeu, mas o JSON recebido não possui uma lista de registros.'
+            );
+
+        }
+
+
+        /*
+         * Remove registros completamente vazios.
+         */
+
+        registros = registros.filter(item => {
+
+            if (!item) return false;
+
+            if (typeof item === 'string') {
+                return item.trim() !== '';
+            }
+
+            if (typeof item === 'object') {
+
+                return (
+                    item.texto ||
+                    item.data ||
+                    item.dataHora ||
+                    item.navio ||
+                    item.nome
+                );
+
+            }
+
+            return false;
+
+        });
+
+
+        /*
+         * Normaliza os registros.
          */
 
         const registrosTratados = registros.map((item, indice) => {
 
+            /*
+             * Caso o registro seja simplesmente texto.
+             */
+
+            if (typeof item === 'string') {
+
+                return {
+                    indice: indice,
+                    texto: item,
+                    dataHora: extrairDataHora(item)
+                };
+
+            }
+
+
+            /*
+             * Caso seja objeto.
+             */
+
+            let texto =
+                item.texto ||
+                item.descricao ||
+                item.nome ||
+                item.navio ||
+                item.movimentacao ||
+                JSON.stringify(item);
+
+
             let dataHora = null;
 
-            if (
+
+            /*
+             * Primeiro tenta usar data/hora existentes.
+             */
+
+            if (item.dataHora) {
+
+                const tentativa =
+                    new Date(item.dataHora);
+
+                if (!isNaN(tentativa.getTime())) {
+                    dataHora = tentativa;
+                }
+
+            }
+
+
+            /*
+             * Depois tenta datas + horas.
+             */
+
+            if (!dataHora &&
                 Array.isArray(item.datas) &&
-                item.datas.length > 0
-            ) {
+                item.datas.length > 0) {
 
                 const data = item.datas[0];
 
@@ -1309,56 +1462,67 @@ async function carregarMovimentacaoNavios() {
                     hora = item.horas[0];
                 }
 
-                if (hora) {
+                dataHora =
+                    converterDataHora(data, hora);
 
-                    const partes = data.split('/');
-
-                    if (partes.length === 3) {
-
-                        dataHora = new Date(
-                            Number(partes[2]),
-                            Number(partes[1]) - 1,
-                            Number(partes[0]),
-                            Number(hora.split(':')[0]),
-                            Number(hora.split(':')[1])
-                        );
-
-                    }
-
-                } else {
-
-                    const partes = data.split('/');
-
-                    if (partes.length === 3) {
-
-                        dataHora = new Date(
-                            Number(partes[2]),
-                            Number(partes[1]) - 1,
-                            Number(partes[0]),
-                            23,
-                            59
-                        );
-
-                    }
-                }
             }
 
+
+            /*
+             * Caso exista uma propriedade "data".
+             */
+
+            if (!dataHora && item.data) {
+
+                dataHora =
+                    extrairDataHora(
+                        String(item.data)
+                    );
+
+            }
+
+
+            /*
+             * Última tentativa:
+             * procurar data dentro do texto.
+             */
+
+            if (!dataHora) {
+
+                dataHora =
+                    extrairDataHora(texto);
+
+            }
+
+
             return {
-                ...item,
                 indice: indice,
-                dataHora: dataHora
+                texto: texto,
+                dataHora: dataHora,
+                original: item
             };
 
         });
 
 
+        console.log(
+            'Registros tratados:',
+            registrosTratados
+        );
+
+
         /*
-         * Separamos registros futuros e passados.
+         * DATA/HORA ATUAL
          */
 
         const agora = new Date();
 
-        const proximas = registrosTratados
+
+        /*
+         * PRÓXIMAS MOVIMENTAÇÕES
+         */
+
+        let proximas = registrosTratados
             .filter(item =>
                 item.dataHora &&
                 item.dataHora >= agora
@@ -1369,7 +1533,11 @@ async function carregarMovimentacaoNavios() {
             .slice(0, 5);
 
 
-        const ultimas = registrosTratados
+        /*
+         * ÚLTIMAS MOVIMENTAÇÕES
+         */
+
+        let ultimas = registrosTratados
             .filter(item =>
                 item.dataHora &&
                 item.dataHora < agora
@@ -1381,31 +1549,28 @@ async function carregarMovimentacaoNavios() {
 
 
         /*
-         * Caso a API não permita determinar corretamente
-         * o passado/futuro, usamos a ordem dos registros.
+         * IMPORTANTE:
+         *
+         * Se a fonte fornecer registros sem data suficiente
+         * para classificação, usamos a ordem recebida.
          */
 
-        if (proximas.length === 0) {
+        if (
+            proximas.length === 0 &&
+            ultimas.length === 0
+        ) {
 
-            const ordenados = [...registrosTratados]
-                .sort((a, b) => {
+            proximas =
+                registrosTratados.slice(0, 5);
 
-                    if (!a.dataHora && !b.dataHora) return 0;
-                    if (!a.dataHora) return 1;
-                    if (!b.dataHora) return -1;
+            ultimas =
+                registrosTratados.slice(5, 10);
 
-                    return a.dataHora - b.dataHora;
-
-                });
-
-            proximas.push(
-                ...ordenados.slice(0, 5)
-            );
         }
 
 
         /*
-         * Monta HTML das próximas.
+         * Monta cada item.
          */
 
         function montarItem(item) {
@@ -1426,29 +1591,47 @@ async function carregarMovimentacaoNavios() {
                         }
                     );
 
-            } else if (
-                item.datas &&
-                item.datas.length
+            }
+
+
+            /*
+             * Se não conseguimos extrair uma data,
+             * tentamos mostrar datas originais.
+             */
+
+            if (
+                !dataExibicao &&
+                item.original &&
+                Array.isArray(item.original.datas)
             ) {
 
-                dataExibicao = item.datas.join(', ');
+                dataExibicao =
+                    item.original.datas.join(' / ');
 
             }
+
 
             return `
                 <div class="navio-item">
 
-                    <div class="navio-data">
-                        <i class="far fa-calendar-alt"></i>
-                        ${dataExibicao || 'Data não informada'}
-                    </div>
+                    ${
+                        dataExibicao
+                        ?
+                        `<div class="navio-data">
+                            <i class="far fa-calendar-alt"></i>
+                            ${escaparHTML(dataExibicao)}
+                        </div>`
+                        :
+                        ''
+                    }
 
                     <div class="navio-texto">
-                        ${escaparHTML(item.texto || 'Movimentação sem descrição')}
+                        ${escaparHTML(item.texto)}
                     </div>
 
                 </div>
             `;
+
         }
 
 
@@ -1464,10 +1647,16 @@ async function carregarMovimentacaoNavios() {
 
             }
 
-            return lista.map(montarItem).join('');
+            return lista
+                .map(montarItem)
+                .join('');
 
         }
 
+
+        /*
+         * DESENHA O PAINEL
+         */
 
         conteudo.innerHTML = `
 
@@ -1508,23 +1697,32 @@ async function carregarMovimentacaoNavios() {
 
 
         /*
-         * Data/hora da atualização.
+         * DATA DA ATUALIZAÇÃO
          */
 
         let dataAtualizacao = '';
 
         if (dados.atualizadoEm) {
 
-            const data = new Date(
-                dados.atualizadoEm
-            );
+            const data =
+                new Date(dados.atualizadoEm);
 
-            dataAtualizacao =
-                data.toLocaleString(
-                    'pt-BR'
-                );
+            if (!isNaN(data.getTime())) {
+
+                dataAtualizacao =
+                    data.toLocaleString('pt-BR');
+
+            }
 
         }
+
+        if (!dataAtualizacao) {
+
+            dataAtualizacao =
+                new Date().toLocaleString('pt-BR');
+
+        }
+
 
         atualizacao.innerHTML =
             `Última atualização: <strong>${dataAtualizacao}</strong> · Fonte: Praticagem ZP21`;
@@ -1533,7 +1731,7 @@ async function carregarMovimentacaoNavios() {
     } catch (erro) {
 
         console.error(
-            'Erro na movimentação de navios:',
+            'Erro na movimentação:',
             erro
         );
 
@@ -1552,9 +1750,8 @@ async function carregarMovimentacaoNavios() {
 
                 <br><br>
 
-                Verifique se a função
-                <strong>/functions/api/movimentacao-navios</strong>
-                está publicada no Cloudflare Pages.
+                Abra o console do navegador (F12)
+                para visualizar a resposta recebida da API.
 
             </div>
 
@@ -1574,6 +1771,138 @@ async function carregarMovimentacaoNavios() {
 
 }
 
+
+/*
+ * Converte:
+ *
+ * 28/08/2026 + 14:45
+ *
+ * para um objeto Date.
+ */
+
+function converterDataHora(data, hora) {
+
+    if (!data) return null;
+
+    const partes =
+        String(data).split('/');
+
+    if (partes.length !== 3) {
+        return null;
+    }
+
+    const dia =
+        parseInt(partes[0], 10);
+
+    const mes =
+        parseInt(partes[1], 10) - 1;
+
+    const ano =
+        parseInt(partes[2], 10);
+
+    let horas = 23;
+    let minutos = 59;
+
+
+    if (hora) {
+
+        const partesHora =
+            String(hora).split(':');
+
+        if (partesHora.length >= 2) {
+
+            horas =
+                parseInt(partesHora[0], 10);
+
+            minutos =
+                parseInt(partesHora[1], 10);
+
+        }
+
+    }
+
+
+    const resultado =
+        new Date(
+            ano,
+            mes,
+            dia,
+            horas,
+            minutos
+        );
+
+
+    if (isNaN(resultado.getTime())) {
+        return null;
+    }
+
+    return resultado;
+
+}
+
+
+/*
+ * Procura uma data/hora dentro de um texto.
+ *
+ * Exemplos:
+ *
+ * 28/08/2026 14:45
+ * 29/08/2026
+ */
+
+function extrairDataHora(texto) {
+
+    if (!texto) return null;
+
+
+    const encontrado =
+        String(texto).match(
+            /(\d{2}\/\d{2}\/\d{4})(?:\s+(\d{2}:\d{2}))?/
+        );
+
+
+    if (!encontrado) {
+        return null;
+    }
+
+
+    return converterDataHora(
+        encontrado[1],
+        encontrado[2] || ''
+    );
+
+}
+
+
+/*
+ * Proteção contra HTML vindo da fonte.
+ */
+
+function escaparHTML(texto) {
+
+    const div =
+        document.createElement('div');
+
+    div.textContent =
+        String(texto ?? '');
+
+    return div.innerHTML;
+
+}
+
+
+/*
+ * Carregamento inicial.
+ */
+
+document.addEventListener(
+    'DOMContentLoaded',
+    function() {
+
+        carregarMovimentacaoNavios();
+
+    }
+);
 
 /*
  * Evita que conteúdo recebido da página externa
