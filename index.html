@@ -1079,45 +1079,50 @@ async function consultarPortarias() {
 
 
 
-    <!-- =========================================================
+  <!-- =========================================================
      RELATÓRIO DE MOVIMENTAÇÃO DE NAVIOS - ZP21
      ========================================================= -->
 
 <style>
 #movimentacao-navios {
-    margin: 25px auto;
-    max-width: 1100px;
+    margin-top: 25px;
+    margin-bottom: 25px;
     background: rgba(15, 23, 42, 0.94);
     border: 1px solid rgba(0, 191, 255, 0.35);
     border-top: 4px solid #00bfff;
-    border-radius: 12px;
+    border-radius: 10px;
     padding: 18px;
     color: white;
     box-shadow: 0 8px 25px rgba(0,0,0,0.35);
 }
 
-#movimentacao-navios .titulo-mov {
+.mov-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 10px;
+    gap: 15px;
     flex-wrap: wrap;
     margin-bottom: 15px;
 }
 
-#movimentacao-navios h2 {
-    margin: 0;
-    color: #00bfff;
-    font-size: 1.25rem;
+.mov-title {
+    font-size: 1.15rem;
     font-weight: 800;
+    color: #00bfff;
+}
+
+.mov-subtitle {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    margin-top: 3px;
 }
 
 #btnAtualizarNavios {
     background: #00bfff;
-    color: #062033;
+    color: #07111f;
     border: none;
-    border-radius: 7px;
-    padding: 8px 14px;
+    padding: 9px 16px;
+    border-radius: 6px;
     font-weight: 800;
     cursor: pointer;
     transition: .2s;
@@ -1125,7 +1130,7 @@ async function consultarPortarias() {
 
 #btnAtualizarNavios:hover {
     background: #67e8f9;
-    transform: scale(1.03);
+    transform: translateY(-1px);
 }
 
 #btnAtualizarNavios:disabled {
@@ -1133,46 +1138,50 @@ async function consultarPortarias() {
     cursor: wait;
 }
 
-.navios-atualizacao {
-    font-size: .72rem;
+.mov-status {
+    font-size: .75rem;
     color: #94a3b8;
     margin-bottom: 15px;
 }
 
-.navios-colunas {
+.mov-status.ok {
+    color: #4ade80;
+}
+
+.mov-status.erro {
+    color: #f87171;
+}
+
+.mov-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 15px;
 }
 
-.navios-bloco {
-    background: rgba(30, 41, 59, .85);
-    border-radius: 9px;
-    overflow: hidden;
-    border: 1px solid rgba(255,255,255,.08);
+.mov-box {
+    background: rgba(30, 41, 59, .9);
+    border-radius: 8px;
+    padding: 12px;
 }
 
-.navios-bloco h3 {
-    margin: 0;
-    padding: 11px 13px;
+.mov-box h3 {
+    margin: 0 0 10px;
     font-size: .9rem;
+    border-bottom: 1px solid rgba(255,255,255,.1);
+    padding-bottom: 8px;
 }
 
-.navios-proximas h3 {
-    background: rgba(0,191,255,.15);
-    color: #67e8f9;
-    border-bottom: 2px solid #00bfff;
+.mov-box.realizadas h3 {
+    color: #4ade80;
 }
 
-.navios-ultimas h3 {
-    background: rgba(163,230,53,.12);
-    color: #a3e635;
-    border-bottom: 2px solid #a3e635;
+.mov-box.proximas h3 {
+    color: #facc15;
 }
 
 .navio-item {
-    padding: 11px 13px;
-    border-bottom: 1px solid rgba(255,255,255,.07);
+    padding: 9px 5px;
+    border-bottom: 1px dashed rgba(255,255,255,.12);
 }
 
 .navio-item:last-child {
@@ -1181,35 +1190,25 @@ async function consultarPortarias() {
 
 .navio-data {
     font-size: .78rem;
-    color: #facc15;
-    font-weight: 700;
-    margin-bottom: 4px;
+    font-weight: 800;
+    color: #00bfff;
 }
 
 .navio-texto {
-    font-size: .82rem;
-    color: #e2e8f0;
+    font-size: .75rem;
+    color: #d1d5db;
     line-height: 1.4;
+    margin-top: 3px;
 }
 
 .navio-vazio {
-    padding: 18px;
-    text-align: center;
-    color: #94a3b8;
-    font-size: .8rem;
-}
-
-.navios-erro {
-    padding: 15px;
-    border-radius: 7px;
-    background: rgba(239,68,68,.12);
-    border: 1px solid rgba(239,68,68,.4);
-    color: #fca5a5;
-    font-size: .82rem;
+    color: #64748b;
+    font-size: .78rem;
+    padding: 10px 0;
 }
 
 @media (max-width: 700px) {
-    .navios-colunas {
+    .mov-grid {
         grid-template-columns: 1fr;
     }
 }
@@ -1218,26 +1217,64 @@ async function consultarPortarias() {
 
 <div id="movimentacao-navios">
 
-    <div class="titulo-mov">
-        <h2>
-            <i class="fas fa-ship"></i>
-            Movimentação de Navios — ZP21
-        </h2>
+    <div class="mov-header">
 
-        <button id="btnAtualizarNavios" onclick="carregarMovimentacaoNavios()">
+        <div>
+            <div class="mov-title">
+                <i class="fas fa-ship"></i>
+                Movimentação de Navios — ZP21
+            </div>
+
+            <div class="mov-subtitle">
+                Últimas movimentações e próximas atracações
+            </div>
+        </div>
+
+        <button id="btnAtualizarNavios"
+                onclick="atualizarMovimentacaoNavios()">
             <i class="fas fa-sync-alt"></i>
             Atualizar
         </button>
+
     </div>
 
-    <div id="navios-atualizacao" class="navios-atualizacao">
-        Consultando movimentação...
+    <div id="mov-status" class="mov-status">
+        Clique em "Atualizar" para consultar.
     </div>
 
-    <div id="navios-conteudo">
-        <div class="navio-vazio">
-            Carregando dados da Praticagem...
+    <div class="mov-grid">
+
+        <div class="mov-box realizadas">
+
+            <h3>
+                <i class="fas fa-history"></i>
+                5 últimas realizadas
+            </h3>
+
+            <div id="navios-realizados">
+                <div class="navio-vazio">
+                    Nenhum dado carregado.
+                </div>
+            </div>
+
         </div>
+
+
+        <div class="mov-box proximas">
+
+            <h3>
+                <i class="fas fa-anchor"></i>
+                5 próximas atracações
+            </h3>
+
+            <div id="navios-proximos">
+                <div class="navio-vazio">
+                    Nenhum dado carregado.
+                </div>
+            </div>
+
+        </div>
+
     </div>
 
 </div>
@@ -1245,522 +1282,308 @@ async function consultarPortarias() {
 
 <script>
 
-async function carregarMovimentacaoNavios() {
+async function atualizarMovimentacaoNavios() {
 
-    const botao = document.getElementById('btnAtualizarNavios');
-    const conteudo = document.getElementById('navios-conteudo');
-    const atualizacao = document.getElementById('navios-atualizacao');
+    const botao = document.getElementById("btnAtualizarNavios");
+    const status = document.getElementById("mov-status");
+
+    const realizados = document.getElementById("navios-realizados");
+    const proximos = document.getElementById("navios-proximos");
 
     botao.disabled = true;
 
     botao.innerHTML =
         '<i class="fas fa-spinner fa-spin"></i> Atualizando...';
 
-    atualizacao.textContent =
-        'Consultando Praticagem ZP21...';
+    status.className = "mov-status";
+    status.innerText = "Consultando movimentação de navios...";
 
     try {
 
-        const resposta = await fetch('/api/movimentacao-navios?nocache=' + Date.now(), {
-            method: 'GET',
-            cache: 'no-store',
-            headers: {
-                'Accept': 'application/json'
+        const resposta = await fetch(
+            "/api/movimentacao-navios",
+            {
+                method: "GET",
+                cache: "no-store",
+                headers: {
+                    "Accept": "application/json"
+                }
             }
-        });
+        );
 
-        const textoResposta = await resposta.text();
+        /*
+         * PRIMEIRO verificamos se o servidor realmente
+         * devolveu JSON.
+         */
 
-        console.log('Resposta recebida da API:', textoResposta);
+        const texto = await resposta.text();
+
+        console.log(
+            "Resposta recebida da API:",
+            texto
+        );
 
         if (!resposta.ok) {
+
             throw new Error(
-                'Erro HTTP ' + resposta.status + ': ' + textoResposta.substring(0, 200)
+                "HTTP " +
+                resposta.status +
+                " - " +
+                resposta.statusText
             );
+
         }
 
         let dados;
 
         try {
-            dados = JSON.parse(textoResposta);
+
+            dados = JSON.parse(texto);
+
         } catch (erroJSON) {
 
             console.error(
-                'A API não retornou JSON:',
-                textoResposta
+                "Resposta que não pôde ser convertida:",
+                texto
             );
 
             throw new Error(
-                'A API retornou conteúdo que não é JSON.'
+                "A API não retornou JSON válido."
             );
-        }
-
-        console.log('Objeto JSON:', dados);
-
-
-        /*
-         * ACEITA DIFERENTES FORMATOS
-         *
-         * Formato esperado:
-         *
-         * {
-         *   sucesso: true,
-         *   fonte: "...",
-         *   atualizadoEm: "...",
-         *   registros: [...]
-         * }
-         */
-
-        let registros = null;
-
-
-        if (Array.isArray(dados.registros)) {
-
-            registros = dados.registros;
-
-        }
-
-        /*
-         * Alguns endpoints podem devolver os dados
-         * dentro de "data".
-         */
-
-        else if (Array.isArray(dados.data)) {
-
-            registros = dados.data;
-
-        }
-
-        /*
-         * Ou diretamente como array.
-         */
-
-        else if (Array.isArray(dados)) {
-
-            registros = dados;
 
         }
 
 
         /*
-         * Se não encontrou registros,
-         * mostramos no console exatamente o que chegou.
+         * Verificação da estrutura.
          */
 
-        if (!registros) {
+        if (!dados) {
+
+            throw new Error(
+                "A API retornou uma resposta vazia."
+            );
+
+        }
+
+
+        if (!Array.isArray(dados.registros)) {
 
             console.error(
-                'Estrutura recebida:',
+                "Objeto recebido:",
                 dados
             );
 
             throw new Error(
-                'A API respondeu, mas o JSON recebido não possui uma lista de registros.'
+                'O JSON recebido não possui uma lista "registros".'
             );
 
         }
 
 
         /*
-         * Remove registros completamente vazios.
+         * Pegamos os registros.
          */
 
-        registros = registros.filter(item => {
-
-            if (!item) return false;
-
-            if (typeof item === 'string') {
-                return item.trim() !== '';
-            }
-
-            if (typeof item === 'object') {
-
-                return (
-                    item.texto ||
-                    item.data ||
-                    item.dataHora ||
-                    item.navio ||
-                    item.nome
-                );
-
-            }
-
-            return false;
-
-        });
+        const registros = dados.registros;
 
 
         /*
-         * Normaliza os registros.
+         * Converte o registro em objeto útil.
          */
 
-        const registrosTratados = registros.map((item, indice) => {
+        const lista = registros.map((registro, indice) => {
 
-            /*
-             * Caso o registro seja simplesmente texto.
-             */
+            const textoRegistro =
+                typeof registro === "string"
+                    ? registro
+                    : (registro.texto || "");
 
-            if (typeof item === 'string') {
+            const datas =
+                registro.datas || [];
 
-                return {
-                    indice: indice,
-                    texto: item,
-                    dataHora: extrairDataHora(item)
-                };
-
-            }
-
-
-            /*
-             * Caso seja objeto.
-             */
-
-            let texto =
-                item.texto ||
-                item.descricao ||
-                item.nome ||
-                item.navio ||
-                item.movimentacao ||
-                JSON.stringify(item);
-
+            const horas =
+                registro.horas || [];
 
             let dataHora = null;
 
+            if (datas.length > 0) {
 
-            /*
-             * Primeiro tenta usar data/hora existentes.
-             */
+                let data = datas[0];
 
-            if (item.dataHora) {
+                let hora =
+                    horas.length > 0
+                        ? horas[0]
+                        : "00:00";
 
-                const tentativa =
-                    new Date(item.dataHora);
+                /*
+                 * Converte DD/MM/YYYY para Date.
+                 */
 
-                if (!isNaN(tentativa.getTime())) {
-                    dataHora = tentativa;
-                }
+                const partes = data.split("/");
 
-            }
+                if (partes.length === 3) {
 
-
-            /*
-             * Depois tenta datas + horas.
-             */
-
-            if (!dataHora &&
-                Array.isArray(item.datas) &&
-                item.datas.length > 0) {
-
-                const data = item.datas[0];
-
-                let hora = '';
-
-                if (
-                    Array.isArray(item.horas) &&
-                    item.horas.length > 0
-                ) {
-                    hora = item.horas[0];
-                }
-
-                dataHora =
-                    converterDataHora(data, hora);
-
-            }
-
-
-            /*
-             * Caso exista uma propriedade "data".
-             */
-
-            if (!dataHora && item.data) {
-
-                dataHora =
-                    extrairDataHora(
-                        String(item.data)
+                    dataHora = new Date(
+                        Number(partes[2]),
+                        Number(partes[1]) - 1,
+                        Number(partes[0]),
+                        Number(hora.split(":")[0]) || 0,
+                        Number(hora.split(":")[1]) || 0
                     );
 
-            }
-
-
-            /*
-             * Última tentativa:
-             * procurar data dentro do texto.
-             */
-
-            if (!dataHora) {
-
-                dataHora =
-                    extrairDataHora(texto);
+                }
 
             }
-
 
             return {
+
                 indice: indice,
-                texto: texto,
-                dataHora: dataHora,
-                original: item
+
+                texto: textoRegistro,
+
+                datas: datas,
+
+                horas: horas,
+
+                dataHora: dataHora
+
             };
 
         });
 
 
-        console.log(
-            'Registros tratados:',
-            registrosTratados
-        );
-
-
         /*
-         * DATA/HORA ATUAL
+         * Data/hora atual.
          */
 
         const agora = new Date();
 
 
         /*
-         * PRÓXIMAS MOVIMENTAÇÕES
+         * Separa registros futuros e passados.
          */
 
-        let proximas = registrosTratados
+        const futuros = lista
             .filter(item =>
                 item.dataHora &&
                 item.dataHora >= agora
             )
             .sort((a, b) =>
                 a.dataHora - b.dataHora
-            )
-            .slice(0, 5);
+            );
 
 
-        /*
-         * ÚLTIMAS MOVIMENTAÇÕES
-         */
-
-        let ultimas = registrosTratados
+        const passados = lista
             .filter(item =>
                 item.dataHora &&
                 item.dataHora < agora
             )
             .sort((a, b) =>
                 b.dataHora - a.dataHora
-            )
-            .slice(0, 5);
+            );
 
 
         /*
-         * IMPORTANTE:
-         *
-         * Se a fonte fornecer registros sem data suficiente
-         * para classificação, usamos a ordem recebida.
+         * Caso existam registros sem data interpretável,
+         * mantemos como fallback.
          */
 
-        if (
-            proximas.length === 0 &&
-            ultimas.length === 0
-        ) {
+        if (futuros.length === 0) {
 
-            proximas =
-                registrosTratados.slice(0, 5);
-
-            ultimas =
-                registrosTratados.slice(5, 10);
+            console.warn(
+                "Nenhuma data futura identificada."
+            );
 
         }
 
 
         /*
-         * Monta cada item.
+         * Limita a 5 registros.
          */
 
-        function montarItem(item) {
+        const ultimas = passados.slice(0, 5);
 
-            let dataExibicao = '';
+        const proximasCinco = futuros.slice(0, 5);
 
-            if (item.dataHora) {
 
-                dataExibicao =
-                    item.dataHora.toLocaleString(
-                        'pt-BR',
-                        {
-                            day: '2-digit',
-                            month: '2-digit',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                        }
+        /*
+         * Renderiza os resultados.
+         */
+
+        renderizarNavios(
+            realizados,
+            ultimas,
+            "realizada"
+        );
+
+        renderizarNavios(
+            proximos,
+            proximasCinco,
+            "proxima"
+        );
+
+
+        /*
+         * Data de atualização fornecida pela API.
+         */
+
+        let atualizacao = "";
+
+        if (dados.atualizadoEm) {
+
+            const dataAtualizacao =
+                new Date(dados.atualizadoEm);
+
+            if (!isNaN(dataAtualizacao)) {
+
+                atualizacao =
+                    dataAtualizacao.toLocaleString(
+                        "pt-BR"
                     );
 
             }
 
-
-            /*
-             * Se não conseguimos extrair uma data,
-             * tentamos mostrar datas originais.
-             */
-
-            if (
-                !dataExibicao &&
-                item.original &&
-                Array.isArray(item.original.datas)
-            ) {
-
-                dataExibicao =
-                    item.original.datas.join(' / ');
-
-            }
-
-
-            return `
-                <div class="navio-item">
-
-                    ${
-                        dataExibicao
-                        ?
-                        `<div class="navio-data">
-                            <i class="far fa-calendar-alt"></i>
-                            ${escaparHTML(dataExibicao)}
-                        </div>`
-                        :
-                        ''
-                    }
-
-                    <div class="navio-texto">
-                        ${escaparHTML(item.texto)}
-                    </div>
-
-                </div>
-            `;
-
         }
 
 
-        function montarLista(lista, mensagem) {
+        status.className = "mov-status ok";
 
-            if (!lista.length) {
+        status.innerHTML =
+            `<i class="fas fa-check-circle"></i>
+             Atualizado com sucesso
+             ${atualizacao
+                ? "em " + atualizacao
+                : ""}`;
 
-                return `
-                    <div class="navio-vazio">
-                        ${mensagem}
-                    </div>
-                `;
+    }
 
-            }
-
-            return lista
-                .map(montarItem)
-                .join('');
-
-        }
-
-
-        /*
-         * DESENHA O PAINEL
-         */
-
-        conteudo.innerHTML = `
-
-            <div class="navios-colunas">
-
-                <div class="navios-bloco navios-proximas">
-
-                    <h3>
-                        <i class="fas fa-arrow-right"></i>
-                        Próximas 5 movimentações
-                    </h3>
-
-                    ${montarLista(
-                        proximas,
-                        'Nenhuma próxima movimentação encontrada.'
-                    )}
-
-                </div>
-
-
-                <div class="navios-bloco navios-ultimas">
-
-                    <h3>
-                        <i class="fas fa-check-circle"></i>
-                        5 últimas realizadas
-                    </h3>
-
-                    ${montarLista(
-                        ultimas,
-                        'Nenhuma movimentação anterior encontrada.'
-                    )}
-
-                </div>
-
-            </div>
-
-        `;
-
-
-        /*
-         * DATA DA ATUALIZAÇÃO
-         */
-
-        let dataAtualizacao = '';
-
-        if (dados.atualizadoEm) {
-
-            const data =
-                new Date(dados.atualizadoEm);
-
-            if (!isNaN(data.getTime())) {
-
-                dataAtualizacao =
-                    data.toLocaleString('pt-BR');
-
-            }
-
-        }
-
-        if (!dataAtualizacao) {
-
-            dataAtualizacao =
-                new Date().toLocaleString('pt-BR');
-
-        }
-
-
-        atualizacao.innerHTML =
-            `Última atualização: <strong>${dataAtualizacao}</strong> · Fonte: Praticagem ZP21`;
-
-
-    } catch (erro) {
+    catch (erro) {
 
         console.error(
-            'Erro na movimentação:',
+            "Erro na movimentação:",
             erro
         );
 
-        conteudo.innerHTML = `
+        realizados.innerHTML =
+            `<div class="navio-vazio">
+                Não foi possível carregar os dados.
+             </div>`;
 
-            <div class="navios-erro">
+        proximos.innerHTML =
+            `<div class="navio-vazio">
+                Não foi possível carregar os dados.
+             </div>`;
 
-                <strong>
-                    <i class="fas fa-exclamation-triangle"></i>
-                    Não foi possível atualizar a movimentação.
-                </strong>
+        status.className = "mov-status erro";
 
-                <br><br>
+        status.innerHTML =
+            `<i class="fas fa-exclamation-triangle"></i>
+             ${escapeHTML(erro.message)}`;
 
-                ${escaparHTML(erro.message)}
+    }
 
-                <br><br>
-
-                Abra o console do navegador (F12)
-                para visualizar a resposta recebida da API.
-
-            </div>
-
-        `;
-
-        atualizacao.textContent =
-            'Falha na atualização.';
-
-    } finally {
+    finally {
 
         botao.disabled = false;
 
@@ -1770,6 +1593,95 @@ async function carregarMovimentacaoNavios() {
     }
 
 }
+
+
+/*
+ * Renderização dos navios.
+ */
+
+function renderizarNavios(container, lista, tipo) {
+
+    if (!lista.length) {
+
+        container.innerHTML =
+            `<div class="navio-vazio">
+                Nenhum registro encontrado.
+             </div>`;
+
+        return;
+
+    }
+
+
+    container.innerHTML = "";
+
+    lista.forEach(item => {
+
+        const div =
+            document.createElement("div");
+
+        div.className = "navio-item";
+
+
+        let dataExibicao = "";
+
+        if (item.dataHora) {
+
+            dataExibicao =
+                item.dataHora.toLocaleString(
+                    "pt-BR",
+                    {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit"
+                    }
+                );
+
+        }
+
+
+        div.innerHTML = `
+
+            <div class="navio-data">
+                ${tipo === "proxima"
+                    ? '<i class="fas fa-anchor"></i> '
+                    : '<i class="fas fa-check"></i> '
+                }
+
+                ${escapeHTML(dataExibicao)}
+            </div>
+
+            <div class="navio-texto">
+                ${escapeHTML(item.texto)}
+            </div>
+
+        `;
+
+        container.appendChild(div);
+
+    });
+
+}
+
+
+/*
+ * Proteção contra HTML vindo da página externa.
+ */
+
+function escapeHTML(texto) {
+
+    return String(texto || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+}
+
+</script>
 
 
 /*
