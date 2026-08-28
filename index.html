@@ -1073,5 +1073,576 @@ async function consultarPortarias() {
     
     <script src="calculadora.js"></script>
     <script src="arkanoid.js"></script>
+
+
+
+<!-- ============================================================
+     RELATÓRIO DE MOVIMENTAÇÃO DE NAVIOS - ZP21
+     ============================================================ -->
+
+<style>
+#mov-navios-container {
+    width: 100%;
+    max-width: 1400px;
+    margin: 25px auto;
+    padding: 0 15px;
+    box-sizing: border-box;
+}
+
+.mov-navios-card {
+    background: rgba(15, 23, 42, 0.94);
+    border: 1px solid rgba(0, 191, 255, 0.35);
+    border-top: 4px solid #00bfff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 8px 30px rgba(0,0,0,.35);
+    backdrop-filter: blur(8px);
+    color: white;
+}
+
+.mov-navios-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+}
+
+.mov-navios-titulo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.mov-navios-titulo i {
+    color: #00bfff;
+    font-size: 25px;
+}
+
+.mov-navios-titulo h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 800;
+}
+
+.mov-navios-subtitulo {
+    color: #94a3b8;
+    font-size: .78rem;
+    margin-top: 3px;
+}
+
+#btnAtualizarNavios {
+    border: none;
+    background: linear-gradient(135deg,#0284c7,#00bfff);
+    color: white;
+    font-weight: 700;
+    padding: 10px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: .25s;
+    box-shadow: 0 4px 12px rgba(0,191,255,.25);
+}
+
+#btnAtualizarNavios:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0,191,255,.45);
+}
+
+#btnAtualizarNavios:disabled {
+    opacity: .6;
+    cursor: wait;
+    transform: none;
+}
+
+.mov-navios-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.mov-navios-coluna {
+    background: rgba(30,41,59,.85);
+    border-radius: 9px;
+    overflow: hidden;
+}
+
+.mov-navios-coluna-header {
+    padding: 13px 15px;
+    font-weight: 800;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+.mov-realizadas .mov-navios-coluna-header {
+    color: #4ade80;
+    border-top: 3px solid #22c55e;
+}
+
+.mov-proximas .mov-navios-coluna-header {
+    color: #38bdf8;
+    border-top: 3px solid #00bfff;
+}
+
+.mov-navio-item {
+    padding: 13px 15px;
+    border-bottom: 1px dashed rgba(255,255,255,.1);
+}
+
+.mov-navio-item:last-child {
+    border-bottom: none;
+}
+
+.mov-navio-nome {
+    font-weight: 800;
+    color: white;
+    margin-bottom: 5px;
+}
+
+.mov-navio-info {
+    color: #cbd5e1;
+    font-size: .78rem;
+    line-height: 1.6;
+}
+
+.mov-navio-info strong {
+    color: #94a3b8;
+}
+
+.mov-navios-status {
+    margin-top: 15px;
+    color: #94a3b8;
+    font-size: .72rem;
+    text-align: right;
+}
+
+.mov-loading {
+    padding: 30px;
+    text-align: center;
+    color: #38bdf8;
+}
+
+.mov-loading i {
+    margin-right: 7px;
+}
+
+.mov-erro {
+    padding: 18px;
+    background: rgba(127,29,29,.25);
+    border: 1px solid rgba(248,113,113,.4);
+    border-radius: 8px;
+    color: #fecaca;
+    line-height: 1.6;
+}
+
+.mov-vazio {
+    padding: 20px;
+    text-align: center;
+    color: #94a3b8;
+}
+
+@media(max-width: 700px) {
+    .mov-navios-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .mov-navios-header {
+        align-items: stretch;
+    }
+
+    #btnAtualizarNavios {
+        width: 100%;
+    }
+}
+</style>
+
+<div id="mov-navios-container">
+
+    <div class="mov-navios-card">
+
+        <div class="mov-navios-header">
+
+            <div class="mov-navios-titulo">
+                <i class="fas fa-ship"></i>
+
+                <div>
+                    <h2>Movimentação de Navios — ZP21</h2>
+
+                    <div class="mov-navios-subtitulo">
+                        Últimas e próximas atracações
+                    </div>
+                </div>
+            </div>
+
+            <button id="btnAtualizarNavios"
+                    onclick="atualizarMovimentacaoNavios()">
+
+                <i class="fas fa-sync-alt"></i>
+                Atualizar movimentação
+
+            </button>
+
+        </div>
+
+        <div id="mov-navios-resultado">
+
+            <div class="mov-loading">
+                <i class="fas fa-spinner fa-spin"></i>
+                Carregando movimentação...
+            </div>
+
+        </div>
+
+        <div id="mov-navios-status"
+             class="mov-navios-status">
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+/* ============================================================
+   MOVIMENTAÇÃO DE NAVIOS - ZP21
+   ============================================================ */
+
+async function atualizarMovimentacaoNavios() {
+
+    const botao =
+        document.getElementById('btnAtualizarNavios');
+
+    const resultado =
+        document.getElementById('mov-navios-resultado');
+
+    const status =
+        document.getElementById('mov-navios-status');
+
+    botao.disabled = true;
+
+    botao.innerHTML =
+        '<i class="fas fa-spinner fa-spin"></i> Atualizando...';
+
+    resultado.innerHTML = `
+        <div class="mov-loading">
+            <i class="fas fa-spinner fa-spin"></i>
+            Consultando movimentação da ZP21...
+        </div>
+    `;
+
+    try {
+
+        /*
+         * IMPORTANTE:
+         *
+         * Esta chamada deverá apontar para uma
+         * Cloudflare Function do seu próprio domínio.
+         *
+         * Exemplo:
+         *
+         * /api/movimentacao-navios
+         */
+
+        const response =
+            await fetch('/api/movimentacao-navios', {
+                method: 'GET',
+                cache: 'no-store'
+            });
+
+        if (!response.ok) {
+
+            throw new Error(
+                'Servidor retornou HTTP ' + response.status
+            );
+
+        }
+
+        const dados =
+            await response.json();
+
+        if (!dados || !dados.sucesso) {
+
+            throw new Error(
+                dados?.erro ||
+                'Não foi possível obter os dados.'
+            );
+
+        }
+
+        renderizarMovimentacaoNavios(dados);
+
+        status.innerHTML =
+            'Atualizado em ' +
+            new Date().toLocaleString('pt-BR');
+
+    } catch (erro) {
+
+        console.error(
+            'Erro na movimentação:',
+            erro
+        );
+
+        resultado.innerHTML = `
+
+            <div class="mov-erro">
+
+                <strong>
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Não foi possível atualizar.
+                </strong>
+
+                <br><br>
+
+                ${escapeHtml(erro.message)}
+
+                <br><br>
+
+                Verifique se a função
+                <strong>/api/movimentacao-navios</strong>
+                está publicada no Cloudflare Pages.
+
+            </div>
+
+        `;
+
+        status.innerHTML = '';
+
+    } finally {
+
+        botao.disabled = false;
+
+        botao.innerHTML =
+            '<i class="fas fa-sync-alt"></i> Atualizar movimentação';
+
+    }
+}
+
+
+/* ============================================================
+   RENDERIZAÇÃO
+   ============================================================ */
+
+function renderizarMovimentacaoNavios(dados) {
+
+    const resultado =
+        document.getElementById('mov-navios-resultado');
+
+    const ultimas =
+        Array.isArray(dados.ultimas)
+            ? dados.ultimas.slice(0, 5)
+            : [];
+
+    const proximas =
+        Array.isArray(dados.proximas)
+            ? dados.proximas.slice(0, 5)
+            : [];
+
+
+    let html = `
+        <div class="mov-navios-grid">
+
+            <div class="mov-navios-coluna mov-realizadas">
+
+                <div class="mov-navios-coluna-header">
+                    <i class="fas fa-check-circle"></i>
+                    5 últimas atracações realizadas
+                </div>
+
+    `;
+
+
+    if (ultimas.length === 0) {
+
+        html += `
+            <div class="mov-vazio">
+                Nenhuma atracação encontrada.
+            </div>
+        `;
+
+    } else {
+
+        ultimas.forEach((navio, indice) => {
+
+            html += criarItemNavio(
+                navio,
+                indice + 1
+            );
+
+        });
+
+    }
+
+
+    html += `
+            </div>
+
+            <div class="mov-navios-coluna mov-proximas">
+
+                <div class="mov-navios-coluna-header">
+                    <i class="fas fa-clock"></i>
+                    5 próximas atracações
+                </div>
+
+    `;
+
+
+    if (proximas.length === 0) {
+
+        html += `
+            <div class="mov-vazio">
+                Nenhuma próxima atracação encontrada.
+            </div>
+        `;
+
+    } else {
+
+        proximas.forEach((navio, indice) => {
+
+            html += criarItemNavio(
+                navio,
+                indice + 1
+            );
+
+        });
+
+    }
+
+
+    html += `
+            </div>
+
+        </div>
+    `;
+
+
+    resultado.innerHTML = html;
+}
+
+
+/* ============================================================
+   ITEM DO NAVIO
+   ============================================================ */
+
+function criarItemNavio(navio, numero) {
+
+    const nome =
+        navio.nome ||
+        navio.navio ||
+        navio.name ||
+        'Navio não informado';
+
+    const data =
+        navio.data ||
+        navio.date ||
+        '';
+
+    const hora =
+        navio.hora ||
+        navio.time ||
+        '';
+
+    const operacao =
+        navio.operacao ||
+        navio.operacao ||
+        navio.status ||
+        '';
+
+    const terminal =
+        navio.terminal ||
+        '';
+
+    const sentido =
+        navio.sentido ||
+        navio.movimento ||
+        '';
+
+
+    return `
+
+        <div class="mov-navio-item">
+
+            <div class="mov-navio-nome">
+
+                ${numero}.
+                ${escapeHtml(nome)}
+
+            </div>
+
+            <div class="mov-navio-info">
+
+                ${data ? `
+                    <div>
+                        <strong>Data:</strong>
+                        ${escapeHtml(data)}
+                    </div>
+                ` : ''}
+
+                ${hora ? `
+                    <div>
+                        <strong>Horário:</strong>
+                        ${escapeHtml(hora)}
+                    </div>
+                ` : ''}
+
+                ${operacao ? `
+                    <div>
+                        <strong>Operação:</strong>
+                        ${escapeHtml(operacao)}
+                    </div>
+                ` : ''}
+
+                ${terminal ? `
+                    <div>
+                        <strong>Terminal:</strong>
+                        ${escapeHtml(terminal)}
+                    </div>
+                ` : ''}
+
+                ${sentido ? `
+                    <div>
+                        <strong>Movimento:</strong>
+                        ${escapeHtml(sentido)}
+                    </div>
+                ` : ''}
+
+            </div>
+
+        </div>
+
+    `;
+}
+
+
+/* ============================================================
+   PROTEÇÃO CONTRA HTML INJETADO
+   ============================================================ */
+
+function escapeHtml(valor) {
+
+    return String(valor)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+
+}
+
+
+/* ============================================================
+   CARREGAR AUTOMATICAMENTE AO ABRIR A PÁGINA
+   ============================================================ */
+
+document.addEventListener(
+    'DOMContentLoaded',
+    function() {
+
+        atualizarMovimentacaoNavios();
+
+    }
+);
+
+</script>
+
+    
 </body>
 </html>
