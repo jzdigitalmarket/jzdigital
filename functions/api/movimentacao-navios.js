@@ -446,6 +446,31 @@ CONDIÇÃO DA BARRA
 
 function extrairCondicaoBarra(html, texto) {
 
+    /*
+     * O site publica a condição como imagem sem texto alternativo.
+     * O nome do arquivo é o sinal mais direto e confiável.
+     */
+    if (/barra[-_\s]?impraticavel/i.test(html)) {
+        return {
+            status: "IMPRATICÁVEL",
+            programacaoTBC: true
+        };
+    }
+
+    if (/barra[-_\s]?restrit[ao]/i.test(html)) {
+        return {
+            status: "RESTRITA",
+            programacaoTBC: false
+        };
+    }
+
+    if (/barra[-_\s]?praticavel/i.test(html)) {
+        return {
+            status: "PRATICÁVEL",
+            programacaoTBC: false
+        };
+    }
+
     const conteudo = `${texto} ${html
         .replace(/<script[\s\S]*?<\/script>/gi, " ")
         .replace(/<style[\s\S]*?<\/style>/gi, " ")}`
