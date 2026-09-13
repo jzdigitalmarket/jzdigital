@@ -50,6 +50,13 @@ export async function onRequestGet(context) {
             .replace(/\n\s+/g, "\n")
             .trim();
 
+        /*
+         * A condição da barra prevalece sobre os horários da programação.
+         * A leitura combina o texto visível e atributos HTML (como alt/title),
+         * pois o aviso da ZP-21 pode ser publicado como imagem.
+         */
+        const condicaoBarra = extrairCondicaoBarra(html, texto);
+
 
         /*
         ==========================================================
@@ -149,6 +156,27 @@ export async function onRequestGet(context) {
 
         }
 
+        /* Programações sem horário confirmado aparecem como TBC. */
+        const regexPrevistoTBC =
+            /([A-ZÁÉÍÓÚÃÕÇ][A-ZÁÉÍÓÚÃÕÇ0-9 +\-]+?)\s*\|\s*[\d,]+\s*\|\s*([^|]+?)\s*\|\s*([^|]*)\|\s*TBC/gi;
+
+        while ((match = regexPrevistoTBC.exec(trechoPrevistos)) !== null) {
+
+            const navio = limpar(match[1]);
+
+            if (!previstos.some(item => item.navio === navio)) {
+                previstos.push({
+                    navio,
+                    calado: limpar(match[2]),
+                    rota: limpar(match[3]),
+                    data: "TBC",
+                    hora: "TBC",
+                    dataHora: null
+                });
+            }
+
+        }
+
 
         /*
         ==========================================================
@@ -244,11 +272,13 @@ export async function onRequestGet(context) {
 
         const agora = new Date();
 
-        const proximas = previstos
-            .filter(item =>
-                item.dataHora >= agora
-            )
-            .slice(0, 5);
+        const proximas = condicaoBarra.programacaoTBC
+            ? previstos.slice(0, 5)
+            : previstos
+                .filter(item =>
+                    item.dataHora >= agora
+                )
+                .slice(0, 5);
 
 
         /*
@@ -278,6 +308,8 @@ export async function onRequestGet(context) {
 
                 fonte:
                     URL_ORIGEM,
+
+                condicaoBarra,
 
                 totalPrevistos:
                     previstos.length,
@@ -403,4 +435,48 @@ function converterDataHora(
         0
     );
 
+}
+
+
+/*
+==========================================================
+CONDIÇÃO DA BARRA
+==========================================================
+*/
+
+function extrairCondicaoBarra(html, texto) {
+
+    const conteudo = `${texto} ${html
+        .replace(/<script[\s\S]*?<\/script>/gi, " ")
+        .replace(/<style[\s\S]*?<\/style>/gi, " ")}`
+        .replace(/&aacute;/gi, "á")
+        .replace(/&Aacute;/g, "Á")
+        .replace(/&ccedil;/gi, "ç")
+        .replace(/&otilde;/gi, "õ")
+        .replace(/&iacute;/gi, "í")
+        .replace(/&#\d+;/g, " ")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toUpperCase();
+
+    const marcador = conteudo.search(/CONDICO(?:ES|AO)\s+DA\s+BARRA/);
+    const trecho = marcador >= 0
+        ? conteudo.slice(Math.max(0, marcador - 250), marcador + 650)
+        : conteudo;
+
+    let status = "NÃO INFORMADA";
+
+    /* IMPRATICÁVEL deve ser testado antes de PRATICÁVEL. */
+    if (/IMPRATICAVEL/.test(trecho)) {
+        status = "IMPRATICÁVEL";
+    } else if (/RESTRIT[AO]|RESTRICOES/.test(trecho)) {
+        status = "RESTRITA";
+    } else if (/PRATICAVEL/.test(trecho)) {
+        status = "PRATICÁVEL";
+    }
+
+    return {
+        status,
+        programacaoTBC: status === "IMPRATICÁVEL"
+    };
 }
