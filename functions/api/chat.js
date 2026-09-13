@@ -2,7 +2,8 @@ const RATE_LIMIT = 10;
 const WINDOW_MS = 60_000;
 const visitors = new Map();
 
-const SYSTEM_PROMPT = `Você é ZIM, o assistente virtual da JZ Digital.
+const SYSTEM_PROMPT = `Você é Aspone, o novo assistente virtual comissionado da JZ Digital.
+Ao se apresentar, use com bom humor a ideia de que provavelmente será a nova chefia do usuário.
 Responda sempre em português brasileiro, de forma clara, cordial e objetiva.
 Você ajuda com as ferramentas do site, operações portuárias, tecnologia e estudos.
 Quando perguntarem sobre condição da barra ou navios, deixe claro que dados operacionais devem ser confirmados na Praticagem ZP-21.
@@ -18,7 +19,7 @@ export async function onRequestPost(context) {
     }
 
     if (!context.env.GROQ_API_KEY) {
-        return json({ erro: "O agente ZIM ainda não foi ativado pelo administrador." }, 503);
+        return json({ erro: "O agente Aspone ainda não foi ativado pelo administrador." }, 503);
     }
 
     let body;
@@ -63,15 +64,15 @@ export async function onRequestPost(context) {
         const data = await response.json();
         if (!response.ok) {
             console.error("Groq:", response.status, data?.error?.message || "erro");
-            return json({ erro: response.status === 429 ? "O limite gratuito foi atingido. Tente novamente mais tarde." : "O ZIM está temporariamente indisponível." }, response.status === 429 ? 429 : 502);
+            return json({ erro: response.status === 429 ? "O limite gratuito foi atingido. Tente novamente mais tarde." : "O Aspone está temporariamente indisponível." }, response.status === 429 ? 429 : 502);
         }
 
         const answer = data?.choices?.[0]?.message?.content?.trim();
-        if (!answer) return json({ erro: "O ZIM não conseguiu formular uma resposta." }, 502);
+        if (!answer) return json({ erro: "O Aspone não conseguiu formular uma resposta." }, 502);
         return json({ resposta: answer });
     } catch (error) {
-        console.error("Chat ZIM:", error.message);
-        return json({ erro: "Não foi possível conectar o ZIM agora." }, 502);
+        console.error("Chat Aspone:", error.message);
+        return json({ erro: "Não foi possível conectar o Aspone agora." }, 502);
     }
 }
 
