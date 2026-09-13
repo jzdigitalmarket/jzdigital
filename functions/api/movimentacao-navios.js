@@ -272,13 +272,11 @@ export async function onRequestGet(context) {
 
         const agora = new Date();
 
-        const proximas = condicaoBarra.programacaoTBC
-            ? previstos.slice(0, 5)
-            : previstos
-                .filter(item =>
-                    item.dataHora >= agora
-                )
-                .slice(0, 5);
+        const proximas = previstos
+            .filter(item =>
+                item.dataHora >= agora || item.dataHora === null
+            )
+            .slice(0, 5);
 
 
         /*
