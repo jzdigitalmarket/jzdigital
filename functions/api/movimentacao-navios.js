@@ -445,9 +445,45 @@ CONDIÇÃO DA BARRA
 function extrairCondicaoBarra(html, texto) {
 
     /*
-     * A ZP-21 publica o estado em uma imagem com a classe
-     * "img-condicao-barra". Lemos primeiro essa imagem específica
-     * para não confundir arquivos antigos ou referências ocultas.
+     * A página publica os dados atuais no objeto JavaScript cond_barra
+     * e só depois troca a imagem exibida. Esse objeto é a fonte primária.
+     */
+    const blocoCondicao = html.match(
+        /\bcond_barra\s*=\s*(\[[\s\S]*?\])\s*;/i
+    )?.[1];
+
+    if (blocoCondicao) {
+        try {
+            const dados = JSON.parse(blocoCondicao)?.[0];
+
+            if (dados && dados.condicao_barra) {
+                const codigo = String(dados.condicao_barra);
+                const statusPorCodigo = {
+                    "1": "PRATICÁVEL",
+                    "2": "IMPRATICÁVEL",
+                    "3": "PRATICÁVEL COM RESTRIÇÕES",
+                    "4": "PRATICÁVEL COM RESTRIÇÕES PARA FECHAMENTO",
+                    "5": "PRATICÁVEL COM RESTRIÇÕES PARA ABERTURA"
+                };
+                const status = statusPorCodigo[codigo]
+                    || String(dados.desc_condicao_barra || "NÃO INFORMADA")
+                        .toLocaleUpperCase("pt-BR");
+
+                return {
+                    status,
+                    programacaoTBC: codigo === "2" || /IMPRATIC/i.test(status),
+                    restricao: dados.restricao || "",
+                    menorProfundidade: dados.menor_profundidade || "",
+                    mareAtual: dados.mare_atual || ""
+                };
+            }
+        } catch (erro) {
+            console.warn("Objeto cond_barra inválido:", erro);
+        }
+    }
+
+    /*
+     * Fallback: lê a imagem específica caso a estrutura do objeto mude.
      */
     const tagImagem = html.match(
         /<img\b(?=[^>]*\bclass=["'][^"']*\bimg-condicao-barra\b[^"']*["'])[^>]*>/i
@@ -483,8 +519,7 @@ function extrairCondicaoBarra(html, texto) {
     }
 
     /*
-     * Fallback para eventual mudança de marcação: limita a busca
-     * ao trecho próximo do aviso e mantém a ordem mais específica.
+     * Último fallback textual, limitado ao trecho próximo do aviso.
      */
     const marcadorImagem = html.search(/img-condicao-barra/i);
     const marcadorTexto = texto.search(/COND[IÍ]Ç(?:ÕES|ÃO)\s+DA\s+BARRA/i);
