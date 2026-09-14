@@ -84,17 +84,20 @@
   const note=$("#note");try{note.value=localStorage.getItem("jz-quick-note")||""}catch(e){}
   $("#save-note").addEventListener("click",()=>{try{localStorage.setItem("jz-quick-note",note.value);$("#note-status").textContent="Nota salva neste dispositivo."}catch(e){$("#note-status").textContent="Não foi possível salvar."}setTimeout(()=>$("#note-status").textContent="",2800)});
   const asponePhrases=[
-    "Cheguei por indicação. Surpresos?",
-    "Ponto eletrônico? Que gracinha.",
+    "Cheguei por indicação.",
+    "Ponto eletrônico? Não é parente meu, não.",
     "Meu currículo tem contatos.",
+    "Oi, prazer meu nome é Aspone, novo comissionado.",
     "Competência é só um detalhe.",
     "Concurso? Prefiro convite.",
     "Meu cargo veio com atalho.",
+    "Oi, prazer meu nome é Aspone, novo comissionado.",
     "Meu padrinho já me avaliou.",
     "Trabalhar? Vou consultar a chefia.",
     "Experiência: ser bem relacionado.",
     "Quem estuda espera. Eu assumo.",
     "Meu mérito tem sobrenome.",
+    "Oi, prazer meu nome é Aspone, novo comissionado.",
     "Chefia nova, padrinho antigo.",
     "Horário flexível. Muito flexível.",
     "Responsabilidade não veio no pacote.",
