@@ -445,35 +445,57 @@ CONDIÇÃO DA BARRA
 function extrairCondicaoBarra(html, texto) {
 
     /*
-     * O site publica a condição como imagem sem texto alternativo.
-     * O nome do arquivo é o sinal mais direto e confiável.
+     * A ZP-21 publica o estado em uma imagem com a classe
+     * "img-condicao-barra". Lemos primeiro essa imagem específica
+     * para não confundir arquivos antigos ou referências ocultas.
      */
-    if (/barra[-_\s]?impraticavel/i.test(html)) {
+    const tagImagem = html.match(
+        /<img\b(?=[^>]*\bclass=["'][^"']*\bimg-condicao-barra\b[^"']*["'])[^>]*>/i
+    )?.[0] || "";
+
+    const origemImagem = (
+        tagImagem.match(/\b(?:src|data-src)=["']([^"']+)["']/i)?.[1] || ""
+    )
+        .replace(/&amp;/gi, "&")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase();
+
+    if (/impraticavel/.test(origemImagem)) {
         return {
             status: "IMPRATICÁVEL",
             programacaoTBC: true
         };
     }
 
-    if (/barra[-_\s]?restrit[ao]/i.test(html)) {
+    if (/restric|restrit|condicionad/.test(origemImagem)) {
         return {
-            status: "RESTRITA",
+            status: "PRATICÁVEL COM RESTRIÇÕES",
             programacaoTBC: false
         };
     }
 
-    if (/barra[-_\s]?praticavel/i.test(html)) {
+    if (/praticavel/.test(origemImagem)) {
         return {
             status: "PRATICÁVEL",
             programacaoTBC: false
         };
     }
 
-    const conteudo = `${texto} ${html
-        .replace(/<script[\s\S]*?<\/script>/gi, " ")
-        .replace(/<style[\s\S]*?<\/style>/gi, " ")}`
+    /*
+     * Fallback para eventual mudança de marcação: limita a busca
+     * ao trecho próximo do aviso e mantém a ordem mais específica.
+     */
+    const marcadorImagem = html.search(/img-condicao-barra/i);
+    const marcadorTexto = texto.search(/COND[IÍ]Ç(?:ÕES|ÃO)\s+DA\s+BARRA/i);
+    const base = marcadorImagem >= 0
+        ? html.slice(Math.max(0, marcadorImagem - 800), marcadorImagem + 1600)
+        : marcadorTexto >= 0
+            ? texto.slice(Math.max(0, marcadorTexto - 250), marcadorTexto + 650)
+            : "";
+
+    const trecho = base
         .replace(/&aacute;/gi, "á")
-        .replace(/&Aacute;/g, "Á")
         .replace(/&ccedil;/gi, "ç")
         .replace(/&otilde;/gi, "õ")
         .replace(/&iacute;/gi, "í")
@@ -482,24 +504,29 @@ function extrairCondicaoBarra(html, texto) {
         .replace(/[\u0300-\u036f]/g, "")
         .toUpperCase();
 
-    const marcador = conteudo.search(/CONDICO(?:ES|AO)\s+DA\s+BARRA/);
-    const trecho = marcador >= 0
-        ? conteudo.slice(Math.max(0, marcador - 250), marcador + 650)
-        : conteudo;
-
-    let status = "NÃO INFORMADA";
-
-    /* IMPRATICÁVEL deve ser testado antes de PRATICÁVEL. */
     if (/IMPRATICAVEL/.test(trecho)) {
-        status = "IMPRATICÁVEL";
-    } else if (/RESTRIT[AO]|RESTRICOES/.test(trecho)) {
-        status = "RESTRITA";
-    } else if (/PRATICAVEL/.test(trecho)) {
-        status = "PRATICÁVEL";
+        return {
+            status: "IMPRATICÁVEL",
+            programacaoTBC: true
+        };
+    }
+
+    if (/RESTRIC|RESTRIT|CONDICIONAD/.test(trecho)) {
+        return {
+            status: "PRATICÁVEL COM RESTRIÇÕES",
+            programacaoTBC: false
+        };
+    }
+
+    if (/PRATICAVEL/.test(trecho)) {
+        return {
+            status: "PRATICÁVEL",
+            programacaoTBC: false
+        };
     }
 
     return {
-        status,
-        programacaoTBC: status === "IMPRATICÁVEL"
+        status: "NÃO INFORMADA",
+        programacaoTBC: false
     };
 }
