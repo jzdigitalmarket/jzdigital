@@ -80,16 +80,19 @@ export async function onRequestGet(context) {
         ==========================================================
         */
 
-        const posPrevistos =
-            texto.indexOf("Navios Previstos");
+        const posManobrasPrevistas =
+            texto.indexOf("Manobras previstas");
+
+        const posNaviosAtracados =
+            texto.indexOf("Navios Atracados", posManobrasPrevistas);
 
         const posRealizados =
             texto.indexOf("Manobras Realizadas");
 
 
-        if (posPrevistos === -1) {
+        if (posManobrasPrevistas === -1 || posNaviosAtracados === -1) {
             throw new Error(
-                "A seção 'Navios Previstos' não foi encontrada."
+                "A seção 'Manobras previstas' não foi encontrada."
             );
         }
 
@@ -102,31 +105,21 @@ export async function onRequestGet(context) {
 
         /*
         ==========================================================
-        EXTRAÇÃO DE NAVIOS PREVISTOS
+        EXTRAÇÃO DE MANOBRAS PREVISTAS
         ==========================================================
+
+        DATA | HORÁRIO | MANOBRA | BERÇO | BORDO | NAVIO |
+        ROTA | LOA | BOCA | CALADO | SITUAÇÃO
         */
 
         const trechoPrevistos =
             texto.substring(
-                posPrevistos,
-                posRealizados
+                posManobrasPrevistas,
+                posNaviosAtracados
             );
 
-        /*
-        Procuramos padrões:
-
-        NAVIO | LOA | CALADO | ROTA | DATA - HORA
-
-        Exemplo:
-
-        MSC BARCELONA VI
-        270,40
-        11,50 EK
-        29/08/2026 - 02:00
-        */
-
         const regexPrevisto =
-            /([A-ZÁÉÍÓÚÃÕÇ][A-ZÁÉÍÓÚÃÕÇ0-9 +\-]+?)\s*\|\s*[\d,]+\s*\|\s*([^|]+?)\s*\|\s*([^|]*)\|\s*(\d{2}\/\d{2}\/\d{4})\s*-\s*(\d{2}:\d{2})/g;
+            /(\d{2}\/\d{2}\/\d{4})\s*\|\s*(TBC|\d{2}:\d{2}\s*(?:ETB|ATB|ETS|ATS)?)\s*\|\s*(Entrada|Saída)\s*\|\s*([^|]*)\|\s*([^|]*)\|\s*([^|]+?)\s*\|\s*([^|]*)\|\s*([^|]*)\|\s*([^|]*)\|\s*([^|]*)\|\s*([^\n]+)/gi;
 
         const previstos = [];
 
@@ -134,46 +127,29 @@ export async function onRequestGet(context) {
 
         while ((match = regexPrevisto.exec(trechoPrevistos)) !== null) {
 
+            const horario = limpar(match[2]).toUpperCase();
+            const partesHorario =
+                horario.match(/^(\d{2}:\d{2})(?:\s+([A-Z]{3}))?$/);
+            const hora = partesHorario?.[1] || "TBC";
+
             previstos.push({
-
-                navio: limpar(match[1]),
-
-                calado: limpar(match[2]),
-
-                rota: limpar(match[3]),
-
-                data: match[4],
-
-                hora: match[5],
-
+                data: match[1],
+                hora,
+                tipoHorario: partesHorario?.[2] || "",
+                manobra: limpar(match[3]),
+                berco: limpar(match[4]),
+                bordo: limpar(match[5]),
+                navio: limpar(match[6]),
+                rota: limpar(match[7]),
+                loa: limpar(match[8]),
+                boca: limpar(match[9]),
+                calado: limpar(match[10]),
+                situacao: limpar(match[11]),
                 dataHora:
-                    converterDataHora(
-                        match[4],
-                        match[5]
-                    )
-
+                    hora === "TBC"
+                        ? null
+                        : converterDataHora(match[1], hora)
             });
-
-        }
-
-        /* Programações sem horário confirmado aparecem como TBC. */
-        const regexPrevistoTBC =
-            /([A-ZÁÉÍÓÚÃÕÇ][A-ZÁÉÍÓÚÃÕÇ0-9 +\-]+?)\s*\|\s*[\d,]+\s*\|\s*([^|]+?)\s*\|\s*([^|]*)\|\s*TBC/gi;
-
-        while ((match = regexPrevistoTBC.exec(trechoPrevistos)) !== null) {
-
-            const navio = limpar(match[1]);
-
-            if (!previstos.some(item => item.navio === navio)) {
-                previstos.push({
-                    navio,
-                    calado: limpar(match[2]),
-                    rota: limpar(match[3]),
-                    data: "TBC",
-                    hora: "TBC",
-                    dataHora: null
-                });
-            }
 
         }
 
@@ -253,11 +229,10 @@ export async function onRequestGet(context) {
         ==========================================================
         */
 
-        previstos.sort(
-            (a, b) =>
-                a.dataHora - b.dataHora
-        );
-
+        /*
+         * A tabela da ZP-21 já vem em ordem operacional.
+         * Preservamos essa ordem para que TBC não ultrapasse horários definidos.
+         */
         realizados.sort(
             (a, b) =>
                 b.dataHora - a.dataHora
@@ -266,15 +241,13 @@ export async function onRequestGet(context) {
 
         /*
         ==========================================================
-        5 PRÓXIMAS
+        5 PRÓXIMAS ATRACAÇÕES
         ==========================================================
         */
 
-        const agora = new Date();
-
         const proximas = previstos
             .filter(item =>
-                item.dataHora >= agora || item.dataHora === null
+                item.manobra.toLocaleLowerCase("pt-BR") === "entrada"
             )
             .slice(0, 5);
 
