@@ -1,54 +1,61 @@
-const FONTE = "https://economia.awesomeapi.com.br/json/last/USD-BRL,BTC-BRL,XAU-USD";
+const URL_CAMBIO = "https://open.er-api.com/v6/latest/USD";
+const URL_BITCOIN = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=brl&include_last_updated_at=true";
+const URL_OURO = "https://api.gold-api.com/price/XAU";
 const GRAMAS_POR_ONCA_TROY = 31.1034768;
+
+async function consultar(url) {
+  const resposta = await fetch(url, {
+    headers: {
+      "Accept": "application/json",
+      "User-Agent": "JZ-Digital/1.0"
+    }
+  });
+
+  if (!resposta.ok) {
+    throw new Error(`Fonte indisponível: HTTP ${resposta.status}`);
+  }
+
+  return resposta.json();
+}
 
 export async function onRequestGet() {
   try {
-    const resposta = await fetch(FONTE, {
-      headers: {
-        "Accept": "application/json",
-        "User-Agent": "JZ-Digital/1.0"
-      }
-    });
+    const [cambio, cripto, metal] = await Promise.all([
+      consultar(URL_CAMBIO),
+      consultar(URL_BITCOIN),
+      consultar(URL_OURO)
+    ]);
 
-    if (!resposta.ok) {
-      throw new Error(`Erro ao consultar cotações: HTTP ${resposta.status}`);
-    }
-
-    const dados = await resposta.json();
-    const dolar = Number(dados.USDBRL?.bid);
-    const bitcoin = Number(dados.BTCBRL?.bid);
-    const ouroPorOncaUSD = Number(dados.XAUUSD?.bid);
+    const dolar = Number(cambio.rates?.BRL);
+    const bitcoin = Number(cripto.bitcoin?.brl);
+    const ouroPorOncaUSD = Number(metal.price);
 
     if (![dolar, bitcoin, ouroPorOncaUSD].every(valor => Number.isFinite(valor) && valor > 0)) {
-      throw new Error("A fonte retornou valores incompletos.");
+      throw new Error("As fontes retornaram valores incompletos.");
     }
 
     const ouroPorGramaBRL = (ouroPorOncaUSD * dolar) / GRAMAS_POR_ONCA_TROY;
     const timestamps = [
-      Number(dados.USDBRL?.timestamp),
-      Number(dados.BTCBRL?.timestamp),
-      Number(dados.XAUUSD?.timestamp)
+      Number(cambio.time_last_update_unix) * 1000,
+      Number(cripto.bitcoin?.last_updated_at) * 1000,
+      Date.parse(metal.updatedAt)
     ].filter(Number.isFinite);
-    const atualizadoEm = timestamps.length
-      ? new Date(Math.max(...timestamps) * 1000).toISOString()
-      : new Date().toISOString();
 
     return new Response(JSON.stringify({
       sucesso: true,
-      atualizadoEm,
-      fonte: FONTE,
-      dolar: {
-        valor: dolar,
-        variacaoPercentual: Number(dados.USDBRL?.pctChange || 0)
+      atualizadoEm: timestamps.length
+        ? new Date(Math.max(...timestamps)).toISOString()
+        : new Date().toISOString(),
+      fontes: {
+        cambio: URL_CAMBIO,
+        bitcoin: URL_BITCOIN,
+        ouro: URL_OURO
       },
-      bitcoin: {
-        valor: bitcoin,
-        variacaoPercentual: Number(dados.BTCBRL?.pctChange || 0)
-      },
+      dolar: { valor: dolar },
+      bitcoin: { valor: bitcoin },
       ouro: {
         valorGrama: ouroPorGramaBRL,
-        valorOncaUSD: ouroPorOncaUSD,
-        variacaoPercentual: Number(dados.XAUUSD?.pctChange || 0)
+        valorOncaUSD: ouroPorOncaUSD
       }
     }), {
       status: 200,
