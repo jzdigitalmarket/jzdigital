@@ -241,15 +241,16 @@ export async function onRequestGet(context) {
 
         /*
         ==========================================================
-        5 PRÓXIMAS ATRACAÇÕES
+        5 PRÓXIMAS MANOBRAS (ENTRADAS E SAÍDAS)
         ==========================================================
         */
 
-        const proximas = previstos
-            .filter(item =>
-                item.manobra.toLocaleLowerCase("pt-BR") === "entrada"
-            )
-            .slice(0, 5);
+        /*
+         * A lista deve reproduzir a ordem operacional publicada pela ZP-21.
+         * Não filtramos apenas entradas, pois saídas como ATS/ETS também são
+         * próximas manobras e precisam aparecer no painel.
+         */
+        const proximas = previstos.slice(0, 5);
 
 
         /*
@@ -288,6 +289,10 @@ export async function onRequestGet(context) {
                 totalRealizados:
                     realizados.length,
 
+                proximasManobras:
+                    proximas,
+
+                /* Compatibilidade com versões anteriores do painel. */
                 proximasAtracacoes:
                     proximas,
 
