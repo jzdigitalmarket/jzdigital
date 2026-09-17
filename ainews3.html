@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI & Robotics Technical Radar</title>
+  <title>Radar Portuário — JZ Digital</title>
   <style>
     * {
       box-sizing: border-box;
@@ -16,11 +16,10 @@
       background-color: #050811;
       
       /* Background com fallback seguro */
-      background: 
-        radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.15) 0%, transparent 70%),
-        radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
-        linear-gradient(rgba(5, 8, 17, 0.85), rgba(5, 8, 17, 0.85)),
-        url('backai.avif') center/cover no-repeat fixed #050811;
+      background:
+        radial-gradient(circle at 15% 0%, rgba(14, 165, 233, 0.2) 0%, transparent 45%),
+        radial-gradient(circle at 90% 85%, rgba(20, 184, 166, 0.12) 0%, transparent 42%),
+        linear-gradient(145deg, #03101c, #071827 55%, #04111d);
 
       color: #f8fafc;
       min-height: 100vh;
@@ -257,7 +256,7 @@
     }
 
     /* Tag especial para Reddit/Bluesky */
-    .news-source-tag.social {
+    .news-source-tag.global {
       color: #a855f7;
       background-color: rgba(168, 85, 247, 0.12);
       border-color: rgba(168, 85, 247, 0.25);
@@ -297,16 +296,16 @@
   <div class="widget-container">
     <div class="widget-header">
       <div class="header-left">
-        <h2 class="widget-title">AI & Robotics Radar</h2>
-        <span id="status" class="status-meta">Initializing feed scanners...</span>
+        <h2 class="widget-title">Radar Portuário</h2>
+        <span id="status" class="status-meta">Preparando fontes portuárias...</span>
       </div>
 
       <div class="tabs-navigation">
-        <button class="tab-btn active" onclick="switchTab('blogs-tab', this)">
-          <span>📡</span> Blogs & Papers
+        <button class="tab-btn active" onclick="switchTab('brasil-tab', this)">
+          <span>⚓</span> Brasil e Regulação
         </button>
-        <button class="tab-btn" onclick="switchTab('social-tab', this)">
-          <span>💬</span> Social & Reddit
+        <button class="tab-btn" onclick="switchTab('global-tab', this)">
+          <span>🌐</span> Portos e Tecnologia
         </button>
       </div>
 
@@ -315,152 +314,186 @@
           <path d="M21.5 2v6h-6M2.5 22v-6h6"></path>
           <path d="M2 11.5a10 10 0 0 1 18.8-4.3L21.5 8M2.5 16l1 1a10 10 0 0 0 18.8-4.3"></path>
         </svg>
-        Sync
+        Atualizar
       </button>
     </div>
 
-    <!-- ABA 1: RSS BLOGS & PAPERS -->
-    <div id="blogs-tab" class="tab-content active">
-      <div class="news-scroll-area" id="blogs-container"></div>
+    <div id="brasil-tab" class="tab-content active">
+      <div class="news-scroll-area" id="brasil-container"></div>
     </div>
 
-    <!-- ABA 2: BLUESKY & REDDIT -->
-    <div id="social-tab" class="tab-content">
-      <div class="news-scroll-area" id="social-container"></div>
+    <div id="global-tab" class="tab-content">
+      <div class="news-scroll-area" id="global-container"></div>
     </div>
   </div>
 
   <script>
-    // Feeds de Artigos, Blogs e Pesquisas
-    const BLOG_FEEDS = [
-      { name: 'ArXiv (AI & RO)', url: 'https://rss.arxiv.org/rss/cs.AI+cs.RO' },
-      { name: 'IEEE Spectrum RO', url: 'https://spectrum.ieee.org/feeds/topic/robotics.rss' },
-      { name: 'IEEE Spectrum AI', url: 'https://spectrum.ieee.org/feeds/topic/artificial-intelligence.rss' },
-      { name: 'NVIDIA Tech Blog', url: 'https://developer.nvidia.com/blog/feed/' },
-      { name: 'Google DeepMind', url: 'https://deepmind.google/blog/rss.xml' },
-      { name: 'OpenAI Blog', url: 'https://openai.com/news/rss.xml' },
-      { name: 'MIT Tech Review', url: 'https://www.technologyreview.com/feed/' },
-      { name: 'The Robot Report', url: 'https://www.therobotreport.com/feed/' },
-      { name: 'Hugging Face', url: 'https://huggingface.co/blog/feed.xml' },
-      { name: 'Robohub', url: 'https://robohub.org/feed/' }
+    const BRASIL_FEEDS = [
+      { name: 'Itajaí e Navegantes', url: 'https://news.google.com/rss/search?q=%22porto+de+Itaja%C3%AD%22+OR+Portonave+OR+%22porto+de+Navegantes%22&hl=pt-BR&gl=BR&ceid=BR:pt-419' },
+      { name: 'ANTAQ e Regulação', url: 'https://news.google.com/rss/search?q=ANTAQ+portos+OR+%22regula%C3%A7%C3%A3o+portu%C3%A1ria%22&hl=pt-BR&gl=BR&ceid=BR:pt-419' },
+      { name: 'Portos do Brasil', url: 'https://news.google.com/rss/search?q=%22portos+brasileiros%22+OR+%22setor+portu%C3%A1rio%22&hl=pt-BR&gl=BR&ceid=BR:pt-419' },
+      { name: 'Aduana e Receita', url: 'https://news.google.com/rss/search?q=%22Receita+Federal%22+portos+OR+aduana+portu%C3%A1ria&hl=pt-BR&gl=BR&ceid=BR:pt-419' },
+      { name: 'Ministério de Portos', url: 'https://news.google.com/rss/search?q=%22Minist%C3%A9rio+de+Portos+e+Aeroportos%22+portos&hl=pt-BR&gl=BR&ceid=BR:pt-419' }
     ];
 
-    // Feeds do Bluesky e Subreddits
-    const SOCIAL_FEEDS = [
-      { name: 'r/robotics', url: 'https://www.reddit.com/r/robotics/.rss' },
-      { name: 'r/MachineLearning', url: 'https://www.reddit.com/r/MachineLearning/.rss' },
-      { name: 'r/ArtificialInteligence', url: 'https://www.reddit.com/r/ArtificialInteligence/.rss' },
-      // Bluesky Feed RSS Nativo (Exemplo: Feed da conta bsky.app)
-      { name: 'Bluesky AI', url: 'https://bsky.app/profile/did:plc:z72i7hdynmk6p2gophli36tl/rss' }
+    const GLOBAL_FEEDS = [
+      { name: 'Portos e Terminais', url: 'https://news.google.com/rss/search?q=ports+terminals+shipping&hl=pt-BR&gl=BR&ceid=BR:pt-419' },
+      { name: 'Tecnologia Portuária', url: 'https://news.google.com/rss/search?q=%22port+technology%22+OR+%22port+automation%22&hl=pt-BR&gl=BR&ceid=BR:pt-419' },
+      { name: 'Logística Marítima', url: 'https://news.google.com/rss/search?q=%22maritime+logistics%22+OR+shipping+ports&hl=pt-BR&gl=BR&ceid=BR:pt-419' },
+      { name: 'gCaptain', url: 'https://gcaptain.com/feed/' }
     ];
 
-    const BANNED_TERMS = [
-      'government', 'politics', 'election', 'congress', 'senate', 'legislation', 
-      'lawsuit', 'copyright', 'union', 'bias', 'diversity', 'inclusion', 
-      'ethics committee', 'biden', 'trump', 'white house', 'eu act'
+    const PORT_TERMS = [
+      'porto', 'portuár', 'terminal', 'antaq', 'aduana', 'alfândega',
+      'navio', 'marítim', 'cabotagem', 'dragagem', 'contêiner', 'container',
+      'logística', 'shipping', 'vessel', 'berth', 'harbor', 'freight'
     ];
 
     const RSS2JSON_ENDPOINT = 'https://api.rss2json.com/v1/api.json?rss_url=';
-    let currentTab = 'blogs-tab';
+    let currentTab = 'brasil-tab';
 
     function switchTab(tabId, btnElement) {
       document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-
       document.getElementById(tabId).classList.add('active');
       btnElement.classList.add('active');
       currentTab = tabId;
     }
 
-    function extractThumbnail(item) {
-      if (item.thumbnail && item.thumbnail.startsWith('http')) return item.thumbnail;
-      if (item.enclosure && item.enclosure.link && item.enclosure.link.startsWith('http')) return item.enclosure.link;
-      
-      if (item.description) {
-        const imgMatch = item.description.match(/<img[^>]+src=["']([^"']+)["']/i);
-        if (imgMatch && imgMatch[1]) return imgMatch[1];
-      }
-      return null;
+    function escapeHTML(value = '') {
+      return String(value).replace(/[&<>"']/g, char => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      })[char]);
     }
 
-    async function fetchSingleFeed(feed, isSocial = false) {
+    function safeUrl(value) {
       try {
-        const response = await fetch(`${RSS2JSON_ENDPOINT}${encodeURIComponent(feed.url)}`);
-        const data = await response.json();
+        const url = new URL(value);
+        return ['http:', 'https:'].includes(url.protocol) ? url.href : '#';
+      } catch {
+        return '#';
+      }
+    }
 
-        if (data.status === 'ok') {
-          return data.items.map(item => ({
-            source: feed.name,
-            title: item.title,
-            link: item.link,
-            pubDate: new Date(item.pubDate),
-            snippet: item.description ? item.description.replace(/<[^>]*>?/gm, '').replace(/^Abstract:\s*/i, '').trim() : '',
-            thumbnail: extractThumbnail(item),
-            isSocial: isSocial
-          }));
-        }
-        return [];
-      } catch (error) {
+    function extractThumbnail(item) {
+      if (item.thumbnail && item.thumbnail.startsWith('http')) return safeUrl(item.thumbnail);
+      if (item.enclosure?.link?.startsWith('http')) return safeUrl(item.enclosure.link);
+      const match = item.description?.match(/<img[^>]+src=["']([^"']+)["']/i);
+      return match?.[1] ? safeUrl(match[1]) : null;
+    }
+
+    async function fetchSingleFeed(feed, isGlobal = false) {
+      try {
+        const response = await fetch(`${RSS2JSON_ENDPOINT}${encodeURIComponent(feed.url)}`, { cache: 'no-store' });
+        if (!response.ok) return [];
+        const data = await response.json();
+        if (data.status !== 'ok' || !Array.isArray(data.items)) return [];
+
+        return data.items.map(item => ({
+          source: feed.name,
+          title: item.title || 'Notícia portuária',
+          link: safeUrl(item.link),
+          pubDate: new Date(item.pubDate),
+          snippet: item.description
+            ? item.description.replace(/<[^>]*>?/gm, '').replace(/\s+/g, ' ').trim()
+            : '',
+          thumbnail: extractThumbnail(item),
+          isGlobal
+        }));
+      } catch {
         return [];
       }
     }
 
-    function isTechnicalContent(article) {
-      const fullText = `${article.title} ${article.snippet}`.toLowerCase();
-      return !BANNED_TERMS.some(term => fullText.includes(term));
+    function isPortContent(article) {
+      const text = `${article.title} ${article.snippet}`.toLocaleLowerCase('pt-BR');
+      return PORT_TERMS.some(term => text.includes(term));
+    }
+
+    function uniqueArticles(articles) {
+      const seen = new Set();
+      return articles.filter(article => {
+        const key = article.title.toLocaleLowerCase('pt-BR').replace(/\s+/g, ' ').trim();
+        if (!key || seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
     }
 
     function renderArticles(articles, containerId) {
       const container = document.getElementById(containerId);
-      if (articles.length === 0) {
-        container.innerHTML = '<div style="color: #64748b; padding: 1rem; text-align: center;">No updates found.</div>';
+      if (!articles.length) {
+        container.innerHTML = '<div style="color:#64748b;padding:1rem;text-align:center;">Nenhuma atualização portuária encontrada no momento.</div>';
         return;
       }
 
-      container.innerHTML = articles.map(article => `
-        <a href="${article.link}" target="_blank" rel="noopener noreferrer" class="news-item">
-          <div class="news-thumb-wrapper">
-            ${article.thumbnail 
-              ? `<img src="${article.thumbnail}" class="news-thumb" alt="Thumbnail" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                 <div class="news-thumb-placeholder" style="display:none;">${article.isSocial ? '💬' : '⚡'}</div>`
-              : `<div class="news-thumb-placeholder">${article.isSocial ? '💬' : '⚡'}</div>`
-            }
-          </div>
-          <div class="news-content">
-            <div>
-              <div class="news-item-header">
-                <span class="news-source-tag ${article.isSocial ? 'social' : ''}">${article.source}</span>
-                <span class="news-date">${article.pubDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
-              </div>
-              <div class="news-item-title">${article.title}</div>
+      container.innerHTML = articles.map(article => {
+        const title = escapeHTML(article.title);
+        const source = escapeHTML(article.source);
+        const snippet = escapeHTML(article.snippet);
+        const link = safeUrl(article.link);
+        const thumbnail = article.thumbnail ? safeUrl(article.thumbnail) : null;
+        const date = Number.isNaN(article.pubDate.getTime())
+          ? 'Data não informada'
+          : article.pubDate.toLocaleDateString('pt-BR', {
+              day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
+            });
+
+        return `
+          <a href="${link}" target="_blank" rel="noopener noreferrer" class="news-item">
+            <div class="news-thumb-wrapper">
+              ${thumbnail
+                ? `<img src="${thumbnail}" class="news-thumb" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+                   <div class="news-thumb-placeholder" style="display:none;">${article.isGlobal ? '🌐' : '⚓'}</div>`
+                : `<div class="news-thumb-placeholder">${article.isGlobal ? '🌐' : '⚓'}</div>`
+              }
             </div>
-            ${article.snippet ? `<div class="news-item-snippet">${article.snippet}</div>` : ''}
-          </div>
-        </a>
-      `).join('');
+            <div class="news-content">
+              <div>
+                <div class="news-item-header">
+                  <span class="news-source-tag ${article.isGlobal ? 'global' : ''}">${source}</span>
+                  <span class="news-date">${date}</span>
+                </div>
+                <div class="news-item-title">${title}</div>
+              </div>
+              ${snippet ? `<div class="news-item-snippet">${snippet}</div>` : ''}
+            </div>
+          </a>
+        `;
+      }).join('');
     }
 
     async function loadAllNews() {
-      const statusElement = document.getElementById('status');
-      const refreshBtn = document.getElementById('refresh-btn');
+      const status = document.getElementById('status');
+      const button = document.getElementById('refresh-btn');
+      button.classList.add('spin');
+      button.disabled = true;
+      status.textContent = 'Consultando notícias, normas e operações portuárias...';
 
-      refreshBtn.classList.add('spin');
-      statusElement.textContent = 'Syncing network feeds...';
+      try {
+        const [brasilResults, globalResults] = await Promise.all([
+          Promise.all(BRASIL_FEEDS.map(feed => fetchSingleFeed(feed, false))),
+          Promise.all(GLOBAL_FEEDS.map(feed => fetchSingleFeed(feed, true)))
+        ]);
 
-      // Carrega Blogs e Social em paralelo
-      const [blogResults, socialResults] = await Promise.all([
-        Promise.all(BLOG_FEEDS.map(f => fetchSingleFeed(f, false))),
-        Promise.all(SOCIAL_FEEDS.map(f => fetchSingleFeed(f, true)))
-      ]);
+        const brasil = uniqueArticles(brasilResults.flat().filter(isPortContent))
+          .sort((a, b) => b.pubDate - a.pubDate)
+          .slice(0, 40);
+        const global = uniqueArticles(globalResults.flat().filter(isPortContent))
+          .sort((a, b) => b.pubDate - a.pubDate)
+          .slice(0, 40);
 
-      const filteredBlogs = blogResults.flat().filter(isTechnicalContent).sort((a, b) => b.pubDate - a.pubDate).slice(0, 35);
-      const filteredSocial = socialResults.flat().filter(isTechnicalContent).sort((a, b) => b.pubDate - a.pubDate).slice(0, 35);
-
-      renderArticles(filteredBlogs, 'blogs-container');
-      renderArticles(filteredSocial, 'social-container');
-
-      refreshBtn.classList.remove('spin');
-      statusElement.textContent = `${filteredBlogs.length + filteredSocial.length} signals active`;
+        renderArticles(brasil, 'brasil-container');
+        renderArticles(global, 'global-container');
+        status.textContent = `${brasil.length + global.length} atualizações portuárias encontradas`;
+      } catch {
+        status.textContent = 'Não foi possível atualizar todas as fontes agora.';
+        renderArticles([], 'brasil-container');
+        renderArticles([], 'global-container');
+      } finally {
+        button.classList.remove('spin');
+        button.disabled = false;
+      }
     }
 
     document.addEventListener('DOMContentLoaded', loadAllNews);
