@@ -1,7 +1,8 @@
 // Cloudflare Pages Function -> rota /api/gemini
 // Requer a variável de ambiente GEMINI_API_KEY (Pages > Settings > Environment variables)
 
-const MODELO = "gemini-2.5-flash"; // confirme o nome atual na documentação do Gemini
+// Modelo padrão; para trocar sem editar o código, crie GEMINI_MODEL nas variáveis do Pages
+const MODELO_PADRAO = "gemini-3.8-flash";
 const LIMITE = 20000; // caracteres
 
 const INSTRUCOES = {
@@ -37,7 +38,7 @@ export async function onRequestPost({ request, env }) {
       return json({ error: `Texto muito longo (máx. ${LIMITE} caracteres). Selecione um trecho.` }, 413);
 
     const r = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${MODELO}:generateContent`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${env.GEMINI_MODEL || MODELO_PADRAO}:generateContent`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY },
