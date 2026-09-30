@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JZ Editor Profissional</title>
+<style>
+:root{--pastel-lavender:#E8E8F8;--pastel-peach:#FFE5D9;--pastel-mint:#E2F0D9;--pastel-rose:#FFE3E3;--pastel-sky:#E4F1FE;--pastel-lemon:#FFF3CD;--pastel-lilac:#F3E5F5;--pastel-cream:#FAF9F6;--pastel-aqua:#E0F2F1;--pastel-sand:#F4EAE1}
+html,body{height:100vh;height:100dvh;margin:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;padding:20px clamp(12px,5vw,5cm);display:flex;flex-direction:column;box-sizing:border-box;transition:background-color .3s,color .3s}
+.toolbar{width:100%;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px;flex-wrap:wrap}
+.toolbar-group{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+select,button{padding:8px 12px;border-radius:6px;border:1px solid rgba(0,0,0,.15);background:rgba(255,255,255,.85);cursor:pointer;font-size:14px;font-weight:500}
+button:hover,select:hover{background:#fff}
+button:disabled{opacity:.5;cursor:wait}
+button:focus-visible,select:focus-visible{outline:2px solid #5b6ee1;outline-offset:2px}
+#findReplacePanel{width:100%;display:none;background:rgba(255,255,255,.9);padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,.15);margin-bottom:10px;gap:8px;align-items:center;box-sizing:border-box;flex-wrap:wrap}
+#findReplacePanel input{padding:6px 10px;border-radius:4px;border:1px solid #ccc;font-size:14px;flex:1;min-width:120px}
+.editor-layout{flex:1;min-height:0;display:grid;grid-template-columns:24px 1fr;grid-template-rows:22px 1fr;background:rgba(255,255,255,.4);border-radius:12px;border:1px solid rgba(0,0,0,.1);box-shadow:0 4px 12px rgba(0,0,0,.05);overflow:hidden;box-sizing:border-box}
+.ruler-corner{grid-column:1;grid-row:1;background:rgba(0,0,0,.05);border-right:1px solid rgba(0,0,0,.1);border-bottom:1px solid rgba(0,0,0,.1)}
+.ruler{position:relative;overflow:hidden;background-color:rgba(0,0,0,.03);background-repeat:repeat-x}
+.ruler span{position:absolute;font-size:8px;color:rgba(0,0,0,.6)}
+.ruler-horizontal{grid-column:2;grid-row:1;border-bottom:1px solid rgba(0,0,0,.1);background-image:linear-gradient(to right,rgba(0,0,0,.3) 1px,transparent 1px),linear-gradient(to right,rgba(0,0,0,.3) 1px,transparent 1px);background-size:10px 5px,50px 10px;background-position:0 100%,0 100%}
+.ruler-horizontal span{top:1px}
+.ruler-vertical{grid-column:1;grid-row:2;border-right:1px solid rgba(0,0,0,.1);background-image:linear-gradient(to bottom,rgba(0,0,0,.3) 1px,transparent 1px),linear-gradient(to bottom,rgba(0,0,0,.3) 1px,transparent 1px);background-size:5px 10px,10px 50px;background-position:100% 0,100% 0;background-repeat:repeat-y}
+.ruler-vertical span{left:1px;writing-mode:vertical-rl}
+#editor{grid-column:2;grid-row:2;width:100%;height:100%;padding:24px;outline:none;overflow-y:auto;box-sizing:border-box;line-height:1.6;font-size:16px;background:transparent}
+#editor:empty::before{content:attr(placeholder);opacity:.5}
+#editor img{max-width:100%;border-radius:8px;margin:10px 0;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.status-bar{width:100%;display:flex;justify-content:space-between;gap:8px;margin-top:8px;font-size:13px;opacity:.75}
+.font-sans{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.font-serif{font-family:Georgia,Cambria,"Times New Roman",Times,serif}
+.font-mono{font-family:SFMono-Regular,Consolas,"Liberation Mono",Menlo,monospace}
+.theme-cream{background-color:var(--pastel-cream);color:#2F2E2D}
+.theme-lavender{background-color:var(--pastel-lavender);color:#2C2C3E}
+.theme-peach{background-color:var(--pastel-peach);color:#3E2C2A}
+.theme-mint{background-color:var(--pastel-mint);color:#253325}
+.theme-rose{background-color:var(--pastel-rose);color:#3E2B2B}
+.theme-sky{background-color:var(--pastel-sky);color:#223344}
+.theme-lemon{background-color:var(--pastel-lemon);color:#3A3520}
+.theme-lilac{background-color:var(--pastel-lilac);color:#332638}
+.theme-aqua{background-color:var(--pastel-aqua);color:#1F3332}
+.theme-sand{background-color:var(--pastel-sand);color:#38302A}
+</style>
+</head>
+<body class="theme-cream font-sans">
+
+<div class="toolbar" id="toolbar">
+  <div class="toolbar-group">
+    <select id="themeSelector" onchange="mudarTema(this.value)" aria-label="Tema">
+      <option value="theme-cream">Creme</option><option value="theme-lavender">Lavanda</option>
+      <option value="theme-peach">Pêssego</option><option value="theme-mint">Menta</option>
+      <option value="theme-rose">Rosa Suave</option><option value="theme-sky">Azul Céu</option>
+      <option value="theme-lemon">Limão</option><option value="theme-lilac">Lilás</option>
+      <option value="theme-aqua">Água Marinha</option><option value="theme-sand">Areia</option>
+    </select>
+    <select id="fontSelector" onchange="mudarFonte(this.value)" aria-label="Fonte">
+      <option value="font-sans">Sans-serif</option><option value="font-serif">Serifada</option><option value="font-mono">Monoespaçada</option>
+    </select>
+  </div>
+  <div class="toolbar-group">
+    <button onclick="formatar('undo')" title="Desfazer">↶</button>
+    <button onclick="formatar('redo')" title="Refazer">↷</button>
+    <button onclick="formatar('bold')" title="Negrito"><b>B</b></button>
+    <button onclick="formatar('italic')" title="Itálico"><i>I</i></button>
+    <button onclick="formatar('formatBlock','H1')">H1</button>
+    <button onclick="formatar('formatBlock','H2')">H2</button>
+    <button onclick="toggleFindReplace()" title="Ctrl+F">🔍 Localizar</button>
+  </div>
+  <div class="toolbar-group">
+    <input type="file" id="fileInput" style="display:none" accept=".html,.htm,.md,.txt" onchange="abrirArquivo(event)">
+    <button onclick="document.getElementById('fileInput').click()">📂 Abrir</button>
+    <button onclick="salvarComo()" title="Ctrl+S">💾 Salvar Como...</button>
+  </div>
+  <div class="toolbar-group">
+    <button class="ia-btn" onclick="chamarIA('corrigir')">✨ Corrigir com IA</button>
+    <button class="ia-btn" onclick="chamarIA('resumir')">📄 Resumir</button>
+  </div>
+</div>
+
+<div id="findReplacePanel">
+  <input type="text" id="findText" placeholder="Localizar palavra..." onkeydown="if(event.key==='Enter')localizarProximo()">
+  <input type="text" id="replaceText" placeholder="Substituir por...">
+  <button onclick="localizarProximo()">Buscar</button>
+  <button onclick="substituirUnico()">Substituir</button>
+  <button onclick="substituirTudo()">Substituir Todos</button>
+  <button onclick="toggleFindReplace()" aria-label="Fechar">✕</button>
+</div>
+
+<div class="editor-layout">
+  <div class="ruler-corner"></div>
+  <div class="ruler ruler-horizontal" id="horizontalRuler"></div>
+  <div class="ruler ruler-vertical" id="verticalRuler"></div>
+  <div id="editor" contenteditable="true" placeholder="Comece a digitar, cole imagens ou arraste arquivos aqui..."></div>
+</div>
+
+<div class="status-bar">
+  <span id="wordCount">Palavras: 0 | Caracteres: 0</span>
+  <span id="saveStatus" role="status">Alterações salvas localmente</span>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const editor = $('editor');
+const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+let msgTimer;
+function msg(texto, ms = 3000) {
+  const s = $('saveStatus');
+  s.innerText = texto;
+  clearTimeout(msgTimer);
+  msgTimer = setTimeout(() => { s.innerText = 'Alterações salvas localmente'; }, ms);
+}
+
+// Remove scripts, handlers on* e javascript: de qualquer HTML externo
+function limpar(html, estrito = false) {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  doc.querySelectorAll('script,style,iframe,object,embed,link,meta,base,form').forEach(n => n.remove());
+  doc.body.querySelectorAll('*').forEach(el => {
+    [...el.attributes].forEach(a => {
+      const n = a.name.toLowerCase(), v = a.value.trim().toLowerCase();
+      const perigoso = n.startsWith('on') || (['href','src','xlink:href'].includes(n) && v.startsWith('javascript:'));
+      if (perigoso || (estrito && ['style','class','id'].includes(n))) el.removeAttribute(a.name);
+    });
+  });
+  return doc.body.innerHTML;
+}
+
+// 1. Inicialização
+window.addEventListener('DOMContentLoaded', () => {
+  const tema = localStorage.getItem('jz_editor_theme') || 'theme-cream';
+  const fonte = localStorage.getItem('jz_editor_font') || 'font-sans';
+  const conteudo = localStorage.getItem('jz_editor_content');
+  $('themeSelector').value = tema;
+  $('fontSelector').value = fonte;
+  document.body.className = `${tema} ${fonte}`;
+  if (conteudo) editor.innerHTML = limpar(conteudo);
+  criarReguas();
+  atualizarEstatisticas();
+  editor.focus();
+});
+
+// Botões da barra não roubam o foco/seleção do editor
+$('toolbar').addEventListener('mousedown', e => { if (e.target.closest('button')) e.preventDefault(); });
+
+// Atalhos
+document.addEventListener('keydown', e => {
+  if (!(e.ctrlKey || e.metaKey)) return;
+  const k = e.key.toLowerCase();
+  if (k === 's') { e.preventDefault(); salvarComo(); }
+  else if (k === 'f') { e.preventDefault(); toggleFindReplace(); }
+});
+
+// 2. Réguas (marcas em CSS, só os números via JS)
+function criarReguas() {
+  const h = $('horizontalRuler'), v = $('verticalRuler');
+  for (let i = 50; i < 3000; i += 50) {
+    h.insertAdjacentHTML('beforeend', `<span style="left:${i - 8}px">${i}</span>`);
+    v.insertAdjacentHTML('beforeend', `<span style="top:${i - 4}px">${i}</span>`);
+  }
+}
+
+// 3. Temas e fontes
+function mudarTema(t) { document.body.className = document.body.className.replace(/theme-\S+/, t); localStorage.setItem('jz_editor_theme', t); }
+function mudarFonte(f) { document.body.className = document.body.className.replace(/font-\S+/, f); localStorage.setItem('jz_editor_font', f); }
+
+// 4. Formatação
+function formatar(cmd, valor = null) { editor.focus(); document.execCommand(cmd, false, valor); salvarAutomatico(); }
+
+// 5. Auto-save (com debounce e tratamento de cota) e estatísticas
+let saveTimer;
+function salvarAutomatico() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    try {
+      localStorage.setItem('jz_editor_content', editor.innerHTML);
+      msg('Salvo automaticamente', 2000);
+    } catch {
+      msg('⚠ Sem espaço local. Use Salvar Como para não perder o texto.', 8000);
+    }
+  }, 400);
+}
+function atualizarEstatisticas() {
+  const t = editor.innerText.trim();
+  $('wordCount').innerText = `Palavras: ${t ? t.split(/\s+/).length : 0} | Caracteres: ${t.length}`;
+}
+editor.addEventListener('input', () => { salvarAutomatico(); atualizarEstatisticas(); });
+
+// 6. Colar e arrastar
+editor.addEventListener('paste', e => {
+  const dt = e.clipboardData;
+  if (!dt) return;
+  e.preventDefault();
+  const img = [...dt.files].find(f => f.type.startsWith('image/'));
+  if (img) return lerImagem(img);
+  const html = dt.getData('text/html');
+  if (html) document.execCommand('insertHTML', false, limpar(html, true));
+  else document.execCommand('insertText', false, dt.getData('text/plain'));
+  atualizarEstatisticas();
+});
+editor.addEventListener('drop', e => {
+  const img = [...(e.dataTransfer?.files || [])].find(f => f.type.startsWith('image/'));
+  if (!img) return; // texto e outros itens seguem o comportamento normal
+  e.preventDefault();
+  posicionarCursor(e.clientX, e.clientY);
+  lerImagem(img);
+});
+function posicionarCursor(x, y) {
+  let r = null;
+  if (document.caretRangeFromPoint) r = document.caretRangeFromPoint(x, y);
+  else if (document.caretPositionFromPoint) {
+    const p = document.caretPositionFromPoint(x, y);
+    if (p) { r = document.createRange(); r.setStart(p.offsetNode, p.offset); r.collapse(true); }
+  }
+  if (r && editor.contains(r.startContainer)) { const s = getSelection(); s.removeAllRanges(); s.addRange(r); }
+}
+// Reduz imagens grandes (máx. 1200px) para não estourar o localStorage
+function lerImagem(file) {
+  const reader = new FileReader();
+  reader.onload = ev => {
+    if (/gif|svg/.test(file.type)) return inserirImagem(ev.target.result);
+    const im = new Image();
+    im.onload = () => {
+      const k = Math.min(1, 1200 / im.width), c = document.createElement('canvas');
+      c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
+      c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+      inserirImagem(c.toDataURL(file.type === 'image/png' ? 'image/webp' : 'image/jpeg', 0.85));
+    };
+    im.onerror = () => inserirImagem(ev.target.result);
+    im.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+function inserirImagem(src) {
+  const img = document.createElement('img');
+  img.src = src;
+  const s = getSelection();
+  if (s.rangeCount && editor.contains(s.anchorNode)) {
+    const r = s.getRangeAt(0);
+    r.deleteContents(); r.insertNode(img);
+    r.setStartAfter(img); r.collapse(true);
+    s.removeAllRanges(); s.addRange(r);
+  } else editor.appendChild(img);
+  salvarAutomatico();
+}
+
+// 7. Localizar / Substituir
+function toggleFindReplace() {
+  const p = $('findReplacePanel'), abrir = p.style.display !== 'flex';
+  p.style.display = abrir ? 'flex' : 'none';
+  if (abrir) $('findText').focus(); else editor.focus();
+}
+function localizarProximo() {
+  const q = $('findText').value;
+  if (!q) return;
+  if (!window.find(q, false, false, true)) msg('Não encontrado', 2000);
+}
+function substituirUnico() {
+  const q = $('findText').value, r = $('replaceText').value;
+  if (!q) return;
+  const s = getSelection();
+  if (s.rangeCount && s.toString() === q && editor.contains(s.anchorNode)) {
+    const rg = s.getRangeAt(0).cloneRange();
+    editor.focus(); s.removeAllRanges(); s.addRange(rg);
+    document.execCommand('insertText', false, r);
+  }
+  localizarProximo();
+}
+function substituirTudo() {
+  const q = $('findText').value, r = $('replaceText').value;
+  if (!q) return;
+  const w = document.createTreeWalker(editor, NodeFilter.SHOW_TEXT), nos = [];
+  while (w.nextNode()) nos.push(w.currentNode);
+  let total = 0;
+  nos.forEach(n => {
+    const partes = n.nodeValue.split(q);
+    if (partes.length > 1) { total += partes.length - 1; n.nodeValue = partes.join(r); }
+  });
+  salvarAutomatico(); atualizarEstatisticas();
+  msg(`${total} substituição(ões)`, 3000);
+}
+
+// 8. Abrir e salvar
+function abrirArquivo(ev) {
+  const f = ev.target.files[0];
+  if (!f) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const txt = e.target.result;
+    editor.innerHTML = /\.html?$/i.test(f.name)
+      ? limpar(txt)
+      : txt.split(/\r?\n/).map(l => `<div>${l ? esc(l) : '<br>'}</div>`).join('');
+    salvarAutomatico(); atualizarEstatisticas();
+  };
+  reader.readAsText(f);
+  ev.target.value = '';
+}
+function salvarComo() {
+  let nome = prompt('Nome do arquivo (.html, .md ou .txt):', 'documento.html');
+  if (!nome) return;
+  const baixo = nome.toLowerCase();
+  let conteudo, mime;
+  if (baixo.endsWith('.md') || baixo.endsWith('.txt')) {
+    conteudo = editor.innerText;
+    mime = baixo.endsWith('.md') ? 'text/markdown' : 'text/plain';
+  } else {
+    if (!baixo.endsWith('.html')) nome += '.html';
+    mime = 'text/html';
+    conteudo = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>${esc(nome)}</title><style>body{font-family:sans-serif;padding:40px;max-width:800px;margin:auto;line-height:1.6}img{max-width:100%;border-radius:8px}</style></head><body>${editor.innerHTML}</body></html>`;
+  }
+  const url = URL.createObjectURL(new Blob([conteudo], { type: mime }));
+  const a = document.createElement('a');
+  a.href = url; a.download = nome;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+}
+
+// 9. IA (Gemini via /api/gemini)
+async function chamarIA(acao) {
+  const sel = getSelection();
+  const temSel = sel.rangeCount && !sel.isCollapsed && editor.contains(sel.anchorNode);
+  const range = temSel ? sel.getRangeAt(0).cloneRange() : null;
+  const textoAlvo = temSel ? sel.toString() : editor.innerText;
+  if (!textoAlvo.trim()) { alert('Selecione um texto ou escreva algo no editor.'); return; }
+
+  const botoes = document.querySelectorAll('.ia-btn');
+  botoes.forEach(b => b.disabled = true);
+  msg('Consultando a IA...', 60000);
+
+  try {
+    const res = await fetch('/api/gemini', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ acao, text: textoAlvo })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.result) throw new Error(data.error || `HTTP ${res.status}`);
+
+    editor.focus();
+    if (range) {
+      sel.removeAllRanges(); sel.addRange(range);
+      document.execCommand('insertText', false, data.result);
+    } else {
+      const p = document.createElement('p'), b = document.createElement('b');
+      p.style.whiteSpace = 'pre-wrap';
+      b.textContent = acao === 'resumir' ? 'Resumo: ' : 'Texto corrigido: ';
+      p.append(b, document.createTextNode(data.result));
+      editor.append(p);
+    }
+    salvarAutomatico(); atualizarEstatisticas();
+    msg('IA aplicada com sucesso!');
+  } catch (e) {
+    console.error(e);
+    msg('Erro da IA: ' + e.message, 8000);
+  } finally {
+    botoes.forEach(b => b.disabled = false);
+  }
+}
+</script>
+</body>
+</html>
