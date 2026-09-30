@@ -1,405 +1,211 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Editor de Texto</title>
-<style>
-  * { box-sizing: border-box; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JZ Editor Minimalista</title>
+    <style>
+        :root {
+            --pastel-lavender: #E8E8F8;
+            --pastel-peach: #FFE5D9;
+            --pastel-mint: #E2F0D9;
+            --pastel-rose: #FFE3E3;
+            --pastel-sky: #E4F1FE;
+            --pastel-lemon: #FFF3CD;
+            --pastel-lilac: #F3E5F5;
+            --pastel-cream: #FAF9F6;
+            --pastel-aqua: #E0F2F1;
+            --pastel-sand: #F4EAE1;
+        }
 
-  html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-    background: #f3f3f3;
-  }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+            transition: background-color 0.3s ease;
+        }
 
-  .editor-wrapper {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    width: 100%;
-    background: #fff;
-    border: 1px solid #d0d0d0;
-  }
+        .toolbar {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
 
-  /* Barra de menu */
-  .menubar {
-    display: flex;
-    align-items: center;
-    gap: 2px;
-    background: #f0f0f0;
-    border-bottom: 1px solid #d0d0d0;
-    padding: 4px 6px;
-    flex-wrap: wrap;
-    font-size: 13px;
-    user-select: none;
-  }
+        select, button {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid rgba(0,0,0,0.15);
+            background: rgba(255,255,255,0.8);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+        }
 
-  .menubar button {
-    background: transparent;
-    border: 1px solid transparent;
-    padding: 5px 10px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 13px;
-    color: #222;
-  }
+        button:hover, select:hover {
+            background: #ffffff;
+        }
 
-  .menubar button:hover {
-    background: #e2e2e2;
-    border-color: #cfcfcf;
-  }
+        #editor {
+            width: 100%;
+            max-width: 800px;
+            height: 75vh;
+            padding: 24px;
+            border-radius: 12px;
+            border: 1px solid rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            outline: none;
+            overflow-y: auto;
+            box-sizing: border-box;
+            line-height: 1.6;
+            font-size: 16px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
 
-  .menubar button:active {
-    background: #d6d6d6;
-  }
+        #editor img {
+            max-width: 100%;
+            border-radius: 8px;
+            margin: 10px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
 
-  .menubar .divider {
-    width: 1px;
-    height: 22px;
-    background: #d0d0d0;
-    margin: 0 4px;
-  }
+        /* Temas Pastéis */
+        .theme-lavender { background-color: var(--pastel-lavender); color: #2C2C3E; }
+        .theme-peach    { background-color: var(--pastel-peach); color: #3E2C2A; }
+        .theme-mint     { background-color: var(--pastel-mint); color: #253325; }
+        .theme-rose     { background-color: var(--pastel-rose); color: #3E2B2B; }
+        .theme-sky      { background-color: var(--pastel-sky); color: #223344; }
+        .theme-lemon    { background-color: var(--pastel-lemon); color: #3A3520; }
+        .theme-lilac    { background-color: var(--pastel-lilac); color: #332638; }
+        .theme-cream    { background-color: var(--pastel-cream); color: #2F2E2D; }
+        .theme-aqua     { background-color: var(--pastel-aqua); color: #1F3332; }
+        .theme-sand     { background-color: var(--pastel-sand); color: #38302A; }
+    </style>
+</head>
+<body class="theme-cream">
 
-  .menubar select {
-    font-size: 13px;
-    padding: 4px 6px;
-    border-radius: 4px;
-    border: 1px solid #cfcfcf;
-    background: #fff;
-    cursor: pointer;
-  }
+    <div class="toolbar">
+        <select id="themeSelector" onchange="mudarTema(this.value)">
+            <option value="theme-cream">Creme (Padrão)</option>
+            <option value="theme-lavender">Lavanda</option>
+            <option value="theme-peach">Pêssego</option>
+            <option value="theme-mint">Menta</option>
+            <option value="theme-rose">Rosa Suave</option>
+            <option value="theme-sky">Azul Céu</option>
+            <option value="theme-lemon">Limão Suave</option>
+            <option value="theme-lilac">Lilás</option>
+            <option value="theme-aqua">Água Marinha</option>
+            <option value="theme-sand">Areia</option>
+        </select>
 
-  .filename-display {
-    margin-left: auto;
-    font-size: 12px;
-    color: #666;
-    padding: 0 8px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 200px;
-  }
+        <button onclick="salvarComo()">💾 Salvar Como...</button>
+    </div>
 
-  /* Área de texto */
-  .editor-area {
-    flex: 1;
-    width: 100%;
-    border: none;
-    outline: none;
-    resize: none;
-    padding: 14px 18px;
-    font-family: 'Consolas', 'Courier New', monospace;
-    font-size: 14px;
-    line-height: 1.6;
-    color: #1a1a1a;
-    background: #ffffff;
-    white-space: pre;
-    overflow: auto;
-    tab-size: 4;
-  }
+    <div id="editor" contenteditable="true" placeholder="Comece a digitar ou cole imagens aqui..."></div>
 
-  .editor-area::placeholder {
-    color: #aaa;
-  }
+    <script>
+        const editor = document.getElementById('editor');
 
-  /* Barra de status */
-  .statusbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #f0f0f0;
-    border-top: 1px solid #d0d0d0;
-    padding: 4px 12px;
-    font-size: 12px;
-    color: #555;
-  }
+        // 1. Gerenciamento de Temas
+        function mudarTema(classeTema) {
+            // Remove classes anteriores do corpo
+            document.body.className = classeTema;
+            localStorage.setItem('jz_editor_theme', classeTema);
+        }
 
-  .statusbar span {
-    white-space: nowrap;
-  }
+        window.addEventListener('DOMContentLoaded', () => {
+            const temaSalvo = localStorage.getItem('jz_editor_theme') || 'theme-cream';
+            document.getElementById('themeSelector').value = temaSalvo;
+            document.body.className = temaSalvo;
+            editor.focus();
+        });
 
-  /* Input de arquivo escondido */
-  #fileInput {
-    display: none;
-  }
+        // 2. Suporte para Colar Imagens (Clipboard)
+        editor.addEventListener('paste', function(e) {
+            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+            
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].type.indexOf('image') === 0) {
+                    e.preventDefault();
+                    const blob = items[i].getAsFile();
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(event) {
+                        inserirImagemNoCursor(event.target.result);
+                    };
+                    
+                    reader.readAsDataURL(blob);
+                    break;
+                }
+            }
+        });
 
-  /* Modo escuro opcional */
-  .dark-mode .editor-wrapper {
-    background: #1e1e1e;
-    border-color: #333;
-  }
-  .dark-mode .menubar {
-    background: #2a2a2a;
-    border-bottom-color: #3a3a3a;
-  }
-  .dark-mode .menubar button {
-    color: #ddd;
-  }
-  .dark-mode .menubar button:hover {
-    background: #3a3a3a;
-    border-color: #444;
-  }
-  .dark-mode .menubar .divider {
-    background: #3a3a3a;
-  }
-  .dark-mode .menubar select {
-    background: #2a2a2a;
-    color: #ddd;
-    border-color: #444;
-  }
-  .dark-mode .filename-display {
-    color: #999;
-  }
-  .dark-mode .editor-area {
-    background: #1e1e1e;
-    color: #e0e0e0;
-  }
-  .dark-mode .statusbar {
-    background: #2a2a2a;
-    border-top-color: #3a3a3a;
-    color: #aaa;
-  }
+        function inserirImagemNoCursor(src) {
+            const img = document.createElement('img');
+            img.src = src;
 
-  @media (max-width: 520px) {
-    .filename-display { display: none; }
-    .menubar button { padding: 5px 7px; }
-  }
-</style>
+            const selection = window.getSelection();
+            if (!selection.rangeCount) return;
+            
+            const range = selection.getRangeAt(0);
+            range.deleteContents();
+            range.insertNode(img);
+            
+            range.setStartAfter(img);
+            range.setEndAfter(img);
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }
+
+        // 3. Função "Salvar Como..."
+        function salvarComo() {
+            let nomeArquivo = prompt('Nome do arquivo (ex: documento.html, arquivo.md ou texto.txt):', 'anotacoes.html');
+            if (!nomeArquivo) return;
+
+            let conteudo = editor.innerHTML;
+            let tipoMime = 'text/html';
+
+            if (nomeArquivo.endsWith('.md') || nomeArquivo.endsWith('.txt')) {
+                conteudo = editor.innerText;
+                tipoMime = nomeArquivo.endsWith('.md') ? 'text/markdown' : 'text/plain';
+            } else {
+                if (!nomeArquivo.endsWith('.html')) nomeArquivo += '.html';
+                // Cria um HTML estruturado mantendo estilos e imagens inseridas
+                conteudo = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>${nomeArquivo}</title>
+    <style>
+        body { font-family: sans-serif; padding: 40px; max-width: 800px; margin: auto; line-height: 1.6; }
+        img { max-width: 100%; border-radius: 8px; }
+    </style>
 </head>
 <body>
+    ${conteudo}
+</body>
+</html>`;
+            }
 
-<div class="editor-wrapper" id="editorWrapper">
-
-  <div class="menubar">
-    <button id="btnNew" title="Novo (Ctrl+N)">Novo</button>
-    <button id="btnOpen" title="Abrir (Ctrl+O)">Abrir</button>
-    <button id="btnSave" title="Salvar (Ctrl+S)">Salvar</button>
-    <div class="divider"></div>
-    <button id="btnUndo" title="Desfazer (Ctrl+Z)">Desfazer</button>
-    <button id="btnRedo" title="Refazer (Ctrl+Y)">Refazer</button>
-    <div class="divider"></div>
-    <button id="btnCut" title="Recortar">Recortar</button>
-    <button id="btnCopy" title="Copiar">Copiar</button>
-    <button id="btnPaste" title="Colar">Colar</button>
-    <div class="divider"></div>
-    <select id="fontSizeSelect" title="Tamanho da fonte">
-      <option value="12">12px</option>
-      <option value="14" selected>14px</option>
-      <option value="16">16px</option>
-      <option value="18">18px</option>
-      <option value="22">22px</option>
-      <option value="28">28px</option>
-    </select>
-    <button id="btnWrap" title="Alternar quebra de linha">Quebra</button>
-    <button id="btnDark" title="Alternar tema claro/escuro">Tema</button>
-    <span class="filename-display" id="fileNameDisplay">sem-titulo.txt</span>
-  </div>
-
-  <textarea
-    id="editorArea"
-    class="editor-area"
-    placeholder="Comece a digitar..."
-    spellcheck="false"
-    autocomplete="off"
-    autocorrect="off"
-  ></textarea>
-
-  <div class="statusbar">
-    <span id="statusInfo">Linha 1, Coluna 1</span>
-    <span id="statusCount">0 caracteres, 0 palavras</span>
-  </div>
-
-</div>
-
-<input type="file" id="fileInput" accept=".txt,.md,.js,.json,.css,.html,.csv,.log,.xml,text/plain">
-
-<script>
-(function () {
-  const textarea = document.getElementById('editorArea');
-  const fileInput = document.getElementById('fileInput');
-  const fileNameDisplay = document.getElementById('fileNameDisplay');
-  const statusInfo = document.getElementById('statusInfo');
-  const statusCount = document.getElementById('statusCount');
-  const wrapper = document.getElementById('editorWrapper');
-
-  let currentFileName = 'sem-titulo.txt';
-  let wrapEnabled = false;
-
-  // ----- Persistência local (auto-save) -----
-  const STORAGE_KEY = 'simpleEditor_content';
-  const STORAGE_NAME_KEY = 'simpleEditor_filename';
-
-  function loadFromStorage() {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      const savedName = localStorage.getItem(STORAGE_NAME_KEY);
-      if (saved !== null) textarea.value = saved;
-      if (savedName) {
-        currentFileName = savedName;
-        fileNameDisplay.textContent = currentFileName;
-      }
-    } catch (e) { /* localStorage indisponível */ }
-  }
-
-  function saveToStorage() {
-    try {
-      localStorage.setItem(STORAGE_KEY, textarea.value);
-      localStorage.setItem(STORAGE_NAME_KEY, currentFileName);
-    } catch (e) { /* ignora */ }
-  }
-
-  let saveTimeout;
-  function scheduleAutoSave() {
-    clearTimeout(saveTimeout);
-    saveTimeout = setTimeout(saveToStorage, 400);
-  }
-
-  // ----- Atualização da barra de status -----
-  function updateStatus() {
-    const text = textarea.value;
-    const cursorPos = textarea.selectionStart;
-    const upToCursor = text.substring(0, cursorPos);
-    const lines = upToCursor.split('\n');
-    const lineNumber = lines.length;
-    const colNumber = lines[lines.length - 1].length + 1;
-
-    statusInfo.textContent = `Linha ${lineNumber}, Coluna ${colNumber}`;
-
-    const charCount = text.length;
-    const wordCount = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
-    statusCount.textContent = `${charCount} caracteres, ${wordCount} palavras`;
-  }
-
-  // ----- Ações de arquivo -----
-  function newFile() {
-    if (textarea.value.length > 0) {
-      const confirmNew = confirm('Criar um novo arquivo? Alterações não salvas serão perdidas.');
-      if (!confirmNew) return;
-    }
-    textarea.value = '';
-    currentFileName = 'sem-titulo.txt';
-    fileNameDisplay.textContent = currentFileName;
-    saveToStorage();
-    updateStatus();
-    textarea.focus();
-  }
-
-  function openFile() {
-    fileInput.click();
-  }
-
-  fileInput.addEventListener('change', function (e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = function (evt) {
-      textarea.value = evt.target.result;
-      currentFileName = file.name;
-      fileNameDisplay.textContent = currentFileName;
-      saveToStorage();
-      updateStatus();
-    };
-    reader.readAsText(file);
-    fileInput.value = '';
-  });
-
-  function saveFile() {
-    const blob = new Blob([textarea.value], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = currentFileName || 'documento.txt';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }
-
-  // ----- Comandos de edição -----
-  function execCmd(command) {
-    textarea.focus();
-    try {
-      document.execCommand(command);
-    } catch (e) { /* navegador pode bloquear copy/cut/paste programático */ }
-  }
-
-  // ----- Eventos dos botões -----
-  document.getElementById('btnNew').addEventListener('click', newFile);
-  document.getElementById('btnOpen').addEventListener('click', openFile);
-  document.getElementById('btnSave').addEventListener('click', saveFile);
-  document.getElementById('btnUndo').addEventListener('click', () => execCmd('undo'));
-  document.getElementById('btnRedo').addEventListener('click', () => execCmd('redo'));
-  document.getElementById('btnCut').addEventListener('click', () => execCmd('cut'));
-  document.getElementById('btnCopy').addEventListener('click', () => execCmd('copy'));
-  document.getElementById('btnPaste').addEventListener('click', () => execCmd('paste'));
-
-  document.getElementById('fontSizeSelect').addEventListener('change', function () {
-    textarea.style.fontSize = this.value + 'px';
-  });
-
-  document.getElementById('btnWrap').addEventListener('click', function () {
-    wrapEnabled = !wrapEnabled;
-    textarea.style.whiteSpace = wrapEnabled ? 'pre-wrap' : 'pre';
-    this.style.background = wrapEnabled ? '#d6d6d6' : '';
-  });
-
-  document.getElementById('btnDark').addEventListener('click', function () {
-    document.body.classList.toggle('dark-mode');
-  });
-
-  // ----- Eventos do textarea -----
-  textarea.addEventListener('input', function () {
-    scheduleAutoSave();
-    updateStatus();
-  });
-  textarea.addEventListener('keyup', updateStatus);
-  textarea.addEventListener('click', updateStatus);
-  textarea.addEventListener('scroll', function () {});
-
-  // ----- Atalhos de teclado -----
-  document.addEventListener('keydown', function (e) {
-    const ctrlOrCmd = e.ctrlKey || e.metaKey;
-    if (!ctrlOrCmd) return;
-
-    if (e.key.toLowerCase() === 's') {
-      e.preventDefault();
-      saveFile();
-    } else if (e.key.toLowerCase() === 'o') {
-      e.preventDefault();
-      openFile();
-    } else if (e.key.toLowerCase() === 'n') {
-      e.preventDefault();
-      newFile();
-    }
-    // Ctrl+Z, Ctrl+Y, Ctrl+C, Ctrl+X, Ctrl+V usam o comportamento nativo do navegador
-  });
-
-  // Suporte a tecla Tab dentro do textarea (insere tabulação em vez de mudar foco)
-  textarea.addEventListener('keydown', function (e) {
-    if (e.key === 'Tab') {
-      e.preventDefault();
-      const start = this.selectionStart;
-      const end = this.selectionEnd;
-      this.value = this.value.substring(0, start) + '\t' + this.value.substring(end);
-      this.selectionStart = this.selectionEnd = start + 1;
-      scheduleAutoSave();
-      updateStatus();
-    }
-  });
-
-  // Aviso antes de sair com alterações (opcional, pode remover se preferir)
-  window.addEventListener('beforeunload', function () {
-    saveToStorage();
-  });
-
-  // ----- Inicialização -----
-  loadFromStorage();
-  updateStatus();
-})();
-</script>
-
+            const blob = new Blob([conteudo], { type: tipoMime });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = nomeArquivo;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+    </script>
 </body>
 </html>
