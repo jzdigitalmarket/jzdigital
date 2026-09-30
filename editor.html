@@ -27,6 +27,7 @@ button:focus-visible,select:focus-visible{outline:2px solid #5b6ee1;outline-offs
 #editor{grid-column:2;grid-row:2;width:100%;height:100%;padding:24px;outline:none;overflow-y:auto;box-sizing:border-box;line-height:1.6;font-size:16px;background:transparent}
 #editor:empty::before{content:attr(placeholder);opacity:.5}
 #editor img{max-width:100%;border-radius:8px;margin:10px 0;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+::highlight(busca){background:#ffd166;color:#000}
 .status-bar{width:100%;display:flex;justify-content:space-between;gap:8px;margin-top:8px;font-size:13px;opacity:.75}
 .font-sans{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
 .font-serif{font-family:Georgia,Cambria,"Times New Roman",Times,serif}
@@ -79,9 +80,10 @@ button:focus-visible,select:focus-visible{outline:2px solid #5b6ee1;outline-offs
 </div>
 
 <div id="findReplacePanel">
-  <input type="text" id="findText" placeholder="Localizar palavra..." onkeydown="if(event.key==='Enter')localizarProximo()">
+  <input type="text" id="findText" placeholder="Localizar palavra..." onkeydown="if(event.key==='Enter'){event.preventDefault();localizarProximo(event.shiftKey)}">
   <input type="text" id="replaceText" placeholder="Substituir por...">
-  <button onclick="localizarProximo()">Buscar</button>
+  <button onclick="localizarProximo(true)">Anterior</button>
+  <button onclick="localizarProximo()">Próximo</button>
   <button onclick="substituirUnico()">Substituir</button>
   <button onclick="substituirTudo()">Substituir Todos</button>
   <button onclick="toggleFindReplace()" aria-label="Fechar">✕</button>
@@ -244,24 +246,63 @@ function inserirImagem(src) {
   salvarAutomatico();
 }
 
-// 7. Localizar / Substituir
+// 7. Localizar / Substituir (busca própria: rola até o trecho e o destaca)
+function limparBusca() { if (window.CSS && CSS.highlights) CSS.highlights.delete('busca'); }
 function toggleFindReplace() {
   const p = $('findReplacePanel'), abrir = p.style.display !== 'flex';
   p.style.display = abrir ? 'flex' : 'none';
-  if (abrir) $('findText').focus(); else editor.focus();
+  if (abrir) $('findText').focus(); else { limparBusca(); editor.focus(); }
 }
-function localizarProximo() {
+function mapaTexto() {
+  const w = document.createTreeWalker(editor, NodeFilter.SHOW_TEXT), nos = [];
+  let texto = '';
+  while (w.nextNode()) { nos.push({ no: w.currentNode, ini: texto.length }); texto += w.currentNode.nodeValue; }
+  return { nos, texto };
+}
+function posNoDoc(nos, off, fim) {
+  for (let i = nos.length - 1; i >= 0; i--) {
+    if (fim ? off > nos[i].ini : off >= nos[i].ini) return [nos[i].no, off - nos[i].ini];
+  }
+  return [nos[0].no, 0];
+}
+function localizarProximo(voltar = false) {
   const q = $('findText').value;
-  if (!q) return;
-  if (!window.find(q, false, false, true)) msg('Não encontrado', 2000);
+  if (!q) return false;
+  const { nos, texto } = mapaTexto();
+  const alvo = q.toLowerCase(), base = texto.toLowerCase();
+  const sel = getSelection();
+  let ini = 0, fimSel = 0;
+  if (sel.rangeCount && editor.contains(sel.getRangeAt(0).commonAncestorContainer)) {
+    const rg = sel.getRangeAt(0), pre = document.createRange();
+    pre.selectNodeContents(editor);
+    pre.setEnd(rg.startContainer, rg.startOffset); ini = pre.toString().length;
+    pre.setEnd(rg.endContainer, rg.endOffset); fimSel = pre.toString().length;
+  }
+  let i = voltar ? (ini > 0 ? base.lastIndexOf(alvo, ini - 1) : -1) : base.indexOf(alvo, fimSel);
+  let volta = false;
+  if (i < 0) { i = voltar ? base.lastIndexOf(alvo) : base.indexOf(alvo); volta = i >= 0; }
+  if (i < 0) { limparBusca(); msg('Não encontrado', 2000); return false; }
+
+  const [n1, o1] = posNoDoc(nos, i, false), [n2, o2] = posNoDoc(nos, i + q.length, true);
+  const r = document.createRange();
+  r.setStart(n1, o1); r.setEnd(n2, o2);
+  sel.removeAllRanges(); sel.addRange(r);
+  if (window.CSS && CSS.highlights && window.Highlight) CSS.highlights.set('busca', new Highlight(r));
+
+  // Rola o editor até o trecho encontrado
+  const rect = r.getClientRects()[0] || r.getBoundingClientRect(), er = editor.getBoundingClientRect();
+  if (rect.top < er.top + 24 || rect.bottom > er.bottom - 24) editor.scrollTop += rect.top - er.top - er.height / 3;
+
+  if (volta) msg(voltar ? 'Voltou ao final do documento' : 'Voltou ao início do documento', 2000);
+  return true;
 }
 function substituirUnico() {
   const q = $('findText').value, r = $('replaceText').value;
   if (!q) return;
   const s = getSelection();
-  if (s.rangeCount && s.toString() === q && editor.contains(s.anchorNode)) {
+  if (s.rangeCount && s.toString().toLowerCase() === q.toLowerCase() && editor.contains(s.getRangeAt(0).commonAncestorContainer)) {
     const rg = s.getRangeAt(0).cloneRange();
-    editor.focus(); s.removeAllRanges(); s.addRange(rg);
+    limparBusca(); editor.focus(); s.removeAllRanges(); s.addRange(rg);
     document.execCommand('insertText', false, r);
   }
   localizarProximo();
@@ -269,14 +310,12 @@ function substituirUnico() {
 function substituirTudo() {
   const q = $('findText').value, r = $('replaceText').value;
   if (!q) return;
+  const re = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
   const w = document.createTreeWalker(editor, NodeFilter.SHOW_TEXT), nos = [];
   while (w.nextNode()) nos.push(w.currentNode);
   let total = 0;
-  nos.forEach(n => {
-    const partes = n.nodeValue.split(q);
-    if (partes.length > 1) { total += partes.length - 1; n.nodeValue = partes.join(r); }
-  });
-  salvarAutomatico(); atualizarEstatisticas();
+  nos.forEach(n => { n.nodeValue = n.nodeValue.replace(re, () => { total++; return r; }); });
+  limparBusca(); salvarAutomatico(); atualizarEstatisticas();
   msg(`${total} substituição(ões)`, 3000);
 }
 
