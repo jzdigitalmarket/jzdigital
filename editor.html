@@ -86,19 +86,61 @@
             flex: 1;
         }
 
-        #editor {
+        /* Estrutura com Réguas e Editor */
+        .editor-layout {
             flex: 1;
-            width: 100%;
-            padding: 24px;
+            display: grid;
+            grid-template-columns: 24px 1fr;
+            grid-template-rows: 22px 1fr;
+            background: rgba(255, 255, 255, 0.4);
             border-radius: 12px;
             border: 1px solid rgba(0,0,0,0.1);
             box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+
+        .ruler-corner {
+            grid-column: 1;
+            grid-row: 1;
+            background: rgba(0,0,0,0.05);
+            border-right: 1px solid rgba(0,0,0,0.1);
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .ruler-horizontal {
+            grid-column: 2;
+            grid-row: 1;
+            background: rgba(0,0,0,0.03);
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ruler-vertical {
+            grid-column: 1;
+            grid-row: 2;
+            background: rgba(0,0,0,0.03);
+            border-right: 1px solid rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        #editor {
+            grid-column: 2;
+            grid-row: 2;
+            width: 100%;
+            height: 100%;
+            padding: 24px;
             outline: none;
             overflow-y: auto;
             box-sizing: border-box;
             line-height: 1.6;
             font-size: 16px;
-            transition: background-color 0.3s ease, color 0.3s ease;
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            transition: color 0.3s ease;
         }
 
         #editor img {
@@ -185,8 +227,13 @@
         <button onclick="toggleFindReplace()">✕</button>
     </div>
 
-    <!-- Área de Edição -->
-    <div id="editor" contenteditable="true" placeholder="Comece a digitar, cole imagens ou arraste arquivos aqui..."></div>
+    <!-- Área com Réguas e Editor -->
+    <div class="editor-layout">
+        <div class="ruler-corner"></div>
+        <div class="ruler-horizontal" id="horizontalRuler"></div>
+        <div class="ruler-vertical" id="verticalRuler"></div>
+        <div id="editor" contenteditable="true" placeholder="Comece a digitar, cole imagens ou arraste arquivos aqui..."></div>
+    </div>
 
     <!-- Barra de Status -->
     <div class="status-bar" id="statusBar">
@@ -209,11 +256,65 @@
             document.body.className = `${temaSalvo} ${fonteSalva}`;
             if (conteudoSalvo) editor.innerHTML = conteudoSalvo;
 
+            criarReguas();
             atualizarEstatisticas();
             editor.focus();
         });
 
-        // 2. Temas e Fontes
+        // 2. Geração Dinâmica das Réguas
+        function criarReguas() {
+            const hRuler = document.getElementById('horizontalRuler');
+            const vRuler = document.getElementById('verticalRuler');
+            
+            hRuler.innerHTML = '';
+            for (let i = 0; i < 3000; i += 10) {
+                const tick = document.createElement('div');
+                tick.style.position = 'absolute';
+                tick.style.left = i + 'px';
+                tick.style.bottom = '0';
+                tick.style.width = '1px';
+                tick.style.height = (i % 50 === 0) ? '10px' : '5px';
+                tick.style.backgroundColor = 'rgba(0,0,0,0.3)';
+                hRuler.appendChild(tick);
+                
+                if (i % 50 === 0 && i > 0) {
+                    const label = document.createElement('span');
+                    label.style.position = 'absolute';
+                    label.style.left = (i - 8) + 'px';
+                    label.style.top = '1px';
+                    label.style.fontSize = '8px';
+                    label.style.color = 'rgba(0,0,0,0.6)';
+                    label.innerText = i;
+                    hRuler.appendChild(label);
+                }
+            }
+
+            vRuler.innerHTML = '';
+            for (let i = 0; i < 3000; i += 10) {
+                const tick = document.createElement('div');
+                tick.style.position = 'absolute';
+                tick.style.top = i + 'px';
+                tick.style.right = '0';
+                tick.style.height = '1px';
+                tick.style.width = (i % 50 === 0) ? '10px' : '5px';
+                tick.style.backgroundColor = 'rgba(0,0,0,0.3)';
+                vRuler.appendChild(tick);
+                
+                if (i % 50 === 0 && i > 0) {
+                    const label = document.createElement('span');
+                    label.style.position = 'absolute';
+                    label.style.top = (i - 4) + 'px';
+                    label.style.left = '1px';
+                    label.style.fontSize = '8px';
+                    label.style.color = 'rgba(0,0,0,0.6)';
+                    label.style.writingMode = 'vertical-rl';
+                    label.innerText = i;
+                    vRuler.appendChild(label);
+                }
+            }
+        }
+
+        // 3. Temas e Fontes
         function mudarTema(tema) {
             document.body.className = document.body.className.replace(/theme-\S+/, tema);
             localStorage.setItem('jz_editor_theme', tema);
@@ -224,14 +325,14 @@
             localStorage.setItem('jz_editor_font', fonte);
         }
 
-        // 3. Formatação Básica
+        // 4. Formatação Básica
         function formatar(comando, valor = null) {
             document.execCommand(comando, false, valor);
             editor.focus();
             salvarAutomatico();
         }
 
-        // 4. Auto-save e Estatísticas
+        // 5. Auto-save e Estatísticas
         editor.addEventListener('input', () => {
             salvarAutomatico();
             atualizarEstatisticas();
@@ -251,7 +352,7 @@
             document.getElementById('wordCount').innerText = `Palavras: ${palavras} | Caracteres: ${caracteres}`;
         }
 
-        // 5. Colar e Arrastar Imagens (Clipboard & Drag/Drop)
+        // 6. Colar e Arrastar Imagens (Clipboard & Drag/Drop)
         editor.addEventListener('paste', handleImageInput);
         editor.addEventListener('drop', (e) => {
             e.preventDefault();
@@ -289,7 +390,7 @@
             salvarAutomatico();
         }
 
-        // 6. Painel Localizar / Substituir
+        // 7. Painel Localizar / Substituir
         function toggleFindReplace() {
             const panel = document.getElementById('findReplacePanel');
             panel.style.display = panel.style.display === 'flex' ? 'none' : 'flex';
@@ -326,7 +427,7 @@
             atualizarEstatisticas();
         }
 
-        // 7. Abrir e Salvar Arquivos
+        // 8. Abrir e Salvar Arquivos
         function abrirArquivo(event) {
             const file = event.target.files[0];
             if (!file) return;
