@@ -473,6 +473,58 @@
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
         }
+
+async function chamarIA(acao) {
+    const editor = document.getElementById('editor');
+    const selection = window.getSelection();
+    const textoAlvo = selection.toString() || editor.innerText;
+
+    if (!textoAlvo.trim()) {
+        alert("Selecione um texto ou escreva algo no editor para usar a IA.");
+        return;
+    }
+
+    let prompt = "";
+    if (acao === 'corrigir') {
+        prompt = "Corrija os erros gramaticais, ortográficos e melhore a fluidez do seguinte texto em português, mantendo o tom original:";
+    } else if (acao === 'resumir') {
+        prompt = "Faça um resumo claro e conciso do seguinte texto:";
+    }
+
+    const status = document.getElementById('saveStatus');
+    status.innerText = "Consultando a IA do Gemini...";
+
+    try {
+        const res = await fetch('/api/gemini', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt, text: textoAlvo })
+        });
+
+        const data = await res.json();
+        
+        if (data.result) {
+            if (selection.toString()) {
+                // Substitui apenas o texto selecionado
+                document.execCommand('insertText', false, data.result);
+            } else {
+                // Se nada estiver selecionado, adiciona no final
+                editor.innerHTML += `<br><br><p><b>Gemini:</b> ${data.result}</p>`;
+            }
+            salvarAutomatico();
+            status.innerText = "IA aplicada com sucesso!";
+        } else {
+            status.innerText = "Erro ao retornar resposta da IA.";
+        }
+    } catch (e) {
+        console.error(e);
+        status.innerText = "Falha na comunicação com a API.";
+    }
+
+    setTimeout(() => { status.innerText = "Alterações salvas localmente"; }, 3000);
+}
+
+        
     </script>
 </body>
 </html>
