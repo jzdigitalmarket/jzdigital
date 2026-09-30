@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JZ Editor Minimalista</title>
+    <title>JZ Editor Profissional</title>
     <style>
         :root {
             --pastel-lavender: #E8E8F8;
@@ -27,25 +27,32 @@
             align-items: center;
             min-height: 100vh;
             box-sizing: border-box;
-            transition: background-color 0.3s ease;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         .toolbar {
             width: 100%;
-            max-width: 800px;
+            max-width: 850px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 12px;
-            gap: 10px;
+            gap: 8px;
             flex-wrap: wrap;
         }
 
-        select, button {
+        .toolbar-group {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        select, button, input[type="file"] {
             padding: 8px 12px;
             border-radius: 6px;
             border: 1px solid rgba(0,0,0,0.15);
-            background: rgba(255,255,255,0.8);
+            background: rgba(255,255,255,0.85);
             cursor: pointer;
             font-size: 14px;
             font-weight: 500;
@@ -55,10 +62,33 @@
             background: #ffffff;
         }
 
+        /* Barra de Localizar / Substituir */
+        #findReplacePanel {
+            width: 100%;
+            max-width: 850px;
+            display: none;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(0,0,0,0.15);
+            margin-bottom: 10px;
+            gap: 8px;
+            align-items: center;
+            box-sizing: border-box;
+        }
+
+        #findReplacePanel input {
+            padding: 6px 10px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+            flex: 1;
+        }
+
         #editor {
             width: 100%;
-            max-width: 800px;
-            height: 75vh;
+            max-width: 850px;
+            height: 70vh;
             padding: 24px;
             border-radius: 12px;
             border: 1px solid rgba(0,0,0,0.1);
@@ -78,7 +108,23 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
+        .status-bar {
+            width: 100%;
+            max-width: 850px;
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 13px;
+            opacity: 0.7;
+        }
+
+        /* Tipografias */
+        .font-sans { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        .font-serif { font-family: Georgia, Cambria, "Times New Roman", Times, serif; }
+        .font-mono  { font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace; }
+
         /* Temas Pastéis */
+        .theme-cream    { background-color: var(--pastel-cream); color: #2F2E2D; }
         .theme-lavender { background-color: var(--pastel-lavender); color: #2C2C3E; }
         .theme-peach    { background-color: var(--pastel-peach); color: #3E2C2A; }
         .theme-mint     { background-color: var(--pastel-mint); color: #253325; }
@@ -86,89 +132,225 @@
         .theme-sky      { background-color: var(--pastel-sky); color: #223344; }
         .theme-lemon    { background-color: var(--pastel-lemon); color: #3A3520; }
         .theme-lilac    { background-color: var(--pastel-lilac); color: #332638; }
-        .theme-cream    { background-color: var(--pastel-cream); color: #2F2E2D; }
         .theme-aqua     { background-color: var(--pastel-aqua); color: #1F3332; }
         .theme-sand     { background-color: var(--pastel-sand); color: #38302A; }
+
+        .focus-mode .toolbar, .focus-mode .status-bar { display: none !important; }
+        .focus-mode #editor { height: 90vh; border: none; box-shadow: none; }
     </style>
 </head>
-<body class="theme-cream">
+<body class="theme-cream font-sans">
 
-    <div class="toolbar">
-        <select id="themeSelector" onchange="mudarTema(this.value)">
-            <option value="theme-cream">Creme (Padrão)</option>
-            <option value="theme-lavender">Lavanda</option>
-            <option value="theme-peach">Pêssego</option>
-            <option value="theme-mint">Menta</option>
-            <option value="theme-rose">Rosa Suave</option>
-            <option value="theme-sky">Azul Céu</option>
-            <option value="theme-lemon">Limão Suave</option>
-            <option value="theme-lilac">Lilás</option>
-            <option value="theme-aqua">Água Marinha</option>
-            <option value="theme-sand">Areia</option>
-        </select>
+    <!-- Barra de Ferramentas -->
+    <div class="toolbar" id="toolbar">
+        <div class="toolbar-group">
+            <select id="themeSelector" onchange="mudarTema(this.value)">
+                <option value="theme-cream">Creme</option>
+                <option value="theme-lavender">Lavanda</option>
+                <option value="theme-peach">Pêssego</option>
+                <option value="theme-mint">Menta</option>
+                <option value="theme-rose">Rosa Suave</option>
+                <option value="theme-sky">Azul Céu</option>
+                <option value="theme-lemon">Limão</option>
+                <option value="theme-lilac">Lilás</option>
+                <option value="theme-aqua">Água Marinha</option>
+                <option value="theme-sand">Areia</option>
+            </select>
 
-        <button onclick="salvarComo()">💾 Salvar Como...</button>
+            <select id="fontSelector" onchange="mudarFonte(this.value)">
+                <option value="font-sans">Sans-serif</option>
+                <option value="font-serif">Serifada</option>
+                <option value="font-mono">Monoespaçada</option>
+            </select>
+        </div>
+
+        <div class="toolbar-group">
+            <button onclick="formatar('bold')"><b>B</b></button>
+            <button onclick="formatar('italic')"><i>I</i></button>
+            <button onclick="formatar('formatBlock', 'H1')">H1</button>
+            <button onclick="formatar('formatBlock', 'H2')">H2</button>
+            <button onclick="toggleFindReplace()">🔍 Localizar</button>
+            <button onclick="toggleFocusMode()">👁️ Foco</button>
+        </div>
+
+        <div class="toolbar-group">
+            <input type="file" id="fileInput" style="display:none" accept=".html,.md,.txt" onchange="abrirArquivo(event)">
+            <button onclick="document.getElementById('fileInput').click()">📂 Abrir</button>
+            <button onclick="salvarComo()">💾 Salvar Como...</button>
+        </div>
     </div>
 
-    <div id="editor" contenteditable="true" placeholder="Comece a digitar ou cole imagens aqui..."></div>
+    <!-- Painel Localizar / Substituir -->
+    <div id="findReplacePanel">
+        <input type="text" id="findText" placeholder="Localizar palavra...">
+        <input type="text" id="replaceText" placeholder="Substituir por...">
+        <button onclick="localizarProximo()">Buscar</button>
+        <button onclick="substituirUnico()">Substituir</button>
+        <button onclick="substituirTudo()">Substituir Todos</button>
+        <button onclick="toggleFindReplace()">✕</button>
+    </div>
+
+    <!-- Área de Edição -->
+    <div id="editor" contenteditable="true" placeholder="Comece a digitar, cole imagens ou arraste arquivos aqui..."></div>
+
+    <!-- Barra de Status -->
+    <div class="status-bar" id="statusBar">
+        <span id="wordCount">Palavras: 0 | Caracteres: 0</span>
+        <span id="saveStatus">Alterações salvas localmente</span>
+    </div>
 
     <script>
         const editor = document.getElementById('editor');
 
-        // 1. Gerenciamento de Temas
-        function mudarTema(classeTema) {
-            // Remove classes anteriores do corpo
-            document.body.className = classeTema;
-            localStorage.setItem('jz_editor_theme', classeTema);
-        }
-
+        // 1. Inicialização e Preferências
         window.addEventListener('DOMContentLoaded', () => {
             const temaSalvo = localStorage.getItem('jz_editor_theme') || 'theme-cream';
+            const fonteSalva = localStorage.getItem('jz_editor_font') || 'font-sans';
+            const conteudoSalvo = localStorage.getItem('jz_editor_content');
+
             document.getElementById('themeSelector').value = temaSalvo;
-            document.body.className = temaSalvo;
+            document.getElementById('fontSelector').value = fonteSalva;
+            
+            document.body.className = `${temaSalvo} ${fonteSalva}`;
+            if (conteudoSalvo) editor.innerHTML = conteudoSalvo;
+
+            atualizarEstatisticas();
             editor.focus();
         });
 
-        // 2. Suporte para Colar Imagens (Clipboard)
-        editor.addEventListener('paste', function(e) {
-            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-            
+        // 2. Temas e Fontes
+        function mudarTema(tema) {
+            document.body.className = document.body.className.replace(/theme-\S+/, tema);
+            localStorage.setItem('jz_editor_theme', tema);
+        }
+
+        function mudarFonte(fonte) {
+            document.body.className = document.body.className.replace(/font-\S+/, fonte);
+            localStorage.setItem('jz_editor_font', fonte);
+        }
+
+        // 3. Formatação Básica
+        function formatar(comando, valor = null) {
+            document.execCommand(comando, false, valor);
+            editor.focus();
+            salvarAutomatico();
+        }
+
+        // 4. Auto-save e Estatísticas
+        editor.addEventListener('input', () => {
+            salvarAutomatico();
+            atualizarEstatisticas();
+        });
+
+        function salvarAutomatico() {
+            localStorage.setItem('jz_editor_content', editor.innerHTML);
+            const status = document.getElementById('saveStatus');
+            status.innerText = "Salvo automaticamente";
+            setTimeout(() => { status.innerText = "Alterações salvas localmente"; }, 2000);
+        }
+
+        function atualizarEstatisticas() {
+            const texto = editor.innerText.trim();
+            const palavras = texto ? texto.split(/\s+/).length : 0;
+            const caracteres = texto.length;
+            document.getElementById('wordCount').innerText = `Palavras: ${palavras} | Caracteres: ${caracteres}`;
+        }
+
+        // 5. Colar e Arrastar Imagens (Clipboard & Drag/Drop)
+        editor.addEventListener('paste', handleImageInput);
+        editor.addEventListener('drop', (e) => {
+            e.preventDefault();
+            handleImageInput(e);
+        });
+
+        function handleImageInput(e) {
+            const items = (e.clipboardData || e.dataTransfer).items;
+            if (!items) return;
+
             for (let i = 0; i < items.length; i++) {
                 if (items[i].type.indexOf('image') === 0) {
                     e.preventDefault();
                     const blob = items[i].getAsFile();
                     const reader = new FileReader();
-                    
-                    reader.onload = function(event) {
-                        inserirImagemNoCursor(event.target.result);
-                    };
-                    
+                    reader.onload = (event) => inserirImagemNoCursor(event.target.result);
                     reader.readAsDataURL(blob);
                     break;
                 }
             }
-        });
+        }
 
         function inserirImagemNoCursor(src) {
             const img = document.createElement('img');
             img.src = src;
-
             const selection = window.getSelection();
             if (!selection.rangeCount) return;
-            
             const range = selection.getRangeAt(0);
             range.deleteContents();
             range.insertNode(img);
-            
             range.setStartAfter(img);
             range.setEndAfter(img);
             selection.removeAllRanges();
             selection.addRange(range);
+            salvarAutomatico();
         }
 
-        // 3. Função "Salvar Como..."
+        // 6. Painel Localizar / Substituir
+        function toggleFindReplace() {
+            const panel = document.getElementById('findReplacePanel');
+            panel.style.display = panel.style.display === 'flex' ? 'none' : 'flex';
+            if (panel.style.display === 'flex') document.getElementById('findText').focus();
+        }
+
+        function localizarProximo() {
+            const query = document.getElementById('findText').value;
+            if (!query) return;
+            window.find(query);
+        }
+
+        function substituirUnico() {
+            const query = document.getElementById('findText').value;
+            const replacement = document.getElementById('replaceText').value;
+            const sel = window.getSelection();
+            if (sel.toString() === query) {
+                document.execCommand('insertText', false, replacement);
+                localizarProximo();
+                salvarAutomatico();
+            } else {
+                localizarProximo();
+            }
+        }
+
+        function substituirTudo() {
+            const query = document.getElementById('findText').value;
+            const replacement = document.getElementById('replaceText').value;
+            if (!query) return;
+            
+            const regex = new RegExp(query, 'g');
+            editor.innerHTML = editor.innerHTML.replace(regex, replacement);
+            salvarAutomatico();
+            atualizarEstatisticas();
+        }
+
+        // 7. Modo Foco
+        function toggleFocusMode() {
+            document.body.classList.toggle('focus-mode');
+        }
+
+        // 8. Abrir e Salvar Arquivos
+        function abrirArquivo(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                editor.innerHTML = e.target.result;
+                salvarAutomatico();
+                atualizarEstatisticas();
+            };
+            reader.readAsText(file);
+        }
+
         function salvarComo() {
-            let nomeArquivo = prompt('Nome do arquivo (ex: documento.html, arquivo.md ou texto.txt):', 'anotacoes.html');
+            let nomeArquivo = prompt('Nome do arquivo (.html, .md ou .txt):', 'documento.html');
             if (!nomeArquivo) return;
 
             let conteudo = editor.innerHTML;
@@ -179,21 +361,7 @@
                 tipoMime = nomeArquivo.endsWith('.md') ? 'text/markdown' : 'text/plain';
             } else {
                 if (!nomeArquivo.endsWith('.html')) nomeArquivo += '.html';
-                // Cria um HTML estruturado mantendo estilos e imagens inseridas
-                conteudo = `<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <title>${nomeArquivo}</title>
-    <style>
-        body { font-family: sans-serif; padding: 40px; max-width: 800px; margin: auto; line-height: 1.6; }
-        img { max-width: 100%; border-radius: 8px; }
-    </style>
-</head>
-<body>
-    ${conteudo}
-</body>
-</html>`;
+                conteudo = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>${nomeArquivo}</title><style>body{font-family:sans-serif;padding:40px;max-width:800px;margin:auto;line-height:1.6}img{max-width:100%;border-radius:8px}</style></head><body>${conteudo}</body></html>`;
             }
 
             const blob = new Blob([conteudo], { type: tipoMime });
