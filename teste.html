@@ -158,7 +158,7 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid 
     </select>
     <button onclick="inserirLink()" title="Inserir link">🔗</button>
     <button onclick="$('imgInput').click()" title="Inserir imagem">🖼️</button>
-    <button onclick="formatar('removeFormat')" title="Limpar formatação">Tx</button>
+    <button onclick="limparFormatacao()" title="Limpar formatação: deixa só o texto em Arial 14, preto (na seleção, ou no documento todo se nada estiver selecionado)">Tx</button>
     <button onclick="toggleFindReplace()" title="Localizar e substituir (Ctrl+F)">🔍 Localizar</button>
     <select id="aiSelector" onchange="chamarIA(this.value)" aria-label="Assistente de IA">
       <option value="">✨ IA</option>
@@ -376,13 +376,54 @@ function inserirLink() {
   if (!/^(https?:|mailto:)/i.test(url)) { status('O link precisa começar com https://, http:// ou mailto:', true); return; }
   formatar('createLink', url);
 }
-function limparEditor() {
-  if (!confirm('Apagar todo o conteúdo do editor?')) return;
-  editor.focus();
-  document.execCommand('selectAll');
-  document.execCommand('delete'); // permite desfazer com Ctrl+Z
+// Reduz um trecho a texto puro: sem negrito, cor, tamanho, títulos, listas, citações ou links.
+// Imagens são mantidas. O texto fica em Arial 14, preto.
+const ESTILO_PADRAO = 'font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#000000';
+function fragParaPlano(frag) {
+  const BLOCO = /^(P|DIV|H[1-6]|LI|UL|OL|BLOCKQUOTE|PRE|TABLE|TR)$/;
+  const paras = [''];
+  const novo = () => { if (paras[paras.length - 1] !== '') paras.push(''); };
+  (function andar(n) {
+    n.childNodes.forEach(c => {
+      if (c.nodeType === 3) paras[paras.length - 1] += esc(c.nodeValue.replace(/\s+/g, ' '));
+      else if (c.nodeType === 1) {
+        if (c.tagName === 'IMG') paras[paras.length - 1] += `<img src="${(c.getAttribute('src') || '').replace(/"/g, '&quot;')}">`;
+        else if (c.tagName === 'BR') paras[paras.length - 1] += '<br>';
+        else if (BLOCO.test(c.tagName)) { novo(); andar(c); novo(); }
+        else andar(c);
+      }
+    });
+  })(frag);
+  return paras.map(p => p.trim()).filter(p => p.replace(/<br>/g, '').trim() !== '' || p.includes('<br>'))
+    .map(p => `<p style="${ESTILO_PADRAO}">${p}</p>`).join('');
+}
+function limparFormatacao() {
+  restaurarSelecao();
+  let s = getSelection();
+  if (!s.rangeCount || s.isCollapsed || !editor.contains(s.anchorNode)) {
+    document.execCommand('selectAll'); // nada selecionado: limpa o documento todo
+    s = getSelection();
+  }
+  if (!s.rangeCount || s.isCollapsed) return;
+  const html = fragParaPlano(s.getRangeAt(0).cloneContents());
+  if (!html) return;
+  document.execCommand('insertHTML', false, html);
   agendarSalvar();
-  status('Conteúdo apagado. Ctrl+Z desfaz.');
+  status('Formatação removida (Arial 14, preto).');
+}
+
+// Apaga TUDO: texto, imagens, listas, formatação. Não pode ser desfeito.
+function limparEditor() {
+  if (!confirm('Apagar TUDO (texto, imagens, listas, títulos e formatação)? Isso não pode ser desfeito.')) return;
+  editor.innerHTML = '';
+  savedRange = null;
+  idxBusca = -1;
+  fecharIA();
+  try { localStorage.removeItem(KEY.c); } catch {}
+  atualizarEstatisticas();
+  atualizarReguas();
+  editor.focus();
+  status('Tudo apagado.');
 }
 
 /* ---------- Salvamento automático e estatísticas ---------- */
