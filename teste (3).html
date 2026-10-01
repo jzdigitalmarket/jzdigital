@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JZ Editor Profissional</title>
+<style>
+:root{--surface:rgba(255,255,255,.85);--hover:#fff;--line:rgba(0,0,0,.15);--tick:rgba(0,0,0,.3)}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;padding:20px clamp(10px,13vw,5cm);display:flex;flex-direction:column;height:100dvh;transition:background-color .3s,color .3s}
+
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.group{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+select,button{height:36px;min-width:36px;padding:6px 10px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:inherit;cursor:pointer;font:inherit;font-size:14px;font-weight:500}
+button:hover,select:hover{background:var(--hover);color:#222}
+option{color:#222;background:#fff}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid #5b6ee1;outline-offset:2px}
+.danger{border-color:#d9534f;color:#a94442}
+
+.split{display:flex;position:relative}
+.split-main{display:flex;align-items:center;gap:6px;border-radius:6px 0 0 6px}
+.split-arrow{min-width:24px;padding:6px;font-size:10px;border-radius:0 6px 6px 0;border-left:0}
+#colorIndicator{width:14px;height:14px;border-radius:3px;border:1px solid rgba(0,0,0,.2)}
+#palette{position:absolute;top:40px;left:0;z-index:20;display:grid;grid-template-columns:repeat(8,22px);gap:4px;padding:8px;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,.18)}
+#palette[hidden]{display:none}
+#palette button{width:22px;height:22px;min-width:0;padding:0;border-radius:4px;border:1px solid rgba(0,0,0,.25)}
+#palette .custom{grid-column:1/-1;width:auto;height:28px;font-size:13px;background:#f3f3f3;color:#222}
+
+.panel{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px;margin-bottom:10px}
+.panel[hidden]{display:none}
+.panel input[type=text]{flex:1;min-width:140px;height:36px;padding:6px 10px;border:1px solid var(--line);border-radius:4px;font-size:14px;background:#fff;color:#222}
+#aiText{flex:1 1 100%;max-height:30vh;overflow:auto;white-space:pre-wrap;line-height:1.5}
+
+.editor-layout{flex:1;min-height:0;display:grid;grid-template-columns:24px 1fr;grid-template-rows:22px 1fr;background:rgba(255,255,255,.4);border-radius:12px;border:1px solid var(--line);box-shadow:0 4px 12px rgba(0,0,0,.05);overflow:hidden}
+.ruler-corner{background:rgba(0,0,0,.05);border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.ruler{position:relative;overflow:hidden;background:rgba(0,0,0,.03);font-size:9px;opacity:.85}
+.ruler-h{grid-column:2;grid-row:1;border-bottom:1px solid var(--line)}
+.ruler-v{grid-column:1;grid-row:2;border-right:1px solid var(--line)}
+.ruler .scale{position:absolute}
+.ruler span{position:absolute}
+.ruler-h span{top:1px}
+.ruler-v span{left:3px}
+/* 1 cm = 37.795px; as réguas começam onde o texto começa */
+.ruler-h .scale{top:0;bottom:0;background:
+ repeating-linear-gradient(90deg,var(--tick) 0 1px,transparent 1px 37.795px) left bottom/100% 10px no-repeat,
+ repeating-linear-gradient(90deg,var(--tick) 0 1px,transparent 1px 18.898px) left bottom/100% 5px no-repeat}
+.ruler-v .scale{left:0;right:0;background:
+ repeating-linear-gradient(180deg,var(--tick) 0 1px,transparent 1px 37.795px) right top/10px 100% no-repeat,
+ repeating-linear-gradient(180deg,var(--tick) 0 1px,transparent 1px 18.898px) right top/5px 100% no-repeat}
+
+#editor{grid-column:2;grid-row:2;padding:24px;outline:none;overflow-y:auto;line-height:1.6;font-size:16px;word-wrap:break-word}
+#editor:empty::before{content:attr(data-placeholder);opacity:.5;pointer-events:none}
+#editor img{max-width:100%;border-radius:8px;margin:10px 0;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+#editor blockquote{margin:12px 0;padding:4px 14px;border-left:3px solid var(--line);opacity:.9}
+#editor a{color:#3b5bdb}
+
+.status-bar{display:flex;justify-content:space-between;gap:12px;margin-top:8px;font-size:13px;opacity:.75}
+
+.font-sans{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.font-serif{font-family:Georgia,Cambria,"Times New Roman",Times,serif}
+.font-mono{font-family:SFMono-Regular,Consolas,"Liberation Mono",Menlo,monospace}
+.font-arial{font-family:Arial,Helvetica,sans-serif}
+.font-verdana{font-family:Verdana,Geneva,Tahoma,sans-serif}
+.font-trebuchet{font-family:"Trebuchet MS",Helvetica,sans-serif}
+.font-georgia{font-family:Georgia,serif}
+.font-times{font-family:"Times New Roman",Times,serif}
+.font-courier{font-family:"Courier New",Courier,monospace}
+
+.theme-cream{background-color:#FAF9F6;color:#2F2E2D}
+.theme-lavender{background-color:#E8E8F8;color:#2C2C3E}
+.theme-peach{background-color:#FFE5D9;color:#3E2C2A}
+.theme-mint{background-color:#E2F0D9;color:#253325}
+.theme-rose{background-color:#FFE3E3;color:#3E2B2B}
+.theme-sky{background-color:#E4F1FE;color:#223344}
+.theme-lemon{background-color:#FFF3CD;color:#3A3520}
+.theme-lilac{background-color:#F3E5F5;color:#332638}
+.theme-aqua{background-color:#E0F2F1;color:#1F3332}
+.theme-sand{background-color:#F4EAE1;color:#38302A}
+.theme-night{background-color:#1d1f27;color:#e6e6ec;--surface:rgba(255,255,255,.08);--line:rgba(255,255,255,.2);--tick:rgba(255,255,255,.4)}
+.theme-night #editor a{color:#8fa8ff}
+
+@media (max-width:700px){
+  .editor-layout{grid-template-columns:1fr;grid-template-rows:1fr}
+  .ruler,.ruler-corner{display:none}
+  #editor{grid-column:1;grid-row:1}
+}
+@media print{
+  .toolbar,.panel,.status-bar,.ruler,.ruler-corner{display:none!important}
+  body{padding:0;height:auto;background:#fff!important;color:#000!important}
+  .editor-layout{display:block;border:0;box-shadow:none;background:none;overflow:visible}
+  #editor{overflow:visible;padding:0}
+}
+</style>
+</head>
+<body class="theme-cream">
+
+<div class="toolbar" id="toolbar">
+  <div class="group">
+    <span style="font-size:13px;font-weight:600;opacity:.85">Ambiente:</span>
+    <select id="themeSelector" onchange="mudarTema(this.value)" aria-label="Tema de cores">
+      <option value="theme-cream">Creme</option>
+      <option value="theme-lavender">Lavanda</option>
+      <option value="theme-peach">Pêssego</option>
+      <option value="theme-mint">Menta</option>
+      <option value="theme-rose">Rosa Suave</option>
+      <option value="theme-sky">Azul Céu</option>
+      <option value="theme-lemon">Limão</option>
+      <option value="theme-lilac">Lilás</option>
+      <option value="theme-aqua">Água Marinha</option>
+      <option value="theme-sand">Areia</option>
+      <option value="theme-night">Noite</option>
+    </select>
+    <select id="fontSelector" onchange="mudarFonte(this.value)" aria-label="Fonte">
+      <option value="font-sans">Sistema (Sans)</option>
+      <option value="font-arial">Arial</option>
+      <option value="font-verdana">Verdana</option>
+      <option value="font-trebuchet">Trebuchet MS</option>
+      <option value="font-serif">Serifada Geral</option>
+      <option value="font-georgia">Georgia</option>
+      <option value="font-times">Times New Roman</option>
+      <option value="font-mono">Monoespaçada</option>
+      <option value="font-courier">Courier New</option>
+    </select>
+    <select id="fontSizeSelector" onchange="mudarTamanho(this.value);this.value=''" aria-label="Tamanho do texto selecionado">
+      <option value="">Tamanho</option>
+      <option>12</option><option>14</option><option>16</option><option>18</option>
+      <option>20</option><option>24</option><option>28</option><option>36</option><option>48</option>
+    </select>
+    <div class="split">
+      <button type="button" class="split-main" onclick="mudarCor(corAtual)" title="Aplicar a cor ao texto selecionado">
+        <span id="colorIndicator" style="background:#c0392b"></span>Cor
+      </button>
+      <button type="button" class="split-arrow" id="colorArrow" onclick="togglePaleta()" title="Escolher outra cor" aria-haspopup="true" aria-expanded="false">▼</button>
+      <div id="palette" hidden></div>
+    </div>
+    <input type="color" id="fontColorPicker" onchange="mudarCor(this.value)" style="position:absolute;opacity:0;pointer-events:none;width:0;height:0" tabindex="-1">
+  </div>
+
+  <div class="group">
+    <button onclick="formatar('undo')" title="Desfazer (Ctrl+Z)">↶</button>
+    <button onclick="formatar('redo')" title="Refazer (Ctrl+Y)">↷</button>
+    <button onclick="formatar('bold')" title="Negrito (Ctrl+B)"><b>B</b></button>
+    <button onclick="formatar('italic')" title="Itálico (Ctrl+I)"><i>I</i></button>
+    <button onclick="formatar('underline')" title="Sublinhado (Ctrl+U)"><u>U</u></button>
+    <button onclick="formatar('strikeThrough')" title="Tachado"><s>S</s></button>
+    <button onclick="bloco('h1')" title="Título 1">H1</button>
+    <button onclick="bloco('h2')" title="Título 2">H2</button>
+    <button onclick="bloco('blockquote')" title="Citação">❝</button>
+    <button onclick="formatar('insertUnorderedList')" title="Lista com marcadores">• Lista</button>
+    <button onclick="formatar('insertOrderedList')" title="Lista numerada">1. Lista</button>
+    <select onchange="formatar(this.value);this.value=''" aria-label="Alinhamento">
+      <option value="">Alinhar</option>
+      <option value="justifyLeft">Esquerda</option>
+      <option value="justifyCenter">Centralizar</option>
+      <option value="justifyRight">Direita</option>
+      <option value="justifyFull">Justificar</option>
+    </select>
+    <button onclick="inserirLink()" title="Inserir link">🔗</button>
+    <button onclick="$('imgInput').click()" title="Inserir imagem">🖼️</button>
+    <button onclick="formatar('removeFormat')" title="Limpar formatação">Tx</button>
+    <button onclick="toggleFindReplace()" title="Localizar e substituir (Ctrl+F)">🔍 Localizar</button>
+    <select id="aiSelector" onchange="chamarIA(this.value)" aria-label="Assistente de IA">
+      <option value="">✨ IA</option>
+      <option value="corrigir">Corrigir texto</option>
+      <option value="melhorar">Melhorar redação</option>
+      <option value="formal">Tom formal</option>
+      <option value="simplificar">Simplificar</option>
+      <option value="resumir">Resumir</option>
+      <option value="traduzir">Traduzir para inglês</option>
+    </select>
+  </div>
+
+  <div class="group">
+    <input type="file" id="fileInput" style="display:none" accept=".html,.htm,.md,.txt" onchange="abrirArquivo(event)">
+    <input type="file" id="imgInput" style="display:none" accept="image/*" multiple onchange="[...this.files].forEach(inserirImagem);this.value=''">
+    <button onclick="$('fileInput').click()">📂 Abrir</button>
+    <button onclick="salvarComo()" title="Salvar como (Ctrl+S)">💾 Salvar</button>
+    <button onclick="window.print()" title="Imprimir ou salvar em PDF">🖨️</button>
+    <button class="danger" onclick="limparEditor()" title="Apagar todo o texto">🗑️ Apagar</button>
+  </div>
+</div>
+
+<div class="panel" id="findReplacePanel" hidden>
+  <input type="text" id="findText" placeholder="Localizar..." aria-label="Localizar"
+         oninput="idxBusca=-1;localizar(1)"
+         onkeydown="if(event.key==='Enter'){event.preventDefault();localizar(event.shiftKey?-1:1)}">
+  <input type="text" id="replaceText" placeholder="Substituir por..." aria-label="Substituir por">
+  <label title="Diferenciar maiúsculas de minúsculas" style="font-size:13px"><input type="checkbox" id="caseSens" onchange="idxBusca=-1;localizar(1)"> Aa</label>
+  <button onclick="localizar(-1)" title="Anterior (Shift+Enter)">↑</button>
+  <button onclick="localizar(1)" title="Próximo (Enter)">↓</button>
+  <button onclick="substituirUnico()">Substituir</button>
+  <button onclick="substituirTudo()">Substituir todos</button>
+  <span id="findInfo" style="font-size:13px;min-width:70px"></span>
+  <button onclick="toggleFindReplace()" aria-label="Fechar">✕</button>
+</div>
+
+<div class="panel" id="aiPanel" hidden>
+  <div id="aiText"></div>
+  <button onclick="aplicarIA('trocar')">Aplicar no lugar</button>
+  <button onclick="aplicarIA('abaixo')">Inserir abaixo</button>
+  <button onclick="fecharIA()">Descartar</button>
+</div>
+
+<div class="editor-layout">
+  <div class="ruler-corner"></div>
+  <div class="ruler ruler-h" id="horizontalRuler"></div>
+  <div class="ruler ruler-v" id="verticalRuler"></div>
+  <div id="editor" class="font-sans" contenteditable="true" spellcheck="true" data-placeholder="Comece a digitar, cole imagens ou arraste arquivos aqui..."></div>
+</div>
+
+<div class="status-bar">
+  <span id="wordCount">0 palavras</span>
+  <span id="saveStatus" aria-live="polite">Pronto</span>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const editor = $('editor');
+const KEY = { c: 'jz_editor_content', t: 'jz_editor_theme', f: 'jz_editor_font' };
+const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const ler = k => { try { return localStorage.getItem(k); } catch { return null; } };
+const guardar = (k, v) => { try { localStorage.setItem(k, v); return true; } catch { return false; } };
+
+function status(msg, erro) {
+  const s = $('saveStatus');
+  s.textContent = msg;
+  s.style.color = erro ? '#c0392b' : '';
+}
+
+/* ---------- Seleção: mantém o texto selecionado ao usar menus e botões ---------- */
+let savedRange = null;
+document.addEventListener('selectionchange', () => {
+  const s = getSelection();
+  if (s.rangeCount && editor.contains(s.anchorNode)) savedRange = s.getRangeAt(0).cloneRange();
+});
+function restaurarSelecao() {
+  editor.focus();
+  if (savedRange) { const s = getSelection(); s.removeAllRanges(); s.addRange(savedRange); }
+}
+// Botões não roubam o foco do editor
+$('toolbar').addEventListener('mousedown', e => { if (!e.target.closest('select,input')) e.preventDefault(); });
+
+/* ---------- Sanitização (conteúdo colado, aberto ou salvo) ---------- */
+const TAGS = new Set('P,BR,DIV,SPAN,B,STRONG,I,EM,U,S,STRIKE,H1,H2,H3,UL,OL,LI,A,IMG,BLOCKQUOTE,HR,PRE,CODE,SUB,SUP,TABLE,THEAD,TBODY,TR,TD,TH'.split(','));
+const CSS_OK = ['color', 'font-size', 'font-weight', 'font-style', 'text-decoration', 'text-align'];
+function limpar(root) {
+  root.querySelectorAll('script,style,iframe,object,embed,link,meta,form,input,button,select,textarea,svg,video,audio').forEach(n => n.remove());
+  root.querySelectorAll('*').forEach(el => {
+    if (!el.parentNode) return;
+    if (!TAGS.has(el.tagName)) { el.replaceWith(...el.childNodes); return; }
+    for (const a of [...el.attributes]) {
+      const n = a.name;
+      if (n === 'style') {
+        const keep = CSS_OK.map(p => [p, el.style.getPropertyValue(p)]).filter(x => x[1]);
+        el.removeAttribute('style');
+        keep.forEach(([p, v]) => el.style.setProperty(p, v));
+      } else if (n === 'href' && /^(https?:|mailto:)/i.test(a.value)) {
+      } else if (n === 'src' && /^(data:image\/(png|jpe?g|gif|webp);|https:)/i.test(a.value)) {
+      } else el.removeAttribute(n);
+    }
+    if (el.tagName === 'A') { el.target = '_blank'; el.rel = 'noopener noreferrer'; }
+  });
+  return root;
+}
+function htmlSeguro(str) {
+  return limpar(new DOMParser().parseFromString(str, 'text/html').body).innerHTML;
+}
+
+/* ---------- Inicialização ---------- */
+window.addEventListener('DOMContentLoaded', () => {
+  const tema = ler(KEY.t) || 'theme-cream', fonte = ler(KEY.f) || 'font-sans', c = ler(KEY.c);
+  $('themeSelector').value = tema;
+  $('fontSelector').value = fonte;
+  document.body.className = tema;
+  editor.className = fonte;
+  montarPaleta();
+  if (c) editor.innerHTML = htmlSeguro(c);
+  document.execCommand('defaultParagraphSeparator', false, 'p');
+  atualizarEstatisticas();
+  atualizarReguas();
+  new ResizeObserver(atualizarReguas).observe(editor);
+  editor.focus();
+});
+
+/* ---------- Réguas em centímetros, sincronizadas com o texto ---------- */
+const CM = 96 / 2.54;
+let reguaV = 0;
+function atualizarReguas() {
+  const cs = getComputedStyle(editor);
+  const pl = parseFloat(cs.paddingLeft), pt = parseFloat(cs.paddingTop);
+  const w = editor.clientWidth - pl - parseFloat(cs.paddingRight);
+  if (w <= 0) return;
+  let h = `<div class="scale" style="left:${pl}px;width:${w}px">`;
+  for (let i = 1; i * CM < w; i++) h += `<span style="left:${i * CM - 3}px">${i}</span>`;
+  $('horizontalRuler').innerHTML = h + '</div>';
+
+  const n = Math.ceil(Math.max(editor.scrollHeight, editor.clientHeight) / CM / 10) * 10;
+  if (n !== reguaV) {
+    reguaV = n;
+    let v = `<div class="scale" style="top:${pt}px;height:${n * CM}px">`;
+    for (let i = 1; i < n; i++) v += `<span style="top:${i * CM - 5}px">${i}</span>`;
+    $('verticalRuler').innerHTML = v + '</div>';
+  }
+  sincronizarRegua();
+}
+function sincronizarRegua() {
+  const s = $('verticalRuler').firstChild;
+  if (s) s.style.transform = `translateY(${-editor.scrollTop}px)`;
+}
+editor.addEventListener('scroll', sincronizarRegua);
+
+/* ---------- Tema, fonte, tamanho e cor ---------- */
+function mudarTema(t) {
+  document.body.className = document.body.className.replace(/theme-\S+/, t);
+  guardar(KEY.t, t);
+}
+function mudarFonte(f) {
+  editor.className = f;
+  guardar(KEY.f, f);
+  atualizarReguas();
+}
+function mudarTamanho(px) {
+  if (!px) return;
+  restaurarSelecao();
+  document.execCommand('styleWithCSS', false, false);
+  document.execCommand('fontSize', false, '7');
+  editor.querySelectorAll('font[size="7"]').forEach(f => {
+    const s = document.createElement('span');
+    s.style.fontSize = px + 'px';
+    while (f.firstChild) s.appendChild(f.firstChild);
+    f.replaceWith(s);
+  });
+  agendarSalvar();
+}
+let corAtual = '#c0392b';
+const CORES = ['#000000', '#434343', '#7f7f7f', '#bfbfbf', '#ffffff', '#c0392b', '#e67e22', '#f1c40f',
+               '#27ae60', '#16a085', '#2980b9', '#2c3e50', '#8e44ad', '#d81b60', '#795548', '#00acc1'];
+function montarPaleta() {
+  $('palette').innerHTML = CORES.map(c => `<button type="button" style="background:${c}" title="${c}" onclick="mudarCor('${c}')"></button>`).join('')
+    + '<button type="button" class="custom" onclick="$(\'fontColorPicker\').click()">Outra cor...</button>';
+}
+function togglePaleta(abrir) {
+  const p = $('palette');
+  const mostrar = abrir === undefined ? p.hidden : abrir;
+  p.hidden = !mostrar;
+  $('colorArrow').setAttribute('aria-expanded', mostrar);
+}
+document.addEventListener('click', e => { if (!e.target.closest('.split')) togglePaleta(false); });
+function mudarCor(cor) {
+  corAtual = cor;
+  $('colorIndicator').style.backgroundColor = cor;
+  togglePaleta(false);
+  restaurarSelecao();
+  document.execCommand('styleWithCSS', false, true);
+  document.execCommand('foreColor', false, cor);
+  agendarSalvar();
+}
+
+/* ---------- Formatação ---------- */
+function formatar(cmd, valor = null) {
+  if (!cmd) return;
+  restaurarSelecao();
+  document.execCommand(cmd, false, valor);
+  agendarSalvar();
+}
+function bloco(tag) {
+  restaurarSelecao();
+  const atual = (document.queryCommandValue('formatBlock') || '').toLowerCase();
+  document.execCommand('formatBlock', false, atual === tag ? 'p' : tag);
+  agendarSalvar();
+}
+function inserirLink() {
+  const url = prompt('Endereço do link (https://...):', 'https://');
+  if (!url) return;
+  if (!/^(https?:|mailto:)/i.test(url)) { status('O link precisa começar com https://, http:// ou mailto:', true); return; }
+  formatar('createLink', url);
+}
+function limparEditor() {
+  if (!confirm('Apagar todo o conteúdo do editor?')) return;
+  editor.focus();
+  document.execCommand('selectAll');
+  document.execCommand('delete'); // permite desfazer com Ctrl+Z
+  agendarSalvar();
+  status('Conteúdo apagado. Ctrl+Z desfaz.');
+}
+
+/* ---------- Salvamento automático e estatísticas ---------- */
+let tSave;
+function agendarSalvar() {
+  clearTimeout(tSave);
+  status('Salvando...');
+  tSave = setTimeout(() => { salvar(); atualizarEstatisticas(); atualizarReguas(); }, 400);
+}
+function salvar() {
+  clearTimeout(tSave);
+  if (guardar(KEY.c, editor.innerHTML)) status('Salvo neste navegador');
+  else status('Sem espaço no navegador. Use 💾 Salvar para baixar o arquivo.', true);
+}
+function atualizarEstatisticas() {
+  const t = editor.innerText.trim();
+  const p = t ? t.split(/\s+/).length : 0;
+  $('wordCount').textContent = `Palavras: ${p} | Caracteres: ${t.length} | Leitura: ${p ? Math.max(1, Math.round(p / 200)) : 0} min`;
+}
+editor.addEventListener('input', agendarSalvar);
+window.addEventListener('pagehide', salvar);
+document.addEventListener('visibilitychange', () => { if (document.hidden) salvar(); });
+
+/* ---------- Colar e arrastar ---------- */
+editor.addEventListener('paste', e => {
+  const cd = e.clipboardData;
+  const html = cd.getData('text/html'), txt = cd.getData('text/plain');
+  const img = [...cd.files].find(f => f.type.startsWith('image/'));
+  if (img && !html && !txt) { e.preventDefault(); inserirImagem(img); return; }
+  if (html) { e.preventDefault(); document.execCommand('insertHTML', false, htmlSeguro(html)); agendarSalvar(); }
+});
+editor.addEventListener('dragover', e => { if ([...e.dataTransfer.types].includes('Files')) e.preventDefault(); });
+editor.addEventListener('drop', e => {
+  const imgs = [...e.dataTransfer.files].filter(f => f.type.startsWith('image/'));
+  if (!imgs.length) return;
+  e.preventDefault();
+  let r = null;
+  if (document.caretRangeFromPoint) r = document.caretRangeFromPoint(e.clientX, e.clientY);
+  else if (document.caretPositionFromPoint) {
+    const p = document.caretPositionFromPoint(e.clientX, e.clientY);
+    if (p) { r = document.createRange(); r.setStart(p.offsetNode, p.offset); }
+  }
+  if (r) { const s = getSelection(); s.removeAllRanges(); s.addRange(r); }
+  imgs.forEach(inserirImagem);
+});
+
+// Reduz imagens grandes para não estourar o limite de armazenamento do navegador
+function inserirImagem(file) {
+  const fr = new FileReader();
+  fr.onload = () => {
+    const im = new Image();
+    im.onload = () => {
+      let src = fr.result;
+      const k = Math.min(1, 1400 / im.width);
+      if (file.type !== 'image/gif' && (k < 1 || file.size > 400e3)) {
+        const c = document.createElement('canvas');
+        c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
+        c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+        src = c.toDataURL(file.type === 'image/png' ? 'image/png' : 'image/jpeg', 0.85);
+      }
+      restaurarSelecao();
+      document.execCommand('insertImage', false, src);
+      agendarSalvar();
+    };
+    im.src = fr.result;
+  };
+  fr.readAsDataURL(file);
+}
+
+/* ---------- IA (Gemini via /api/gemini) ---------- */
+const PROMPTS = {
+  corrigir: 'Corrija erros gramaticais, ortográficos e de pontuação do texto a seguir, sem mudar o sentido nem o tom. Responda somente com o texto corrigido.',
+  melhorar: 'Melhore a clareza e a fluidez do texto a seguir, mantendo o sentido e o tom. Responda somente com o texto reescrito.',
+  formal: 'Reescreva o texto a seguir em linguagem formal e institucional, em português do Brasil. Responda somente com o texto reescrito.',
+  simplificar: 'Reescreva o texto a seguir em linguagem simples e direta, sem perder as informações. Responda somente com o texto reescrito.',
+  resumir: 'Resuma o texto a seguir em poucas frases, em português. Responda somente com o resumo.',
+  traduzir: 'Traduza o texto a seguir para inglês. Responda somente com a tradução.'
+};
+let alvoIA = null;
+async function chamarIA(acao) {
+  $('aiSelector').value = '';
+  if (!PROMPTS[acao]) return;
+  restaurarSelecao();
+  const sel = getSelection();
+  const temSel = sel.rangeCount && !sel.isCollapsed && editor.contains(sel.anchorNode);
+  const texto = temSel ? sel.toString() : editor.innerText;
+  if (!texto.trim()) { status('Escreva ou selecione um texto para usar a IA.', true); return; }
+  alvoIA = temSel ? sel.getRangeAt(0).cloneRange() : null;
+
+  status('Consultando a IA...');
+  const ctl = new AbortController();
+  const to = setTimeout(() => ctl.abort(), 30000);
+  try {
+    const r = await fetch('/api/gemini', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: PROMPTS[acao], text: texto, action: acao }),
+      signal: ctl.signal
+    });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok || !d.result) throw new Error(d.error || 'HTTP ' + r.status);
+    $('aiText').textContent = d.result;
+    $('aiPanel').hidden = false;
+    status('Sugestão pronta. Revise antes de aplicar.');
+  } catch (e) {
+    status(e.name === 'AbortError' ? 'A IA demorou demais. Tente de novo.' : 'Falha ao consultar a IA: ' + e.message, true);
+  } finally { clearTimeout(to); }
+}
+function aplicarIA(modo) {
+  const html = $('aiText').textContent.split(/\n{2,}/).map(p => '<p>' + esc(p.trim()).replace(/\n/g, '<br>') + '</p>').join('');
+  const s = getSelection();
+  editor.focus();
+  if (alvoIA) {
+    const r = alvoIA.cloneRange();
+    if (modo === 'abaixo') r.collapse(false);
+    s.removeAllRanges(); s.addRange(r);
+  } else {
+    document.execCommand('selectAll');
+    if (modo === 'abaixo') s.collapseToEnd();
+  }
+  document.execCommand('insertHTML', false, html);
+  fecharIA();
+  agendarSalvar();
+}
+function fecharIA() { $('aiPanel').hidden = true; alvoIA = null; }
+
+/* ---------- Localizar e substituir (só no texto, sem tocar nas tags) ---------- */
+let idxBusca = -1;
+function regexBusca() {
+  const q = $('findText').value;
+  return q ? new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), $('caseSens').checked ? 'g' : 'gi') : null;
+}
+function achados() {
+  const re = regexBusca(), out = [];
+  if (!re) return out;
+  const w = document.createTreeWalker(editor, NodeFilter.SHOW_TEXT);
+  let n;
+  while ((n = w.nextNode())) {
+    re.lastIndex = 0;
+    let m;
+    while ((m = re.exec(n.nodeValue))) out.push([n, m.index, m.index + m[0].length]);
+  }
+  return out;
+}
+function localizar(passo) {
+  const a = achados();
+  const info = $('findInfo');
+  if (!a.length) { info.textContent = $('findText').value ? 'Sem resultados' : ''; idxBusca = -1; return null; }
+  idxBusca = (((idxBusca + passo) % a.length) + a.length) % a.length;
+  const [n, s, e] = a[idxBusca];
+  const r = document.createRange();
+  r.setStart(n, s); r.setEnd(n, e);
+  const sel = getSelection();
+  sel.removeAllRanges(); sel.addRange(r);
+  n.parentElement.scrollIntoView({ block: 'center' });
+  info.textContent = `${idxBusca + 1} de ${a.length}`;
+  return r;
+}
+function substituirUnico() {
+  const rep = $('replaceText').value;
+  const r = idxBusca >= 0 ? localizar(0) : localizar(1);
+  if (!r) return;
+  editor.focus();
+  const sel = getSelection();
+  sel.removeAllRanges(); sel.addRange(r);
+  document.execCommand('insertText', false, rep);
+  const repete = regexBusca() && regexBusca().test(rep) ? 1 : 0;
+  agendarSalvar();
+  idxBusca = Math.max(-1, idxBusca - 1 + repete);
+  localizar(1);
+}
+function substituirTudo() {
+  const re = regexBusca(), rep = $('replaceText').value;
+  if (!re) return;
+  let total = 0;
+  const w = document.createTreeWalker(editor, NodeFilter.SHOW_TEXT);
+  const nos = [];
+  let n;
+  while ((n = w.nextNode())) nos.push(n);
+  nos.forEach(no => { no.nodeValue = no.nodeValue.replace(re, () => { total++; return rep; }); });
+  $('findInfo').textContent = `${total} substituído(s)`;
+  idxBusca = -1;
+  agendarSalvar();
+}
+function toggleFindReplace(abrir) {
+  const p = $('findReplacePanel');
+  const mostrar = abrir === true || p.hidden;
+  p.hidden = !mostrar;
+  if (mostrar) {
+    const s = getSelection().toString();
+    if (s && s.length < 80 && !s.includes('\n')) $('findText').value = s;
+    $('findText').focus(); $('findText').select();
+  }
+}
+
+/* ---------- Abrir e salvar (HTML, Markdown, TXT) ---------- */
+function mdParaHtml(md) {
+  const inl = s => esc(s)
+    .replace(/!\[[^\]]*\]\(([^)\s]+)\)/g, '<img src="$1">')
+    .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, '<a href="$2">$1</a>')
+    .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')
+    .replace(/\*(.+?)\*/g, '<i>$1</i>')
+    .replace(/~~(.+?)~~/g, '<s>$1</s>');
+  const out = []; let lista = null, par = [];
+  const fechaLista = () => { if (lista) { out.push(`</${lista}>`); lista = null; } };
+  const fechaPar = () => { if (par.length) { out.push('<p>' + par.map(inl).join('<br>') + '</p>'); par = []; } };
+  for (const l of md.split(/\r?\n/)) {
+    let m;
+    if (!l.trim()) { fechaPar(); fechaLista(); }
+    else if ((m = l.match(/^(#{1,3})\s+(.*)/))) { fechaPar(); fechaLista(); out.push(`<h${m[1].length}>${inl(m[2])}</h${m[1].length}>`); }
+    else if (/^---+$/.test(l.trim())) { fechaPar(); fechaLista(); out.push('<hr>'); }
+    else if ((m = l.match(/^>\s?(.*)/))) { fechaPar(); fechaLista(); out.push(`<blockquote>${inl(m[1])}</blockquote>`); }
+    else if ((m = l.match(/^\s*([-*]|\d+\.)\s+(.*)/))) {
+      fechaPar();
+      const t = /\d/.test(m[1]) ? 'ol' : 'ul';
+      if (lista !== t) { fechaLista(); out.push(`<${t}>`); lista = t; }
+      out.push(`<li>${inl(m[2])}</li>`);
+    } else { fechaLista(); par.push(l); }
+  }
+  fechaPar(); fechaLista();
+  return out.join('');
+}
+function textoParaHtml(t) {
+  return t.split(/\n{2,}/).map(p => '<p>' + esc(p).replace(/\n/g, '<br>') + '</p>').join('');
+}
+function paraMd(no) {
+  return [...no.childNodes].map(mdNo).join('');
+}
+function mdNo(n) {
+  if (n.nodeType === 3) return n.nodeValue.replace(/\s+/g, ' ');
+  if (n.nodeType !== 1) return '';
+  const t = n.tagName, c = () => paraMd(n);
+  switch (t) {
+    case 'B': case 'STRONG': return `**${c()}**`;
+    case 'I': case 'EM': return `*${c()}*`;
+    case 'S': case 'STRIKE': return `~~${c()}~~`;
+    case 'H1': return `\n\n# ${c()}\n\n`;
+    case 'H2': return `\n\n## ${c()}\n\n`;
+    case 'H3': return `\n\n### ${c()}\n\n`;
+    case 'BR': return '  \n';
+    case 'HR': return '\n\n---\n\n';
+    case 'A': return `[${c()}](${n.getAttribute('href') || ''})`;
+    case 'IMG': return `![](${n.getAttribute('src') || ''})`;
+    case 'BLOCKQUOTE': return `\n\n> ${c().trim().replace(/\n/g, '\n> ')}\n\n`;
+    case 'UL': case 'OL':
+      return '\n\n' + [...n.children].map((li, i) => (t === 'UL' ? '- ' : `${i + 1}. `) + paraMd(li).trim()).join('\n') + '\n\n';
+    case 'P': case 'DIV': return `\n\n${c()}\n\n`;
+    default: return c();
+  }
+}
+
+function abrirArquivo(ev) {
+  const f = ev.target.files[0];
+  ev.target.value = '';
+  if (!f) return;
+  if (editor.innerText.trim() && !confirm('Substituir o conteúdo atual pelo arquivo aberto?')) return;
+  const fr = new FileReader();
+  fr.onload = () => {
+    const t = fr.result;
+    const html = /\.html?$/i.test(f.name) ? t : /\.md$/i.test(f.name) ? mdParaHtml(t) : textoParaHtml(t);
+    editor.innerHTML = htmlSeguro(html);
+    salvar(); atualizarEstatisticas(); atualizarReguas();
+  };
+  fr.readAsText(f);
+}
+
+function salvarComo() {
+  let nome = prompt('Nome do arquivo (.html, .md ou .txt):', 'documento.html');
+  if (!nome) return;
+  nome = nome.trim().replace(/[\\/:*?"<>|]/g, '_');
+  const ext = (nome.match(/\.(html?|md|txt)$/i) || [])[1];
+  if (!ext) nome += '.html';
+  const tipo = (ext || 'html').toLowerCase();
+
+  let conteudo, mime;
+  if (tipo === 'md') {
+    conteudo = paraMd(editor).replace(/\n{3,}/g, '\n\n').trim() + '\n';
+    mime = 'text/markdown';
+  } else if (tipo === 'txt') {
+    conteudo = editor.innerText;
+    mime = 'text/plain';
+  } else {
+    const cs = getComputedStyle(document.body);
+    const css = `body{font-family:${getComputedStyle(editor).fontFamily};background:${cs.backgroundColor};color:${cs.color};padding:40px;max-width:800px;margin:auto;line-height:1.6}img{max-width:100%;border-radius:8px}`;
+    conteudo = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${esc(nome.replace(/\.html?$/i, ''))}</title><style>${css}</style></head><body>${editor.innerHTML}</body></html>`;
+    mime = 'text/html';
+  }
+  const url = URL.createObjectURL(new Blob([conteudo], { type: mime + ';charset=utf-8' }));
+  const a = document.createElement('a');
+  a.href = url; a.download = nome;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  status('Arquivo baixado: ' + nome);
+}
+
+/* ---------- Atalhos ---------- */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { $('findReplacePanel').hidden = true; fecharIA(); togglePaleta(false); return; }
+  if (!(e.ctrlKey || e.metaKey)) return;
+  const k = e.key.toLowerCase();
+  if (k === 's') { e.preventDefault(); salvarComo(); }
+  else if (k === 'f' || k === 'h') { e.preventDefault(); toggleFindReplace(true); }
+});
+</script>
+</body>
+</html>
