@@ -50,7 +50,7 @@
             flex-wrap: wrap;
         }
 
-        select, button, input[type="file"], input[type="color"] {
+        select, button, input[type="file"] {
             padding: 6px 10px;
             border-radius: 6px;
             border: 1px solid rgba(0,0,0,0.15);
@@ -60,11 +60,6 @@
             font-weight: 500;
             height: 36px;
             box-sizing: border-box;
-        }
-
-        input[type="color"] {
-            padding: 2px;
-            width: 38px;
         }
 
         button:hover, select:hover {
@@ -195,18 +190,21 @@
     <!-- Barra de Ferramentas -->
     <div class="toolbar" id="toolbar">
         <div class="toolbar-group">
-            <select id="themeSelector" onchange="mudarTema(this.value)">
-                <option value="theme-cream">Creme</option>
-                <option value="theme-lavender">Lavanda</option>
-                <option value="theme-peach">Pêssego</option>
-                <option value="theme-mint">Menta</option>
-                <option value="theme-rose">Rosa Suave</option>
-                <option value="theme-sky">Azul Céu</option>
-                <option value="theme-lemon">Limão</option>
-                <option value="theme-lilac">Lilás</option>
-                <option value="theme-aqua">Água Marinha</option>
-                <option value="theme-sand">Areia</option>
-            </select>
+            <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="font-size: 13px; font-weight: 600; opacity: 0.85;">Ambiente:</span>
+                <select id="themeSelector" onchange="mudarTema(this.value)">
+                    <option value="theme-cream">Creme</option>
+                    <option value="theme-lavender">Lavanda</option>
+                    <option value="theme-peach">Pêssego</option>
+                    <option value="theme-mint">Menta</option>
+                    <option value="theme-rose">Rosa Suave</option>
+                    <option value="theme-sky">Azul Céu</option>
+                    <option value="theme-lemon">Limão</option>
+                    <option value="theme-lilac">Lilás</option>
+                    <option value="theme-aqua">Água Marinha</option>
+                    <option value="theme-sand">Areia</option>
+                </select>
+            </div>
 
             <select id="fontSelector" onchange="mudarFonte(this.value)">
                 <option value="font-sans">Sistema (Sans)</option>
@@ -230,7 +228,15 @@
                 <option value="7">Enorme (7)</option>
             </select>
 
-            <input type="color" id="fontColorPicker" onchange="mudarCor(this.value)" title="Cor do Texto">
+            <!-- Botão de Cor com Seta e Indicador -->
+            <div style="position: relative; display: inline-block;">
+                <button type="button" onclick="document.getElementById('fontColorPicker').click()" title="Cor do Texto" style="display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.85); border: 1px solid rgba(0,0,0,0.15); border-radius: 6px; padding: 6px 10px; cursor: pointer; height: 36px;">
+                    <span id="colorIndicator" style="width: 14px; height: 14px; background-color: #333333; border-radius: 3px; display: inline-block; border: 1px solid rgba(0,0,0,0.2);"></span>
+                    <span style="font-size: 14px; font-weight: 500;">Cor</span>
+                    <span style="font-size: 10px; opacity: 0.7;">▼</span>
+                </button>
+                <input type="color" id="fontColorPicker" onchange="mudarCor(this.value)" style="position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0;">
+            </div>
         </div>
 
         <div class="toolbar-group">
@@ -247,7 +253,7 @@
             <input type="file" id="fileInput" style="display:none" accept=".html,.md,.txt" onchange="abrirArquivo(event)">
             <button onclick="document.getElementById('fileInput').click()">📂 Abrir</button>
             <button onclick="salvarComo()">💾 Salvar</button>
-            <button onclick="limparEditor()" style="border-color: #d9534f; color: #a94442;" title="Apagar todo o texto">🗑️ Apagar</button>
+            <button onclick="limparEditor()" style="border-color: #d9534f; color: #a94442;" title="Apagar todo o texto">🗑️️ Apagar</button>
         </div>
     </div>
 
@@ -366,6 +372,7 @@
         }
 
         function mudarCor(cor) {
+            document.getElementById('colorIndicator').style.backgroundColor = cor;
             document.execCommand('foreColor', false, cor);
             editor.focus();
             salvarAutomatico();
