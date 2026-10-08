@@ -28,38 +28,9 @@
     .chat{position:fixed;right:22px;bottom:22px;z-index:100;width:min(390px,calc(100% - 24px));height:min(590px,calc(100vh - 32px));display:none;grid-template-rows:auto 1fr auto;border-radius:22px;overflow:hidden;background:#0c1b2d;border:1px solid rgba(57,216,255,.25);box-shadow:0 30px 90px rgba(0,0,0,.55)}.chat.open{display:grid}.chat-head{display:flex;align-items:center;gap:11px;padding:14px 15px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.025)}.chat-avatar{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,var(--cyan),var(--lime));color:#06111f;font-weight:900}.chat-title{flex:1}.chat-title b{display:block;font-size:.86rem}.chat-title small{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:.62rem}.chat-close,.chat-clear{border:0;background:transparent;color:var(--muted);cursor:pointer}.chat-close{font-size:1.3rem}.chat-messages{display:flex;flex-direction:column;gap:10px;padding:15px;overflow-y:auto}.message{max-width:86%;padding:10px 12px;border-radius:15px;font-size:.76rem;line-height:1.55;white-space:pre-wrap}.message.zim{align-self:flex-start;background:rgba(57,216,255,.1);border:1px solid rgba(57,216,255,.15);border-bottom-left-radius:4px}.message.user{align-self:flex-end;color:#06111f;background:linear-gradient(135deg,var(--cyan),#83eaff);border-bottom-right-radius:4px}.message.error{color:#ffc2ca;background:rgba(255,82,103,.1);border:1px solid rgba(255,82,103,.25)}.typing{display:inline-flex;gap:4px}.typing i{width:5px;height:5px;border-radius:50%;background:var(--cyan);animation:blink 1s infinite}.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}@keyframes blink{50%{opacity:.25;transform:translateY(-2px)}}.chat-form{display:grid;grid-template-columns:1fr auto;gap:8px;padding:12px;border-top:1px solid var(--line);background:rgba(4,13,24,.45)}.chat-input{min-width:0;min-height:42px;padding:0 12px;border:1px solid var(--line);border-radius:12px;color:var(--text);background:#071423;outline:0}.chat-send{width:42px;border:0;border-radius:12px;color:#06111f;background:var(--cyan);font-weight:900;cursor:pointer}.chat-send:disabled{opacity:.45;cursor:not-allowed}.chat-note{grid-column:1/-1;margin:0;color:var(--muted);font-size:.56rem;text-align:center}
     @media(max-width:560px){.chat{right:12px;bottom:12px;height:calc(100vh - 24px)}}
     @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
-.calc-root{
-  --bg:#f3f1ee;--panel:#fff;--key:#e8e5e0;--key-h:#d9d5ce;--ink:#1d1c1a;--mute:#6b6760;
-  --op:#1f5f5b;--op-ink:#fff;--clr:#b3261e;--focus:#1f5f5b;
-  max-width:340px;width:100%;margin:0 auto;padding:16px;border-radius:20px;
-  background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-}
-.calc-root[data-theme="dark"]{
-  --bg:#1a1918;--panel:#262523;--key:#34322f;--key-h:#47443f;--ink:#f1eee9;--mute:#a09b93;
-  --op:#5fb8b0;--op-ink:#10211f;--clr:#ff8a80;--focus:#5fb8b0;
-}
-.calc-root *{box-sizing:border-box}
-.calc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-.calc-top h2{font-size:1rem;font-weight:600;margin:0}
-.calc-theme{border:0;background:var(--key);color:var(--ink);border-radius:999px;padding:6px 12px;font:inherit;font-size:.85rem;cursor:pointer}
-.calc-screen{background:var(--panel);border-radius:14px;padding:12px 14px;margin-bottom:12px;min-height:84px;
-  display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-end;overflow:hidden}
-.calc-expr{font-size:.95rem;color:var(--mute);min-height:1.3em;max-width:100%;overflow-x:auto;white-space:nowrap}
-.calc-out{font-size:2rem;font-weight:600;max-width:100%;overflow-x:auto;white-space:nowrap;font-variant-numeric:tabular-nums}
-.calc-out.erro{font-size:1.1rem;color:var(--clr)}
-.calc-keys{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.calc-keys button{border:0;border-radius:14px;padding:0;height:56px;font:inherit;font-size:1.2rem;
-  background:var(--key);color:var(--ink);cursor:pointer;transition:background .12s,transform .08s}
-.calc-keys button:hover{background:var(--key-h)}
-.calc-keys button:active{transform:scale(.96)}
-.calc-keys .op{background:var(--op);color:var(--op-ink)}
-.calc-keys .op:hover{filter:brightness(1.1);background:var(--op)}
-.calc-keys .clr{color:var(--clr)}
-.calc-keys .wide{grid-column:span 2}
-.calc-root button:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
-@media (prefers-reduced-motion:reduce){.calc-keys button{transition:none}}
+    .note-panel{padding:16px}.note-panel textarea{min-height:42px;height:46px;margin:8px 0 3px;padding:9px 11px}.note-panel .note-status{min-height:0}.note-status:empty{display:none}
+    .calc-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.calc-open{display:grid;place-items:center;width:32px;height:32px;border:1px solid var(--line);border-radius:10px;background:rgba(57,216,255,.07);color:var(--cyan);font-size:1rem}.calc-open:hover{background:rgba(57,216,255,.15)}.calc-input{display:block;width:100%;min-width:0;height:42px;margin-top:12px;padding:0 12px;border:1px solid var(--line);border-radius:12px;color:var(--text);background:rgba(4,13,24,.52);font-variant-numeric:tabular-nums}.calc-input:focus{border-color:var(--cyan)}.calc-result{display:block;min-height:24px;margin-top:8px;color:var(--cyan);font-size:1.1rem;font-weight:800;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}.calc-result[data-error="true"]{color:#ff6478}
 
-    .calc-panel{padding:0;background:transparent;border:0;box-shadow:none}.calc-panel .calc-root{box-sizing:border-box;max-width:none}.calc-root:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
   </style>
 </head>
 <body>
@@ -90,43 +61,10 @@
       <aside class="side" aria-label="Utilitários">
         <section class="panel glass"><div class="bar-head"><div><p class="label">Praticagem ZP-21</p><h2>Condição da barra</h2></div><button class="bar-refresh" id="refresh-bar" type="button" aria-label="Atualizar condição da barra" title="Atualizar condição da barra"><span id="refresh-bar-icon" aria-hidden="true">↻</span></button></div><div class="bar-condition" id="bar-condition" data-state="loading" aria-live="polite"><b id="bar-status">CONSULTANDO…</b><small id="bar-detail">Buscando condição publicada pela Praticagem ZP-21.</small></div></section>
         <section class="panel glass note-panel"><div class="note-head"><div><p class="label">Produtividade</p><h2>Nota rápida</h2></div><button class="btn primary" id="save-note" type="button">Salvar</button></div><textarea id="note" maxlength="800" placeholder="Anote algo importante..." aria-label="Nota rápida"></textarea><span class="note-status" id="note-status"></span></section>
-        <section class="panel glass calc-panel" aria-label="Calculadora">
-<div class="calc-root" id="calc" data-theme="light" tabindex="0" aria-label="Calculadora">
-  <div class="calc-top">
-    <h2>Calculadora</h2>
-    <button type="button" class="calc-theme" id="calc-theme" aria-label="Alternar tema claro e escuro">Tema escuro</button>
-  </div>
-  <div class="calc-screen">
-    <div class="calc-expr" id="calc-expr" aria-hidden="true"></div>
-    <div class="calc-out" id="calc-out" role="status" aria-live="polite" aria-atomic="true">0</div>
-  </div>
-  <div class="calc-keys" id="calc-keys" tabindex="-1">
-    <button type="button" class="clr" data-act="clear" aria-label="Limpar tudo">C</button>
-    <button type="button" data-act="back" aria-label="Apagar último dígito">⌫</button>
-    <button type="button" data-act="percent" aria-label="Porcentagem">%</button>
-    <button type="button" class="op" data-op="/" aria-label="Dividir">÷</button>
-
-    <button type="button" data-num="7">7</button>
-    <button type="button" data-num="8">8</button>
-    <button type="button" data-num="9">9</button>
-    <button type="button" class="op" data-op="*" aria-label="Multiplicar">×</button>
-
-    <button type="button" data-num="4">4</button>
-    <button type="button" data-num="5">5</button>
-    <button type="button" data-num="6">6</button>
-    <button type="button" class="op" data-op="-" aria-label="Subtrair">−</button>
-
-    <button type="button" data-num="1">1</button>
-    <button type="button" data-num="2">2</button>
-    <button type="button" data-num="3">3</button>
-    <button type="button" class="op" data-op="+" aria-label="Somar">+</button>
-
-    <button type="button" data-act="sign" aria-label="Inverter sinal">±</button>
-    <button type="button" data-num="0">0</button>
-    <button type="button" data-act="dot" aria-label="Vírgula decimal">,</button>
-    <button type="button" class="op" data-act="eq" aria-label="Igual">=</button>
-  </div>
-</div>
+        <section class="panel glass calc-panel" aria-labelledby="calc-title">
+          <div class="calc-head"><h2 id="calc-title">Calculadora</h2><a class="calc-open" id="calc-open" href="calculadora.html" target="_blank" rel="noopener" aria-label="Abrir calculadora completa em janela separada" title="Abrir calculadora completa">↗</a></div>
+          <input class="calc-input" id="calc-input" type="text" inputmode="text" maxlength="200" autocomplete="off" spellcheck="false" aria-label="Digite uma conta e pressione Enter" placeholder="Ex.: 25 + 10 — Enter" aria-describedby="calc-result">
+          <output class="calc-result" id="calc-result" for="calc-input" role="status" aria-live="polite" aria-atomic="true">= 0</output>
         </section>
       </aside>
       <section class="panel glass ships" id="navios">
@@ -180,126 +118,37 @@
 </script>
 <script>
 (function(){
-  var root=document.getElementById('calc');
-  var outEl=document.getElementById('calc-out');
-  var exprEl=document.getElementById('calc-expr');
-  var themeBtn=document.getElementById('calc-theme');
-  var SYM={'+':'+','-':'−','*':'×','/':'÷'};
-
-  var cur='0';        // número em edição (string)
-  var acc=null;       // acumulador
-  var op=null;        // operador pendente
-  var fresh=true;     // próximo dígito substitui o visor
-  var erro=false;
-
-  function fmt(n){
-    if(!isFinite(n)) return 'Erro';
-    var r=parseFloat(n.toPrecision(12)); // remove ruído de ponto flutuante
-    var s=String(r);
-    if(s.indexOf('e')>-1) return s.replace('.',',');
-    return s.replace('.',',');
-  }
-  function val(){return parseFloat(cur.replace(',','.'))}
-  function render(){
-    outEl.textContent=erro?'Divisão por zero':cur;
-    outEl.classList.toggle('erro',erro);
-    exprEl.textContent=(acc!==null&&op)?fmt(acc)+' '+SYM[op]:'';
-  }
-  function compute(a,b,o){
-    if(o==='+')return a+b;
-    if(o==='-')return a-b;
-    if(o==='*')return a*b;
-    if(o==='/')return b===0?NaN:a/b;
-    return b;
-  }
-  function reset(){cur='0';acc=null;op=null;fresh=true;erro=false;render()}
-  function num(d){
-    if(erro)reset();
-    if(fresh||cur==='0'){cur=d;fresh=false}
-    else if(cur.replace(/[-,]/g,'').length<15){cur+=d}
-    render();
-  }
-  function dot(){
-    if(erro)reset();
-    if(fresh){cur='0,';fresh=false}
-    else if(cur.indexOf(',')<0){cur+=','}
-    render();
-  }
-  function setOp(o){
-    if(erro)return;
-    if(op&&!fresh){ // encadeia: 2+3+ ...
-      var r=compute(acc,val(),op);
-      if(isNaN(r)){erro=true;acc=null;op=null;render();return}
-      acc=r;cur=fmt(r);
-    }else if(!op){acc=val()}
-    op=o;fresh=true;render();
-  }
-  function eq(){
-    if(erro||!op)return;
-    var r=compute(acc,val(),op);
-    if(isNaN(r)){erro=true;acc=null;op=null;render();return}
-    cur=fmt(r);acc=null;op=null;fresh=true;render();
-  }
-  function back(){
-    if(erro){reset();return}
-    if(fresh)return;
-    cur=cur.length>1?cur.slice(0,-1):'0';
-    if(cur==='-')cur='0';
-    render();
-  }
-  function percent(){
-    if(erro)return;
-    var v=val();
-    v=(op&&acc!==null&&(op==='+'||op==='-'))?acc*v/100:v/100;
-    cur=fmt(v);fresh=false;render();
-  }
-  function sign(){
-    if(erro||cur==='0')return;
-    cur=cur.charAt(0)==='-'?cur.slice(1):'-'+cur;render();
-  }
-
-  document.getElementById('calc-keys').addEventListener('click',function(e){
-    var b=e.target.closest('button');if(!b)return;
-    if(b.dataset.num!==undefined)num(b.dataset.num);
-    else if(b.dataset.op)setOp(b.dataset.op);
-    else switch(b.dataset.act){
-      case 'clear':reset();break;
-      case 'back':back();break;
-      case 'percent':percent();break;
-      case 'sign':sign();break;
-      case 'dot':dot();break;
-      case 'eq':eq();break;
+  "use strict";
+  const input=document.getElementById("calc-input"),result=document.getElementById("calc-result");
+  function calculate(source){
+    const text=source.replace(/\s/g,"").replace(/,/g,".").replace(/[×xX]/g,"*").replace(/[÷]/g,"/").replace(/−/g,"-");
+    let pos=0;
+    function fail(){throw new Error("Confira a conta digitada.")}
+    function factor(){
+      if(text[pos]==="+"){pos++;return factor()}
+      if(text[pos]==="-"){pos++;return -factor()}
+      let value;
+      if(text[pos]==="("){pos++;value=sum();if(text[pos++]!==")")fail()}
+      else {const m=text.slice(pos).match(/^(?:\d+(?:\.\d*)?|\.\d+)/);if(!m)fail();pos+=m[0].length;value=Number(m[0])}
+      while(text[pos]==="%"){pos++;value/=100}
+      return value;
     }
-  });
-
-  // Teclado: só captura as teclas da calculadora e só com o foco dentro dela.
-  root.addEventListener('keydown',function(e){
-    if(e.ctrlKey||e.metaKey||e.altKey)return;
-    var k=e.key,used=true;
-    if(/^[0-9]$/.test(k))num(k);
-    else if(k==='+'||k==='-'||k==='*'||k==='/')setOp(k);
-    else if(k==='x'||k==='X')setOp('*');
-    else if(k==='.'||k===',')dot();
-    else if(k==='%')percent();
-    else if(k==='Backspace')back();
-    else if(k==='Escape'||k==='Delete')reset();
-    else if(k==='='||(k==='Enter'&&e.target.tagName!=='BUTTON'))eq();
-    else used=false;
-    if(used)e.preventDefault();
-  });
-
-  // Tema: segue o sistema e lembra a escolha (se o navegador permitir).
-  function setTheme(t,save){
-    root.dataset.theme=t;
-    themeBtn.textContent=t==='dark'?'Tema claro':'Tema escuro';
-    if(save){try{localStorage.setItem('calc-theme',t)}catch(_){}}
+    function product(){let value=factor();while(text[pos]==="*"||text[pos]==="/"){const op=text[pos++],right=factor();if(op==="/"&&right===0)throw new Error("Divisão por zero");value=op==="*"?value*right:value/right}return value}
+    function sum(){let value=product();while(text[pos]==="+"||text[pos]==="-"){const op=text[pos++],right=product();value=op==="+"?value+right:value-right}return value}
+    const value=sum();if(pos!==text.length)fail();if(!Number.isFinite(value))throw new Error("Resultado fora do limite.");return Number(value.toPrecision(12));
   }
-  var saved=null;try{saved=localStorage.getItem('calc-theme')}catch(_){}
-  setTheme(saved||(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'),false);
-  themeBtn.addEventListener('click',function(){setTheme(root.dataset.theme==='dark'?'light':'dark',true)});
-
-  render();
-})();
-</script>
+  input.addEventListener("keydown",function(e){
+    if(e.key==="Escape"){input.value="";result.textContent="= 0";result.dataset.error="false";return}
+    if(e.key!=="Enter")return;
+    e.preventDefault();
+    if(!input.value.trim()){result.textContent="= 0";result.dataset.error="false";return}
+    try{result.textContent="= "+calculate(input.value).toLocaleString("pt-BR",{maximumSignificantDigits:12});result.dataset.error="false"}catch(error){result.textContent=error.message;result.dataset.error="true"}
+  });
+  input.addEventListener("input",function(){result.textContent="= …";result.dataset.error="false"});
+  document.getElementById("calc-open").addEventListener("click",function(e){
+    const popup=window.open(this.href,"jz-calculadora","popup=yes,width=430,height=660,resizable=yes,scrollbars=yes");
+    if(popup){popup.opener=null;popup.focus();e.preventDefault()}
+  });
+})();</script>
 </body>
 </html>
