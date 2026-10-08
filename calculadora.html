@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calculadora — JZ Digital</title>
+<style>
+.calc-root{
+  --bg:#f3f1ee;--panel:#fff;--key:#e8e5e0;--key-h:#d9d5ce;--ink:#1d1c1a;--mute:#6b6760;
+  --op:#1f5f5b;--op-ink:#fff;--clr:#b3261e;--focus:#1f5f5b;
+  max-width:340px;width:100%;margin:0 auto;padding:16px;border-radius:20px;
+  background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+.calc-root[data-theme="dark"]{
+  --bg:#1a1918;--panel:#262523;--key:#34322f;--key-h:#47443f;--ink:#f1eee9;--mute:#a09b93;
+  --op:#5fb8b0;--op-ink:#10211f;--clr:#ff8a80;--focus:#5fb8b0;
+}
+.calc-root *{box-sizing:border-box}
+.calc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.calc-top h2{font-size:1rem;font-weight:600;margin:0}
+.calc-theme{border:0;background:var(--key);color:var(--ink);border-radius:999px;padding:6px 12px;font:inherit;font-size:.85rem;cursor:pointer}
+.calc-screen{background:var(--panel);border-radius:14px;padding:12px 14px;margin-bottom:12px;min-height:84px;
+  display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-end;overflow:hidden}
+.calc-expr{font-size:.95rem;color:var(--mute);min-height:1.3em;max-width:100%;overflow-x:auto;white-space:nowrap}
+.calc-out{font-size:2rem;font-weight:600;max-width:100%;overflow-x:auto;white-space:nowrap;font-variant-numeric:tabular-nums}
+.calc-out.erro{font-size:1.1rem;color:var(--clr)}
+.calc-keys{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.calc-keys button{border:0;border-radius:14px;padding:0;height:56px;font:inherit;font-size:1.2rem;
+  background:var(--key);color:var(--ink);cursor:pointer;transition:background .12s,transform .08s}
+.calc-keys button:hover{background:var(--key-h)}
+.calc-keys button:active{transform:scale(.96)}
+.calc-keys .op{background:var(--op);color:var(--op-ink)}
+.calc-keys .op:hover{filter:brightness(1.1);background:var(--op)}
+.calc-keys .clr{color:var(--clr)}
+.calc-keys .wide{grid-column:span 2}
+.calc-root button:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.calc-keys button{transition:none}}
+
+html,body{margin:0;min-height:100%;background:#07111f}body{padding:16px;box-sizing:border-box}
+.calc-root,.calc-root[data-theme="dark"]{box-sizing:border-box;--bg:#0f1d30;--panel:#071423;--key:#1a2b40;--key-h:#253e59;--ink:#f7fbff;--mute:#98a9bd;--op:#39d8ff;--op-ink:#04101c;--clr:#ff6478;--focus:#39d8ff;border:1px solid rgba(148,163,184,.17);box-shadow:0 22px 70px rgba(0,0,0,.34)}
+.calc-back{display:block;max-width:340px;margin:0 auto 14px;color:#39d8ff;text-decoration:none;font:14px system-ui}
+</style>
+</head>
+<body>
+
+<a class="calc-back" href="./" target="_blank" rel="noopener">← Abrir painel JZ Digital</a>
+<div class="calc-root" id="calc" data-theme="dark" tabindex="0">
+  <div class="calc-top">
+    <h2>Calculadora</h2>
+
+  </div>
+  <div class="calc-screen">
+    <div class="calc-expr" id="calc-expr" aria-hidden="true"></div>
+    <div class="calc-out" id="calc-out" role="status" aria-live="polite" aria-atomic="true">0</div>
+  </div>
+  <div class="calc-keys" id="calc-keys" tabindex="-1">
+    <button type="button" class="clr" data-act="clear" aria-label="Limpar tudo">C</button>
+    <button type="button" data-act="back" aria-label="Apagar último dígito">⌫</button>
+    <button type="button" data-act="percent" aria-label="Porcentagem">%</button>
+    <button type="button" class="op" data-op="/" aria-label="Dividir">÷</button>
+
+    <button type="button" data-num="7">7</button>
+    <button type="button" data-num="8">8</button>
+    <button type="button" data-num="9">9</button>
+    <button type="button" class="op" data-op="*" aria-label="Multiplicar">×</button>
+
+    <button type="button" data-num="4">4</button>
+    <button type="button" data-num="5">5</button>
+    <button type="button" data-num="6">6</button>
+    <button type="button" class="op" data-op="-" aria-label="Subtrair">−</button>
+
+    <button type="button" data-num="1">1</button>
+    <button type="button" data-num="2">2</button>
+    <button type="button" data-num="3">3</button>
+    <button type="button" class="op" data-op="+" aria-label="Somar">+</button>
+
+    <button type="button" data-act="sign" aria-label="Inverter sinal">±</button>
+    <button type="button" data-num="0">0</button>
+    <button type="button" data-act="dot" aria-label="Vírgula decimal">,</button>
+    <button type="button" class="op" data-act="eq" aria-label="Igual">=</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  var root=document.getElementById('calc');
+  var outEl=document.getElementById('calc-out');
+  var exprEl=document.getElementById('calc-expr');
+
+  var SYM={'+':'+','-':'−','*':'×','/':'÷'};
+
+  var cur='0';        // número em edição (string)
+  var acc=null;       // acumulador
+  var op=null;        // operador pendente
+  var fresh=true;     // próximo dígito substitui o visor
+  var erro=false;
+
+  function fmt(n){
+    if(!isFinite(n)) return 'Erro';
+    var r=parseFloat(n.toPrecision(12)); // remove ruído de ponto flutuante
+    var s=String(r);
+    if(s.indexOf('e')>-1) return s.replace('.',',');
+    return s.replace('.',',');
+  }
+  function val(){return parseFloat(cur.replace(',','.'))}
+  function render(){
+    outEl.textContent=erro?'Divisão por zero':cur;
+    outEl.classList.toggle('erro',erro);
+    exprEl.textContent=(acc!==null&&op)?fmt(acc)+' '+SYM[op]:'';
+  }
+  function compute(a,b,o){
+    if(o==='+')return a+b;
+    if(o==='-')return a-b;
+    if(o==='*')return a*b;
+    if(o==='/')return b===0?NaN:a/b;
+    return b;
+  }
+  function reset(){cur='0';acc=null;op=null;fresh=true;erro=false;render()}
+  function num(d){
+    if(erro)reset();
+    if(fresh||cur==='0'){cur=d;fresh=false}
+    else if(cur.replace(/[-,]/g,'').length<15){cur+=d}
+    render();
+  }
+  function dot(){
+    if(erro)reset();
+    if(fresh){cur='0,';fresh=false}
+    else if(cur.indexOf(',')<0){cur+=','}
+    render();
+  }
+  function setOp(o){
+    if(erro)return;
+    if(op&&!fresh){ // encadeia: 2+3+ ...
+      var r=compute(acc,val(),op);
+      if(isNaN(r)){erro=true;acc=null;op=null;render();return}
+      acc=r;cur=fmt(r);
+    }else if(!op){acc=val()}
+    op=o;fresh=true;render();
+  }
+  function eq(){
+    if(erro||!op)return;
+    var r=compute(acc,val(),op);
+    if(isNaN(r)){erro=true;acc=null;op=null;render();return}
+    cur=fmt(r);acc=null;op=null;fresh=true;render();
+  }
+  function back(){
+    if(erro){reset();return}
+    if(fresh)return;
+    cur=cur.length>1?cur.slice(0,-1):'0';
+    if(cur==='-')cur='0';
+    render();
+  }
+  function percent(){
+    if(erro)return;
+    var v=val();
+    v=(op&&acc!==null&&(op==='+'||op==='-'))?acc*v/100:v/100;
+    cur=fmt(v);fresh=false;render();
+  }
+  function sign(){
+    if(erro||cur==='0')return;
+    cur=cur.charAt(0)==='-'?cur.slice(1):'-'+cur;render();
+  }
+
+  document.getElementById('calc-keys').addEventListener('click',function(e){
+    var b=e.target.closest('button');if(!b)return;
+    if(b.dataset.num!==undefined)num(b.dataset.num);
+    else if(b.dataset.op)setOp(b.dataset.op);
+    else switch(b.dataset.act){
+      case 'clear':reset();break;
+      case 'back':back();break;
+      case 'percent':percent();break;
+      case 'sign':sign();break;
+      case 'dot':dot();break;
+      case 'eq':eq();break;
+    }
+  });
+
+  // Teclado: só captura as teclas da calculadora e só com o foco dentro dela.
+  root.addEventListener('keydown',function(e){
+    if(e.ctrlKey||e.metaKey||e.altKey)return;
+    var k=e.key,used=true;
+    if(/^[0-9]$/.test(k))num(k);
+    else if(k==='+'||k==='-'||k==='*'||k==='/')setOp(k);
+    else if(k==='x'||k==='X')setOp('*');
+    else if(k==='.'||k===',')dot();
+    else if(k==='%')percent();
+    else if(k==='Backspace')back();
+    else if(k==='Escape'||k==='Delete')reset();
+    else if(k==='='||(k==='Enter'&&e.target.tagName!=='BUTTON'))eq();
+    else used=false;
+    if(used)e.preventDefault();
+  });
+
+  render();
+  root.focus({preventScroll:true});
+})();
+</script>
+</body>
+</html>
