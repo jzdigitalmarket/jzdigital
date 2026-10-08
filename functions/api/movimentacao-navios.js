@@ -289,6 +289,9 @@ export async function onRequestGet(context) {
                 totalRealizados:
                     realizados.length,
 
+                proximaAtracacao:
+                    previstos.find(item => item.manobra.toLocaleLowerCase("pt-BR") === "entrada") || null,
+
                 proximasManobras:
                     proximas,
 
