@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nota rápida — JZ Digital</title>
+<style>
+*{box-sizing:border-box}body{margin:0;padding:20px;min-height:100vh;background:#07111f;color:#f7fbff;font:15px system-ui,sans-serif}.panel{max-width:720px;margin:auto;padding:20px;border:1px solid rgba(148,163,184,.17);border-radius:20px;background:#0f1d30}header{display:flex;align-items:center;justify-content:space-between;gap:14px}h1{font-size:1.3rem;margin:0}button{padding:9px 15px;border:0;border-radius:11px;background:#39d8ff;color:#04101c;font:700 14px system-ui;cursor:pointer}textarea{display:block;width:100%;min-height:300px;height:60vh;margin-top:16px;padding:14px;border:1px solid rgba(148,163,184,.17);border-radius:14px;background:#071423;color:#f7fbff;font:16px/1.5 system-ui;resize:vertical}:focus-visible{outline:3px solid #39d8ff;outline-offset:3px}#status{display:block;min-height:22px;margin-top:10px;color:#a8e85b;font-size:.85rem}
+</style>
+</head>
+<body><main class="panel"><header><h1>Nota rápida</h1><button id="save" type="button">Salvar</button></header><textarea id="note" maxlength="800" aria-label="Nota rápida completa" placeholder="Anote algo importante..."></textarea><span id="status" role="status" aria-live="polite"></span></main>
+<script>
+(function(){
+"use strict";
+const note=document.getElementById("note"),status=document.getElementById("status");
+try{note.value=localStorage.getItem("jz-quick-note")||""}catch(error){status.textContent="Não foi possível carregar a nota neste navegador."}
+function save(){try{localStorage.setItem("jz-quick-note",note.value);status.textContent="Nota salva e atualizada no painel."}catch(error){status.textContent="Não foi possível salvar a nota."}}
+document.getElementById("save").addEventListener("click",save);
+note.addEventListener("input",()=>{status.textContent="Alterações ainda não salvas."});
+note.addEventListener("keydown",function(e){if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="s"){e.preventDefault();save()}});
+window.addEventListener("storage",function(e){if(e.key==="jz-quick-note"){note.value=e.newValue||"";status.textContent="Nota atualizada pelo painel."}});
+note.focus();
+})();
+</script></body></html>
