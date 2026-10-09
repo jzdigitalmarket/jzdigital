@@ -8,6 +8,7 @@ Painel de Itajaí com manobras da Praticagem ZP-21, clima, cotações, notícias
 |---|---|
 | `index.html` | Painel, calendário, tarefas, calculadora, conversores e mensagens |
 | `functions/api/movimentacao-navios.js` | Rota `/api/movimentacao-navios` no Cloudflare Pages |
+| `functions/api/canal.js` | Rota `/api/canal` para a foto pública do canal |
 | `functions/api/cotacoes.js` | Rota `/api/cotacoes` e fontes alternativas de cotações |
 | `functions/api/gemini.js` | Rota `/api/gemini` usada pelo Editor |
 | `ainews3.html` | Radar Portuário |
@@ -25,7 +26,13 @@ A fonte é https://praticoszp21.com.br/movimentacao-de-navios/ . A consulta tem 
 
 O cache usa `caches.default`, compartilhado por centro de dados da Cloudflare, e não um banco de dados persistente. Em ambiente sem cache disponível, a consulta continua funcionando. O navegador também guarda a última consulta bem-sucedida por até 6 horas.
 
-Quando há falha da fonte, os registros anteriores podem continuar visíveis com sua data, mas a barra aparece como **NÃO CONFIRMADA**. Dados anteriores não acionam alertas de mudança nem alimentam a contagem regressiva. A cópia não constitui confirmação operacional atual. O painel consulta novamente a cada 2 minutos enquanto estiver visível.
+Quando há falha da fonte, os registros anteriores podem continuar visíveis com sua data, mas a barra aparece como **NÃO CONFIRMADA**. Dados anteriores não acionam alertas de mudança. A cópia não constitui confirmação operacional atual. O painel consulta novamente a cada 2 minutos enquanto estiver visível.
+
+## Foto do canal
+
+A foto fica à direita do título das manobras. O navegador consulta `/api/canal` ao abrir a página, a cada 60 segundos enquanto estiver visível e ao retornar à aba. Configure `CANAL_CAMERA_URL` no Cloudflare Pages com o endereço HTTPS de uma imagem pública atual da câmera (JPEG, PNG ou WebP). O endereço fica no servidor; a rota não aceita URLs enviadas pelo navegador. A fonte tem limite de espera de 8 segundos e imagem de até 5 MB.
+
+Sem fonte configurada ou em caso de falha, aparece **Imagem indisponível**; uma foto anterior é ocultada. A legenda informa o horário da consulta, não o horário de captura. A frequência de captura depende da câmera. Uma miniatura fixa de vídeo ou o indicador ilustrativo da Praticagem não substituem uma foto atual do canal.
 
 ## Calendário e calculadora
 
@@ -57,6 +64,7 @@ Execute na raiz com Node 20 ou superior:
 
 ```sh
 node tests/api.test.mjs
+node tests/canal.test.mjs
 ```
 
 Os testes usam fontes simuladas e não exigem chave nem geram solicitações ao Gemini. Cobrem parsing, cache, simultaneidade, cópia anterior, timeout, ações do Editor, validação e limite de requisições. A configuração de segredos e o funcionamento do provedor no ambiente publicado precisam ser verificados nesse ambiente.

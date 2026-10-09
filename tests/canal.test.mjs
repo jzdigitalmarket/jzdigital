@@ -1,0 +1,30 @@
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+const code=await readFile(new URL('../functions/api/canal.js',import.meta.url),'utf8');
+const {onRequestGet}=await import('data:text/javascript;base64,'+Buffer.from(code).toString('base64'));
+const originalFetch=globalThis.fetch,originalTimeout=globalThis.setTimeout;
+const env={CANAL_CAMERA_URL:'https://camera.example/snapshot.jpg'};
+try {
+  let calls=0;
+  globalThis.fetch=async()=>{calls++;return new Response(new Uint8Array([255,216,255,0]),{headers:{'Content-Type':'image/jpeg'}})};
+  assert.equal((await onRequestGet({env:{}})).status,503);
+  assert.equal((await onRequestGet({env:{CANAL_CAMERA_URL:'http://camera.example/a'}})).status,503);
+  assert.equal(calls,0);
+  let response=await onRequestGet({env,request:new Request('https://panel.example/api/canal?url=https://evil.example')});
+  assert.equal(response.status,200);assert.equal(response.headers.get('Cache-Control'),'no-store');
+  assert.deepEqual([...new Uint8Array(await response.arrayBuffer())],[255,216,255,0]);
+  globalThis.fetch=async(url,options)=>{assert.equal(url,env.CANAL_CAMERA_URL);assert.equal(options.redirect,'error');return new Response('<html>offline</html>',{headers:{'Content-Type':'image/jpeg'}})};
+  assert.equal((await onRequestGet({env})).status,502);
+  globalThis.fetch=async()=>new Response('<svg/>',{headers:{'Content-Type':'image/svg+xml'}});
+  assert.equal((await onRequestGet({env})).status,502);
+  globalThis.fetch=async()=>new Response('offline',{status:503});
+  assert.equal((await onRequestGet({env})).status,502);
+  globalThis.fetch=async()=>new Response(new Uint8Array([255,216,255]),{headers:{'Content-Type':'image/jpeg','Content-Length':'6000000'}});
+  assert.equal((await onRequestGet({env})).status,502);
+  globalThis.fetch=async()=>new Response(new ReadableStream({start(c){c.enqueue(new Uint8Array(5*1024*1024+1));c.close()}}),{headers:{'Content-Type':'image/jpeg'}});
+  assert.equal((await onRequestGet({env})).status,502);
+  globalThis.setTimeout=(fn)=>originalTimeout(fn,5);
+  globalThis.fetch=async(url,{signal})=>new Promise((resolve,reject)=>signal.addEventListener('abort',()=>reject(Object.assign(new Error('timeout'),{name:'AbortError'}))));
+  assert.equal((await onRequestGet({env})).status,504);
+  console.log('PASS foto do canal: fonte ausente/HTTPS, URL do servidor, imagem válida, sem cache, resposta inválida/erro, limite de tamanho e timeout.');
+} finally {globalThis.fetch=originalFetch;globalThis.setTimeout=originalTimeout;}
