@@ -1,12 +1,12 @@
 # Painel Portuário JZ Digital
 
-Painel de Itajaí com manobras da Praticagem ZP-21, clima, cotações, notícias, calendário com notas, tarefas e ferramentas de produtividade. A página principal é `index.html`.
+Painel de Itajaí com manobras da Praticagem ZP-21, clima, cotações, notícias, calendário com notas e câmera do canal. A página principal é `index.html`.
 
 ## Estrutura e rotas
 
 | Arquivo | Função |
 |---|---|
-| `index.html` | Painel, calendário, tarefas, calculadora, conversores e mensagens |
+| `index.html` | Painel de manobras, câmera do canal e calendário com notas |
 | `functions/api/movimentacao-navios.js` | Rota `/api/movimentacao-navios` no Cloudflare Pages |
 | `functions/api/canal.js` | Rota `/api/canal` para a foto pública do canal |
 | `functions/api/cotacoes.js` | Rota `/api/cotacoes` e fontes alternativas de cotações |
@@ -30,7 +30,7 @@ Quando há falha da fonte, os registros anteriores podem continuar visíveis com
 
 ## Imagem do canal via YouTube
 
-A transmissão `HLbQIdAiO1M`, da ConexãoDCTV, aparece no player oficial do YouTube à direita do título das manobras (abaixo no celular). A cada 60 segundos, enquanto a aba estiver visível, o painel carrega a transmissão sem som, tenta alcançar o trecho recente e pausa após 2,5 segundos de reprodução. A legenda marca o horário da atualização do quadro; não representa o horário de captura da câmera nem elimina o atraso da transmissão. O player mantém os controles e a identificação do YouTube; o painel não extrai JPEG nem usa miniatura fixa como foto atual.
+A transmissão `HLbQIdAiO1M`, da ConexãoDCTV, aparece no player oficial do YouTube no primeiro quadro da lateral direita, com o calendário abaixo. A cada 60 segundos, enquanto a aba estiver visível, o painel carrega a transmissão sem som, tenta alcançar o trecho recente e pausa após 2,5 segundos de reprodução. A legenda marca o horário da atualização do quadro; não representa o horário de captura da câmera nem elimina o atraso da transmissão. O player mantém os controles e a identificação do YouTube; o painel não extrai JPEG nem usa miniatura fixa como foto atual.
 
 Se o navegador bloquear o início automático, o botão **Iniciar câmera** permite a interação necessária. Falhas e encerramento da transmissão são informados; **Ver ao vivo** abre a fonte original. O player tem pelo menos 200 × 200 pixels nas telas suportadas. A incorporação depende do YouTube e das permissões do canal, sem exigir chave de API.
 
@@ -38,11 +38,11 @@ A rota `/api/canal` permanece disponível como alternativa para uma câmera que 
 
 Referência: https://developers.google.com/youtube/iframe_api_reference .
 
-## Calendário e calculadora
+## Calendário com notas
 
-Notas e tarefas são locais ao navegador e dispositivo, sem sincronização de contas. A exportação JSON inclui apenas as notas. Ao restaurar uma cópia, notas existentes são preservadas por padrão; sua substituição exige marcar a opção correspondente. Se uma gravação falha, a restauração tenta reverter as alterações parciais e informa o resultado.
+Clique em qualquer data para criar, editar ou excluir sua nota. Datas com notas exibem uma bolinha piscando; ao passar o mouse, aparece um resumo. Notas são locais ao navegador e dispositivo, sem sincronização de contas.
 
-A calculadora aceita expressões, parênteses e vírgula decimal, sem `eval`. Em adição ou subtração, um termo de porcentagem isolado é relativo ao valor à esquerda: `50 + 10% = 55`, `50 - 10% = 45`. Em multiplicação ou divisão, `%` representa a fração: `50 * 10% = 5`. Termos com multiplicações ou divisões próprias seguem a precedência matemática normal. O cálculo de dias úteis exclui o início, inclui o final e exige informar os feriados desejados.
+Calculadora, conversores, datas/horas, mensagens, tarefas e exportação/restauração foram retirados do painel. Os dados locais já salvos não foram apagados; páginas independentes antigas continuam com seus endereços preservados.
 
 ## Notícias e imagens
 
