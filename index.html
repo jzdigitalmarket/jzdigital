@@ -75,7 +75,7 @@
       </section>
       <aside class="side" aria-label="Utilitários">
         <section class="panel glass calendar-panel" aria-labelledby="calendar-title">
-          <div class="calendar-head"><h2 id="calendar-title">Calendário</h2><button class="btn calendar-today-btn" id="calendar-today" type="button">Hoje</button></div>
+          <div class="calendar-head"><h2 id="calendar-title">Calendário com Notas</h2><button class="btn calendar-today-btn" id="calendar-today" type="button">Hoje</button></div>
           <div class="calendar-nav"><button id="calendar-prev" type="button" aria-label="Mês anterior">‹</button><span class="calendar-month" id="calendar-month" aria-live="polite"></span><button id="calendar-next" type="button" aria-label="Próximo mês">›</button></div>
           <table class="calendar-table" aria-labelledby="calendar-month"><thead><tr><th scope="col" aria-label="Domingo">Dom</th><th scope="col" aria-label="Segunda-feira">Seg</th><th scope="col" aria-label="Terça-feira">Ter</th><th scope="col" aria-label="Quarta-feira">Qua</th><th scope="col" aria-label="Quinta-feira">Qui</th><th scope="col" aria-label="Sexta-feira">Sex</th><th scope="col" aria-label="Sábado">Sáb</th></tr></thead><tbody id="calendar-days"></tbody></table>
         </section>
@@ -230,7 +230,8 @@
         time.setAttribute("aria-label",new Date(Date.UTC(year,month,day)).toLocaleDateString("pt-BR",{day:"numeric",month:"long",year:"numeric",timeZone:"UTC"}));
         if(year===current.year&&month===current.month&&day===current.day){cell.className="calendar-today";time.setAttribute("aria-current","date")}
         const button=document.createElement("button");button.type="button";button.className="calendar-day";button.dataset.date=time.dateTime;
-        const hasNote=Boolean(readNote(time.dateTime).trim());button.setAttribute("aria-label",time.getAttribute("aria-label")+(hasNote?", com nota. Editar nota":", adicionar nota"));
+        const noteText=readNote(time.dateTime).trim(),hasNote=Boolean(noteText);
+        if(hasNote){const summary=noteText.replace(/\s+/g," ");button.title=summary.length>140?summary.slice(0,137)+"…":summary}button.setAttribute("aria-label",time.getAttribute("aria-label")+(hasNote?", com nota. Editar nota":", adicionar nota"));
         button.append(time);if(hasNote){const dot=document.createElement("span");dot.className="calendar-note-dot";dot.setAttribute("aria-hidden","true");button.append(dot)}
         button.addEventListener("click",()=>openNote(time.dateTime));cell.append(button);
       }
