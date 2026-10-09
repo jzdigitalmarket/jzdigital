@@ -28,11 +28,15 @@ O cache usa `caches.default`, compartilhado por centro de dados da Cloudflare, e
 
 Quando há falha da fonte, os registros anteriores podem continuar visíveis com sua data, mas a barra aparece como **NÃO CONFIRMADA**. Dados anteriores não acionam alertas de mudança. A cópia não constitui confirmação operacional atual. O painel consulta novamente a cada 2 minutos enquanto estiver visível.
 
-## Foto do canal
+## Imagem do canal via YouTube
 
-A foto fica à direita do título das manobras. O navegador consulta `/api/canal` ao abrir a página, a cada 60 segundos enquanto estiver visível e ao retornar à aba. Configure `CANAL_CAMERA_URL` no Cloudflare Pages com o endereço HTTPS de uma imagem pública atual da câmera (JPEG, PNG ou WebP). O endereço fica no servidor; a rota não aceita URLs enviadas pelo navegador. A fonte tem limite de espera de 8 segundos e imagem de até 5 MB.
+A transmissão `HLbQIdAiO1M`, da ConexãoDCTV, aparece no player oficial do YouTube à direita do título das manobras (abaixo no celular). A cada 60 segundos, enquanto a aba estiver visível, o painel carrega a transmissão sem som, tenta alcançar o trecho recente e pausa após 2,5 segundos de reprodução. A legenda marca o horário da atualização do quadro; não representa o horário de captura da câmera nem elimina o atraso da transmissão. O player mantém os controles e a identificação do YouTube; o painel não extrai JPEG nem usa miniatura fixa como foto atual.
 
-Sem fonte configurada ou em caso de falha, aparece **Imagem indisponível**; uma foto anterior é ocultada. A legenda informa o horário da consulta, não o horário de captura. A frequência de captura depende da câmera. Uma miniatura fixa de vídeo ou o indicador ilustrativo da Praticagem não substituem uma foto atual do canal.
+Se o navegador bloquear o início automático, o botão **Iniciar câmera** permite a interação necessária. Falhas e encerramento da transmissão são informados; **Ver ao vivo** abre a fonte original. O player tem pelo menos 200 × 200 pixels nas telas suportadas. A incorporação depende do YouTube e das permissões do canal, sem exigir chave de API.
+
+A rota `/api/canal` permanece disponível como alternativa para uma câmera que forneça foto pública JPEG, PNG ou WebP. Para usá-la numa integração futura, configure `CANAL_CAMERA_URL` no Cloudflare Pages com o endereço HTTPS da imagem. Essa rota não é consultada pelo player do YouTube; limita a fonte a 8 segundos e 5 MB e retorna indisponibilidade sem configuração ou em falhas.
+
+Referência: https://developers.google.com/youtube/iframe_api_reference .
 
 ## Calendário e calculadora
 

@@ -37,7 +37,7 @@ Inventário de referências estáticas no código em 09/10/2026. A ausência de 
 | `editorzinho.html` | `index2.html` | Página independente, recurso ou versão anterior; endereço preservado |
 | `files (1).zip` | Nenhuma referência estática encontrada | Recurso ou arquivo preservado; uso externo a confirmar |
 | `forca.html` | Nenhuma referência estática encontrada | Página independente, recurso ou versão anterior; endereço preservado |
-| `functions/api/canal.js` | `index.html (rota)` | Foto pública do canal; fonte configurada no servidor |
+| `functions/api/canal.js` | Alternativa documentada no README | Foto pública do canal; preservada para fonte JPEG/PNG/WebP futura |
 | `functions/api/chat.js` | `chat.html (rota)`, `chat2.html (rota)`, `indexnewold.html (rota)` | Function do Cloudflare; algumas rotas podem ser independentes |
 | `functions/api/cotacoes.js` | Nenhuma referência estática encontrada | Function do Cloudflare; algumas rotas podem ser independentes |
 | `functions/api/gemini.js` | `editor.html (rota)`, `editorold.html (rota)`, `teste2.html (rota)` | Function do Cloudflare; algumas rotas podem ser independentes |
