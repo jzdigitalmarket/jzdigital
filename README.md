@@ -28,11 +28,11 @@ O cache usa `caches.default`, compartilhado por centro de dados da Cloudflare, e
 
 Quando há falha da fonte, os registros anteriores podem continuar visíveis com sua data, mas a barra aparece como **NÃO CONFIRMADA**. Dados anteriores não acionam alertas de mudança. A cópia não constitui confirmação operacional atual. O painel consulta novamente a cada 2 minutos enquanto estiver visível.
 
-## Imagem do canal via YouTube
+## Vídeo do canal via YouTube
 
-A transmissão `HLbQIdAiO1M`, da ConexãoDCTV, aparece no player oficial do YouTube no primeiro quadro da lateral direita, com o calendário abaixo. A cada 60 segundos, enquanto a aba estiver visível, o painel carrega a transmissão sem som, tenta alcançar o trecho recente e pausa após 2,5 segundos de reprodução. A legenda marca o horário da atualização do quadro; não representa o horário de captura da câmera nem elimina o atraso da transmissão. O player mantém os controles e a identificação do YouTube; o painel não extrai JPEG nem usa miniatura fixa como foto atual.
+A transmissão completa `HLbQIdAiO1M`, da ConexãoDCTV, aparece no player oficial do YouTube no primeiro quadro da lateral direita, com o calendário abaixo. O vídeo roda continuamente, sem pausas programadas nem recarregamento a cada minuto. Os controles originais permitem pausar, retomar, ajustar o volume e abrir em tela cheia. O início automático é solicitado sem som; o usuário pode ativar o áudio pelos controles do vídeo.
 
-Se o navegador bloquear o início automático, o botão **Iniciar câmera** permite a interação necessária. Falhas e encerramento da transmissão são informados; **Ver ao vivo** abre a fonte original. O player tem pelo menos 200 × 200 pixels nas telas suportadas. A incorporação depende do YouTube e das permissões do canal, sem exigir chave de API.
+Se o navegador bloquear o início automático, o botão **Iniciar vídeo** permite a interação necessária. Falhas e encerramento da transmissão são informados; **Ver ao vivo** abre a fonte original. Se a API não carregar, os controles do próprio player continuam disponíveis. O player tem pelo menos 200 × 200 pixels nas telas suportadas. A incorporação depende do YouTube e das permissões do canal, sem exigir chave de API.
 
 A rota `/api/canal` permanece disponível como alternativa para uma câmera que forneça foto pública JPEG, PNG ou WebP. Para usá-la numa integração futura, configure `CANAL_CAMERA_URL` no Cloudflare Pages com o endereço HTTPS da imagem. Essa rota não é consultada pelo player do YouTube; limita a fonte a 8 segundos e 5 MB e retorna indisponibilidade sem configuração ou em falhas.
 

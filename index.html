@@ -80,9 +80,9 @@
       <aside class="side" aria-label="Câmera e calendário">
         <section class="panel glass camera-panel" aria-label="Câmera do canal">
             <figure class="channel-camera" id="channel-camera" data-state="loading">
-              <div class="channel-camera-frame"><iframe id="channel-youtube-player" title="Câmera do canal do Porto de Itajaí — ConexãoDCTV" width="240" height="200" src="https://www.youtube.com/embed/HLbQIdAiO1M?enablejsapi=1&amp;playsinline=1&amp;mute=1&amp;rel=0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
+              <div class="channel-camera-frame"><iframe id="channel-youtube-player" title="Câmera do canal do Porto de Itajaí — ConexãoDCTV" width="240" height="200" src="https://www.youtube.com/embed/HLbQIdAiO1M?enablejsapi=1&amp;playsinline=1&amp;mute=1&amp;autoplay=1&amp;rel=0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
               <figcaption><strong>Canal de acesso · YouTube</strong><span id="channel-camera-status" role="status">Carregando transmissão…</span></figcaption>
-              <div class="channel-camera-actions"><button class="btn" id="channel-camera-refresh" type="button" disabled>Atualizar imagem</button><a href="https://www.youtube.com/watch?v=HLbQIdAiO1M" target="_blank" rel="noopener">Ver ao vivo ↗</a></div>
+              <div class="channel-camera-actions"><button class="btn" id="channel-camera-start" type="button" hidden>Iniciar vídeo</button><a href="https://www.youtube.com/watch?v=HLbQIdAiO1M" target="_blank" rel="noopener">Ver ao vivo ↗</a></div>
             </figure>
         </section>
         <section class="panel glass calendar-panel" aria-labelledby="calendar-title">
@@ -124,56 +124,32 @@
   const $=s=>document.querySelector(s);
   function clock(){const n=new Date();$("#clock").textContent=n.toLocaleTimeString("pt-BR",{timeZone:"America/Sao_Paulo",hour:"2-digit",minute:"2-digit"});$("#date").textContent=n.toLocaleDateString("pt-BR",{timeZone:"America/Sao_Paulo",day:"2-digit",month:"2-digit"})}
   (()=>{
-    const videoId="HLbQIdAiO1M",frame=document.getElementById("channel-camera"),status=document.getElementById("channel-camera-status"),button=document.getElementById("channel-camera-refresh"),iframe=document.getElementById("channel-youtube-player");
-    let player=null,ready=false,pending=false,seeking=false,blocked=false,freezeTimer=null,waitTimer=null;
+    const videoId="HLbQIdAiO1M",frame=document.getElementById("channel-camera"),status=document.getElementById("channel-camera-status"),button=document.getElementById("channel-camera-start"),iframe=document.getElementById("channel-youtube-player");
+    let player=null,ready=false;
     const url=new URL(iframe.src);url.searchParams.set("origin",location.origin);iframe.src=url.href;
-    function clearTimers(){clearTimeout(freezeTimer);clearTimeout(waitTimer);freezeTimer=null;waitTimer=null;}
-    function unavailable(message){clearTimers();pending=false;frame.dataset.state="error";status.textContent=message;button.disabled=!ready;}
-    function updateCamera(){
-      if(!ready||document.hidden||pending||blocked)return;
-      clearTimers();pending=true;seeking=false;button.disabled=true;frame.dataset.state="loading";status.textContent="Atualizando quadro da transmissão…";
-      try{
-        player.mute();player.loadVideoById({videoId});
-        waitTimer=setTimeout(()=>{try{player.pauseVideo()}catch(error){}unavailable("Não foi possível atualizar · tente novamente");},20000);
-      }catch(error){unavailable("Transmissão indisponível · tente novamente");}
-    }
     function onStateChange(event){
-      if(event.data===YT.PlayerState.ENDED){unavailable("Transmissão encerrada · ver no YouTube");return;}
-      if(event.data!==YT.PlayerState.PLAYING)return;
-      if(document.hidden){player.pauseVideo();return;}
-      if(blocked){blocked=false;pending=true;seeking=false;button.textContent="Atualizar imagem";}
-      if(!pending)return;
-      clearTimeout(freezeTimer);
-      const duration=player.getDuration(),position=player.getCurrentTime();
-      if(!seeking&&duration>0&&duration-position>10){seeking=true;player.seekTo(Math.max(0,duration-2),true);}
-      freezeTimer=setTimeout(()=>{
-        if(!pending||document.hidden)return;
-        const duration=player.getDuration(),position=player.getCurrentTime();
-        if(duration>0&&duration-position>15){player.pauseVideo();unavailable("Trecho recente indisponível · ver ao vivo");return;}
-        pending=false;clearTimers();player.pauseVideo();frame.dataset.state="ready";button.disabled=false;
-        status.textContent="Quadro às "+new Date().toLocaleTimeString("pt-BR",{timeZone:"America/Sao_Paulo",hour:"2-digit",minute:"2-digit"})+" · atualização de 60 s";
-      },2500);
+      if(event.data===YT.PlayerState.PLAYING){frame.dataset.state="ready";status.textContent="Transmissão contínua · use os controles do vídeo";button.hidden=true;}
+      else if(event.data===YT.PlayerState.PAUSED){status.textContent="Vídeo pausado · pressione ▶ para continuar";}
+      else if(event.data===YT.PlayerState.BUFFERING){status.textContent="Carregando transmissão…";}
+      else if(event.data===YT.PlayerState.ENDED){frame.dataset.state="error";status.textContent="Transmissão encerrada · ver no YouTube";}
     }
+    function fallback(){if(ready)return;status.textContent="Use ▶ no player para iniciar ou abra no YouTube";}
     function initialize(){
       if(player)return;
       player=new YT.Player("channel-youtube-player",{events:{
-        onReady:()=>{ready=true;button.disabled=false;updateCamera();},onStateChange,
-        onError:()=>unavailable("Câmera indisponível · ver no YouTube"),
-        onAutoplayBlocked:()=>{blocked=true;unavailable("Clique em Iniciar câmera para carregar a imagem");button.textContent="Iniciar câmera";}
+        onReady:()=>{ready=true;player.mute();player.playVideo();},onStateChange,
+        onError:()=>{frame.dataset.state="error";status.textContent="Transmissão indisponível · tente novamente ou abra no YouTube";button.textContent="Tentar novamente";button.hidden=false;},
+        onAutoplayBlocked:()=>{status.textContent="Clique em Iniciar vídeo para assistir";button.textContent="Iniciar vídeo";button.hidden=false;}
       }});
     }
     button.addEventListener("click",()=>{
-      if(!ready){status.textContent="Abra a transmissão em Ver ao vivo";return;}
-      if(blocked){clearTimers();pending=true;seeking=false;player.mute();player.playVideo();}
-      else updateCamera();
+      if(!ready)return;
+      if(frame.dataset.state==="error"){frame.dataset.state="loading";player.mute();player.loadVideoById({videoId});}
+      else player.playVideo();
     });
-    setInterval(updateCamera,60000);
-    document.addEventListener("visibilitychange",()=>{if(document.hidden){clearTimers();pending=false;if(ready)player.pauseVideo();}else updateCamera();});
     if(window.YT?.Player)initialize();else{
-      window.onYouTubeIframeAPIReady=initialize;
-      setTimeout(()=>{if(!ready)unavailable("Player indisponível · ver no YouTube");},20000);
-      const script=document.createElement("script");script.src="https://www.youtube.com/iframe_api";
-      script.onerror=()=>unavailable("Player indisponível · ver no YouTube");document.head.append(script);
+      window.onYouTubeIframeAPIReady=initialize;setTimeout(fallback,20000);
+      const script=document.createElement("script");script.src="https://www.youtube.com/iframe_api";script.onerror=fallback;document.head.append(script);
     }
   })();
   const ITAJAI_NEWS_FEED="https://news.google.com/rss/search?q=%28%22Porto+de+Itaja%C3%AD%22+OR+Portonave+OR+%22JBS+Terminais%22+OR+%22Porto+de+Navegantes%22%29+when%3A90d&hl=pt-BR&gl=BR&ceid=BR:pt-419";
