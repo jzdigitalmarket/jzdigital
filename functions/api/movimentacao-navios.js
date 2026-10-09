@@ -1,11 +1,83 @@
+// Cache compartilhado por centro de dados, independente dos parâmetros da URL.
+// Uma segunda cópia permite mostrar o último resultado com aviso de desatualização.
+const FRESH_SECONDS = 60;
+const LAST_GOOD_SECONDS = 21600;
+const sourceRequests = new Map();
+
+function clientResponse(data, status = 200) {
+    return new Response(JSON.stringify(data), {
+        status,
+        headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" }
+    });
+}
+
+async function cacheRead(cache, key) {
+    try { return cache ? await cache.match(key) : null; } catch { return null; }
+}
+
+async function cacheWrite(cache, key, data, seconds) {
+    if (!cache) return;
+    try {
+        await cache.put(key, new Response(JSON.stringify(data), {
+            headers: { "Content-Type": "application/json", "Cache-Control": `public, max-age=${seconds}` }
+        }));
+    } catch { /* Uma falha de cache não impede a consulta ou a resposta. */ }
+}
+
 export async function onRequestGet(context) {
+    const origin = new URL(context.request.url).origin;
+    const cache = globalThis.caches?.default;
+    const key = new Request(`${origin}/__jz-cache/manobras-v2`);
+    const lastGoodKey = new Request(`${origin}/__jz-cache/manobras-v2/last-good`);
+    const cached = await cacheRead(cache, key);
+    if (cached) {
+        try { return clientResponse({ ...await cached.json(), cache: true }); } catch { /* Consulte a fonte. */ }
+    }
+    if (!sourceRequests.has(origin)) {
+        const pending = (async () => {
+            const response = await consultSource();
+            const data = await response.json();
+            if (response.ok && data.sucesso) {
+                const current = { ...data, desatualizado: false, cache: false };
+                await Promise.all([
+                    cacheWrite(cache, key, current, FRESH_SECONDS),
+                    cacheWrite(cache, lastGoodKey, current, LAST_GOOD_SECONDS)
+                ]);
+                return clientResponse(current);
+            }
+            const previous = await cacheRead(cache, lastGoodKey);
+            if (previous) {
+                try {
+                    const old = await previous.json();
+                    if (old.sucesso && Date.now() - Date.parse(old.atualizadoEm) <= LAST_GOOD_SECONDS * 1000) {
+                        const stale = { ...old, desatualizado: true, cache: true,
+                            aviso: "Dados anteriores. Não foi possível confirmar a situação atual.",
+                            tentativaEm: new Date().toISOString() };
+                        await cacheWrite(cache, key, stale, 15);
+                        return clientResponse(stale);
+                    }
+                } catch { /* Sem cópia válida, devolva a indisponibilidade. */ }
+            }
+            return clientResponse(data, 503);
+        })();
+        sourceRequests.set(origin, pending);
+        pending.finally(() => sourceRequests.delete(origin)).catch(() => {});
+    }
+    try { return (await sourceRequests.get(origin)).clone(); }
+    catch { return clientResponse({ sucesso: false, erro: "Consulta temporariamente indisponível." }, 503); }
+}
+
+async function consultSource() {
 
     const URL_ORIGEM =
         "https://praticoszp21.com.br/movimentacao-de-navios/";
 
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
     try {
 
         const resposta = await fetch(URL_ORIGEM, {
+            signal: controller.signal,
             headers: {
                 "User-Agent":
                     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/151 Safari/537.36",
@@ -327,7 +399,7 @@ export async function onRequestGet(context) {
 
         console.error(
             "Erro movimentação ZP21:",
-            erro
+            erro.message
         );
 
         return new Response(
@@ -365,6 +437,8 @@ export async function onRequestGet(context) {
 
         );
 
+    } finally {
+        clearTimeout(timeout);
     }
 }
 
@@ -396,23 +470,9 @@ function converterDataHora(
         hora.split(":")
             .map(Number);
 
-    /*
-     * A página da ZP21 utiliza horário local
-     * de Itajaí/Brasil.
-     *
-     * Criamos o Date no horário local do
-     * runtime da Function.
-     */
-
-    return new Date(
-        ano,
-        mes,
-        dia,
-        h,
-        m,
-        0,
-        0
-    );
+    // Horário de Itajaí explícito, independente do fuso do runtime.
+    const dataISO = `${ano}-${String(mes + 1).padStart(2, "0")}-${String(dia).padStart(2, "0")}`;
+    return new Date(`${dataISO}T${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:00-03:00`);
 
 }
 

@@ -297,7 +297,7 @@
     <div class="widget-header">
       <div class="header-left">
         <h2 class="widget-title">Radar Portuário</h2>
-        <span id="status" class="status-meta">Preparando fontes portuárias...</span>
+        <span id="status" role="status" aria-live="polite" class="status-meta">Preparando fontes portuárias...</span>
       </div>
 
       <div class="tabs-navigation">
@@ -382,14 +382,17 @@
       return match?.[1] ? safeUrl(match[1]) : null;
     }
 
+    let successfulFeeds = 0;
     async function fetchSingleFeed(feed, isGlobal = false) {
+      const controller = new AbortController(), timeout = setTimeout(() => controller.abort(), 10000);
       try {
-        const response = await fetch(`${RSS2JSON_ENDPOINT}${encodeURIComponent(feed.url)}`, { cache: 'no-store' });
+        const response = await fetch(`${RSS2JSON_ENDPOINT}${encodeURIComponent(feed.url)}`, { cache: 'no-store', signal: controller.signal });
         if (!response.ok) return [];
         const data = await response.json();
         if (data.status !== 'ok' || !Array.isArray(data.items)) return [];
 
-        return data.items.map(item => ({
+        successfulFeeds++;
+        return data.items.filter(item => item && typeof item === 'object').map(item => ({
           source: feed.name,
           title: item.title || 'Notícia portuária',
           link: safeUrl(item.link),
@@ -402,7 +405,7 @@
         }));
       } catch {
         return [];
-      }
+      } finally { clearTimeout(timeout); }
     }
 
     function isPortContent(article) {
@@ -431,8 +434,8 @@
         const title = escapeHTML(article.title);
         const source = escapeHTML(article.source);
         const snippet = escapeHTML(article.snippet);
-        const link = safeUrl(article.link);
-        const thumbnail = article.thumbnail ? safeUrl(article.thumbnail) : null;
+        const link = escapeHTML(safeUrl(article.link));
+        const thumbnail = article.thumbnail ? escapeHTML(safeUrl(article.thumbnail)) : null;
         const date = Number.isNaN(article.pubDate.getTime())
           ? 'Data não informada'
           : article.pubDate.toLocaleDateString('pt-BR', {
@@ -466,6 +469,8 @@
     async function loadAllNews() {
       const status = document.getElementById('status');
       const button = document.getElementById('refresh-btn');
+      if (button.disabled) return;
+      successfulFeeds = 0;
       button.classList.add('spin');
       button.disabled = true;
       status.textContent = 'Consultando notícias, normas e operações portuárias...';
@@ -483,13 +488,22 @@
           .sort((a, b) => b.pubDate - a.pubDate)
           .slice(0, 40);
 
+        if (!successfulFeeds) throw new Error('Fontes indisponíveis');
+        try { localStorage.setItem('jz-radar-last-good', JSON.stringify({ savedAt: new Date().toISOString(), brasil, global })); } catch {}
         renderArticles(brasil, 'brasil-container');
         renderArticles(global, 'global-container');
-        status.textContent = `${brasil.length + global.length} atualizações portuárias encontradas`;
+        status.textContent = `${brasil.length + global.length} atualizações encontradas · ${successfulFeeds}/${BRASIL_FEEDS.length + GLOBAL_FEEDS.length} fontes consultadas`;
       } catch {
-        status.textContent = 'Não foi possível atualizar todas as fontes agora.';
-        renderArticles([], 'brasil-container');
-        renderArticles([], 'global-container');
+        let saved = null;
+        try { const data = JSON.parse(localStorage.getItem('jz-radar-last-good') || 'null'), age = Date.now() - Date.parse(data?.savedAt);
+          if (age >= 0 && age <= 24 * 60 * 60 * 1000 && Array.isArray(data.brasil) && Array.isArray(data.global)) {
+            const restore = items => items.slice(0, 40).filter(item => item && typeof item.title === 'string' && typeof item.source === 'string').map(item => ({ ...item, snippet: String(item.snippet || ''), pubDate: new Date(item.pubDate) }));
+            saved = { ...data, brasil: restore(data.brasil), global: restore(data.global) };
+          }
+        } catch {}
+        status.textContent = saved ? 'Fontes indisponíveis · cópia anterior de ' + new Date(saved.savedAt).toLocaleString('pt-BR') + ' · notícias desatualizadas.' : 'Não foi possível atualizar as fontes agora. Tente novamente.';
+        renderArticles(saved?.brasil || [], 'brasil-container');
+        renderArticles(saved?.global || [], 'global-container');
       } finally {
         button.classList.remove('spin');
         button.disabled = false;

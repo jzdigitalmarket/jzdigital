@@ -879,7 +879,7 @@ async function chamarIA(acao) {
   modoCarregandoIA(true);
   status(temSel ? 'Enviando o trecho selecionado...' : 'Enviando o texto inteiro...');
   try {
-    const res = await pedirIA({ prompt: PROMPTS[acao], text: texto, action: acao }, ctlIA.signal);
+    const res = await pedirIA({ acao, text: texto }, ctlIA.signal);
     modoCarregandoIA(false);
     $('aiText').textContent = res;
     status(temSel ? 'Sugestão para o trecho selecionado. Revise antes de aplicar.' : 'Sugestão para o texto inteiro. Revise antes de aplicar.');
