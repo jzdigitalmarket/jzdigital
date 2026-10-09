@@ -34,6 +34,12 @@
       .bar-next{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}.bar-next .label{margin-bottom:5px;font-size:.6rem}.bar-next strong{display:block;color:var(--text);font-size:.88rem}.bar-next small{display:block;margin-top:4px;color:var(--muted);font-size:.68rem;line-height:1.5}
 
     .calendar-panel{padding:16px}.calendar-head{display:flex;justify-content:space-between;align-items:center;gap:10px}.calendar-head h2{color:var(--cyan)}.calendar-today-btn{min-height:28px;padding:0 10px;font-size:.68rem}.calendar-nav{display:grid;grid-template-columns:28px 1fr 28px;align-items:center;gap:6px;margin:12px 0 8px}.calendar-nav button{width:28px;height:28px;padding:0;border:1px solid var(--line);border-radius:8px;background:rgba(57,216,255,.07);color:var(--cyan);font-size:1.15rem;cursor:pointer}.calendar-nav button:hover{background:rgba(57,216,255,.15)}.calendar-month{text-align:center;font-size:.82rem;font-weight:800;text-transform:capitalize}.calendar-table{width:100%;table-layout:fixed;border-collapse:separate;border-spacing:3px}.calendar-table th{height:20px;color:var(--muted);font-size:.6rem;font-weight:700}.calendar-table td{height:26px;text-align:center;border-radius:7px;color:var(--text);font-size:.74rem;font-variant-numeric:tabular-nums}.calendar-table td:first-child,.calendar-table td:last-child{color:#ffd166}.calendar-table .calendar-today{background:var(--cyan);color:#04101c!important;font-weight:900}.calendar-table time{display:block}
+
+    .bar-inline{display:flex;align-items:center;justify-content:center;gap:6px;margin:4px 0 14px;font-size:.78rem;white-space:nowrap}.bar-inline span{color:var(--muted)}.bar-inline[data-state="open"] b{color:var(--lime)}.bar-inline[data-state="closed"] b{color:#ff6478}.bar-inline[data-state="restricted"] b{color:#ffd166}
+    .calc-head{grid-template-columns:auto minmax(0,1fr)}.calc-keypad{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:12px}.calc-keypad button{height:44px;border:1px solid var(--line);border-radius:11px;background:#1a2b40;color:var(--text);font:inherit;font-size:1.05rem;cursor:pointer}.calc-keypad button:hover{background:#253e59}.calc-keypad .operator{background:rgba(57,216,255,.16);color:var(--cyan)}
+    .calendar-day{position:relative;display:block;width:100%;height:29px;padding:0 0 3px;border:0;border-radius:7px;color:inherit;background:transparent;font:inherit;cursor:pointer}.calendar-day:hover{background:rgba(57,216,255,.14)}.calendar-day:focus-visible,.calc-keypad button:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}.calendar-note-dot{position:absolute;bottom:2px;left:calc(50% - 3px);width:6px;height:6px;border-radius:50%;background:var(--lime);box-shadow:0 0 6px var(--lime);animation:note-pulse 1.2s ease-in-out infinite}.calendar-today .calendar-note-dot{background:#06111f;box-shadow:none}@keyframes note-pulse{50%{opacity:.2}}
+    .calendar-note-dialog{width:min(480px,calc(100% - 32px));max-height:calc(100dvh - 32px);overflow:auto;padding:22px;border:1px solid var(--line);border-radius:20px;color:var(--text);background:#0f1d30;box-shadow:var(--shadow)}.calendar-note-dialog::backdrop{background:rgba(0,0,0,.65)}.calendar-note-dialog h2{color:var(--cyan)}.calendar-note-dialog label{font-size:.85rem}.calendar-note-dialog textarea{min-height:150px;margin:8px 0;resize:vertical}.calendar-note-actions{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:8px}#calendar-note-status{color:#ff6478;font-size:.8rem}#calendar-note-status:empty{display:none}
+    @media(prefers-reduced-motion:reduce){.calendar-note-dot{animation:none}}
 </style>
 </head>
 <body>
@@ -62,25 +68,36 @@
         </div>
         <section class="ships" id="navios">
           <div class="panel-head ships-head"><h2 style="text-align: center;">Manobras de navios no Complexo Portuário</h2><button class="btn" id="refresh" type="button" title="Atualizar movimentação" aria-label="Atualizar movimentação"><span id="refresh-icon" aria-hidden="true">↻</span></button></div>
+          <p class="bar-inline" id="bar-condition" data-state="loading" aria-live="polite"><span>Barra:</span> <b id="bar-status">CONSULTANDO…</b><span id="bar-detail" hidden></span></p>
           <div class="ships-grid"><div class="ship-list"><h3>Últimas realizadas</h3><div id="past"><p class="ship-state">Carregando movimentações...</p></div></div><div class="ship-list"><h3>Próximas manobras</h3><div id="next"><p class="ship-state">Carregando previsões...</p></div></div></div>
           <div class="meta" id="ship-status" role="status">Consultando fonte oficial…</div>
         </section>
       </section>
       <aside class="side" aria-label="Utilitários">
-        <section class="panel glass"><div class="bar-head"><div><p class="label">Praticagem ZP-21</p><h2>Condição da barra</h2></div><button class="bar-refresh" id="refresh-bar" type="button" aria-label="Atualizar condição da barra" title="Atualizar condição da barra"><span id="refresh-bar-icon" aria-hidden="true">↻</span></button></div><div class="bar-condition" id="bar-condition" data-state="loading" aria-live="polite"><b id="bar-status">CONSULTANDO…</b><small id="bar-detail">Buscando condição publicada pela Praticagem ZP-21.</small></div><div class="bar-next" aria-live="polite"><p class="label">Próxima atracação</p><strong id="bar-next-name">Consultando…</strong><small id="bar-next-detail"></small></div></section>
         <section class="panel glass calendar-panel" aria-labelledby="calendar-title">
           <div class="calendar-head"><h2 id="calendar-title">Calendário</h2><button class="btn calendar-today-btn" id="calendar-today" type="button">Hoje</button></div>
           <div class="calendar-nav"><button id="calendar-prev" type="button" aria-label="Mês anterior">‹</button><span class="calendar-month" id="calendar-month" aria-live="polite"></span><button id="calendar-next" type="button" aria-label="Próximo mês">›</button></div>
           <table class="calendar-table" aria-labelledby="calendar-month"><thead><tr><th scope="col" aria-label="Domingo">Dom</th><th scope="col" aria-label="Segunda-feira">Seg</th><th scope="col" aria-label="Terça-feira">Ter</th><th scope="col" aria-label="Quarta-feira">Qua</th><th scope="col" aria-label="Quinta-feira">Qui</th><th scope="col" aria-label="Sexta-feira">Sex</th><th scope="col" aria-label="Sábado">Sáb</th></tr></thead><tbody id="calendar-days"></tbody></table>
         </section>
-        <section class="panel glass note-panel"><div class="note-head"><div><p class="label">Produtividade</p><h2>Nota rápida</h2></div><div class="note-actions"><button class="btn primary" id="save-note" type="button">Salvar</button><a class="calc-open" id="note-open" href="notas.html" target="_blank" rel="noopener" aria-label="Abrir notas em janela separada" title="Abrir notas em janela separada">↗</a></div></div><textarea rows="3" id="note" maxlength="800" placeholder="Anote algo importante..." aria-label="Nota rápida"></textarea><span class="note-status" id="note-status"></span></section>
         <section class="panel glass calc-panel" aria-labelledby="calc-title">
-          <div class="calc-head"><h2 id="calc-title">Calculadora</h2><output class="calc-result" id="calc-result" for="calc-input" role="status" aria-live="polite" aria-atomic="true">= 0</output><a class="calc-open" id="calc-open" href="calculadora.html" target="_blank" rel="noopener" aria-label="Abrir calculadora completa em janela separada" title="Abrir calculadora completa">↗</a></div>
+          <div class="calc-head"><h2 id="calc-title">Calculadora</h2><output class="calc-result" id="calc-result" for="calc-input" role="status" aria-live="polite" aria-atomic="true">= 0</output></div>
           <input class="calc-input" id="calc-input" type="text" inputmode="text" maxlength="200" autocomplete="off" spellcheck="false" aria-label="Digite uma conta e pressione Enter" placeholder="Ex.: 25 + 10 — Enter" aria-describedby="calc-result">
+          <div class="calc-keypad" id="calc-keypad" aria-label="Teclado da calculadora"><button type="button" data-key="clear" aria-label="Limpar tudo">C</button><button type="button" data-key="back" aria-label="Apagar último dígito">⌫</button><button type="button" data-key="%" aria-label="Porcentagem">%</button><button type="button" data-key="/" aria-label="Dividir" class="operator">÷</button><button type="button" data-key="7" aria-label="7">7</button><button type="button" data-key="8" aria-label="8">8</button><button type="button" data-key="9" aria-label="9">9</button><button type="button" data-key="*" aria-label="Multiplicar" class="operator">×</button><button type="button" data-key="4" aria-label="4">4</button><button type="button" data-key="5" aria-label="5">5</button><button type="button" data-key="6" aria-label="6">6</button><button type="button" data-key="-" aria-label="Subtrair" class="operator">−</button><button type="button" data-key="1" aria-label="1">1</button><button type="button" data-key="2" aria-label="2">2</button><button type="button" data-key="3" aria-label="3">3</button><button type="button" data-key="+" aria-label="Somar" class="operator">+</button><button type="button" data-key="sign" aria-label="Inverter sinal">±</button><button type="button" data-key="0" aria-label="0">0</button><button type="button" data-key="comma" aria-label="Vírgula decimal">,</button><button type="button" data-key="equals" aria-label="Calcular" class="operator">=</button></div>
         </section>
       </aside>
     </div>
   </main>
+  <dialog id="calendar-note-dialog" class="calendar-note-dialog" aria-labelledby="calendar-note-title">
+    <form id="calendar-note-form">
+      <h2 id="calendar-note-title">Nota da data</h2>
+      <p id="calendar-note-date"></p>
+      <label for="calendar-note-text">Sua nota</label>
+      <textarea id="calendar-note-text" rows="6" maxlength="5000" placeholder="Anote um compromisso ou lembrete..."></textarea>
+      <p class="meta">Notas salvas neste navegador e dispositivo.</p>
+      <p id="calendar-note-status" role="status" aria-live="polite"></p>
+      <div class="calendar-note-actions"><button class="btn" id="calendar-note-delete" type="button">Excluir nota</button><button class="btn" id="calendar-note-close" type="button">Fechar</button><button class="btn primary" type="submit">Salvar</button></div>
+    </form>
+  </dialog>
   <footer><span>© <span id="year"></span> JZ Digital · Naturally Smart</span><span>Otimizado para computador, tablet e celular.</span></footer>
 </div>
 <script>
@@ -126,33 +143,14 @@
   async function fetchMarketData(){try{const source="https://economia.awesomeapi.com.br/json/last/USD-BRL,BTC-BRL,XAU-USD",response=await fetch(source,{headers:{Accept:"application/json"},cache:"no-store"});if(!response.ok)throw new Error(`fonte direta HTTP ${response.status}`);const raw=await response.json(),usd=Number(raw.USDBRL?.bid),btc=Number(raw.BTCBRL?.bid),goldOunceUSD=Number(raw.XAUUSD?.bid);if(![usd,btc,goldOunceUSD].every(value=>Number.isFinite(value)&&value>0))throw new Error("valores diretos incompletos");return{sucesso:true,atualizadoEm:new Date(Math.max(Number(raw.USDBRL?.timestamp)||0,Number(raw.BTCBRL?.timestamp)||0,Number(raw.XAUUSD?.timestamp)||0)*1000).toISOString(),dolar:{valor:usd},bitcoin:{valor:btc},ouro:{valorGrama:goldOunceUSD*usd/31.1034768}}}catch(directError){const response=await fetch(`/api/cotacoes?atualizar=${Date.now()}`,{headers:{Accept:"application/json"},cache:"no-store"}),type=response.headers.get("content-type")||"";if(!response.ok||!type.includes("application/json"))throw new Error(`consulta indisponível (${response.status})`);const data=await response.json();if(data.sucesso===false)throw new Error(data.erro||"dados indisponíveis");return data}}
   async function loadMarket(){const button=$("#refresh-market"),icon=$("#refresh-market-icon");button.disabled=true;icon.classList.add("spin");try{const data=await fetchMarketData();$("#quote-usd").textContent=formatBRL(data.dolar.valor,2);$("#quote-btc").textContent=formatBRL(data.bitcoin.valor,0);$("#quote-gold").textContent=`${formatBRL(data.ouro.valorGrama,2)}/g`;const updated=data.atualizadoEm?new Date(data.atualizadoEm).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}):"--:--";$("#market-widget").title=`Dólar e Bitcoin em BRL; ouro estimado por grama em BRL. Atualizado às ${updated}.`}catch(e){$("#quote-usd").textContent="—";$("#quote-btc").textContent="—";$("#quote-gold").textContent="—";$("#market-widget").title=`Não foi possível atualizar as cotações: ${e.message}`}finally{button.disabled=false;icon.classList.remove("spin")}}
   $("#refresh-market").addEventListener("click",loadMarket);
-  const note=$("#note");try{note.value=localStorage.getItem("jz-quick-note")||""}catch(e){}
-  $("#save-note").addEventListener("click",()=>{try{localStorage.setItem("jz-quick-note",note.value);$("#note-status").textContent="Nota salva neste dispositivo."}catch(e){$("#note-status").textContent="Não foi possível salvar."}setTimeout(()=>$("#note-status").textContent="",2800)});
-
-  window.addEventListener("storage",function(e){if(e.key==="jz-quick-note")note.value=e.newValue||""});
-  $("#note-open").addEventListener("click",function(e){
-    try{localStorage.setItem("jz-quick-note",note.value)}catch(error){$("#note-status").textContent="Não foi possível levar a nota para a janela.";e.preventDefault();return}
-    const popup=window.open(this.href,"jz-notas","popup=yes,width=600,height=550,resizable=yes,scrollbars=yes");
-    if(popup){popup.opener=null;popup.focus();e.preventDefault()}
-  });
   const clean=v=>String(v??"").trim();
   function shipNode(item,tbc=false){const el=document.createElement("article");el.className="ship-item";const b=document.createElement("b"),s=document.createElement("small");b.textContent=clean(item.navio||item.nome||item.texto||"Movimentação");const hora=clean(item.hora||item.horas?.[0]),itemTBC=tbc||hora.toUpperCase()==="TBC",horaExibida=[hora,clean(item.tipoHorario)].filter(Boolean).join(" ");const dt=itemTBC?"TBC — horário a confirmar":[clean(item.data||item.datas?.[0]),horaExibida].filter(Boolean).join(" às ");const info=[item.manobra,item.berco&&`Berço ${item.berco}`,item.situacao,item.rota&&`Rota ${item.rota}`].filter(Boolean).join(" · ");s.textContent=[dt,info].filter(Boolean).join(" · ")||"Consulte a fonte para mais detalhes.";el.append(b,s);return el}
   function render(target,items,msg,tbc=false){target.replaceChildren();if(!items.length){const p=document.createElement("p");p.className="ship-state";p.textContent=msg;target.append(p);return}items.slice(0,5).forEach(i=>target.append(shipNode(i,tbc)))}
-  function updateBar(condition){const box=$("#bar-condition"),status=$("#bar-status"),detail=$("#bar-detail");const value=clean(condition?.status||condition||"NÃO INFORMADA").toLocaleUpperCase("pt-BR");status.textContent=value;box.dataset.state=value.includes("IMPRATIC")?"closed":value.includes("RESTR")?"restricted":value.includes("PRATIC")?"open":"loading";const extras=[condition?.restricao&&`Restrição: ${clean(condition.restricao)}`,condition?.menorProfundidade&&`Profundidade: ${clean(condition.menorProfundidade)}`].filter(Boolean).join(" · ");detail.textContent=extras||(value.includes("IMPRATIC")?"Declarada pela Autoridade Marítima. Programações em TBC.":value.includes("RESTR")?"Operação sujeita às restrições informadas pela Autoridade Marítima.":value.includes("PRATIC")?"Barra aberta conforme informação operacional mais recente.":"Condição não identificada na fonte neste momento.");return value.includes("IMPRATIC")}
+  function updateBar(condition){const box=$("#bar-condition"),status=$("#bar-status"),detail=$("#bar-detail");const value=clean(condition?.status||condition||"NÃO INFORMADA").toLocaleUpperCase("pt-BR");status.textContent=value;box.dataset.state=value.includes("IMPRATIC")?"closed":value.includes("RESTR")?"restricted":value.includes("PRATIC")?"open":"loading";const extras=[condition?.restricao&&`Restrição: ${clean(condition.restricao)}`,condition?.menorProfundidade&&`Profundidade: ${clean(condition.menorProfundidade)}`].filter(Boolean).join(" · ");box.title=extras;detail.textContent=extras||(value.includes("IMPRATIC")?"Declarada pela Autoridade Marítima. Programações em TBC.":value.includes("RESTR")?"Operação sujeita às restrições informadas pela Autoridade Marítima.":value.includes("PRATIC")?"Barra aberta conforme informação operacional mais recente.":"Condição não identificada na fonte neste momento.");return value.includes("IMPRATIC")}
   function legacy(records){const now=new Date(),all=records.map(i=>{const [d,m,y]=clean(i.datas?.[0]).split(/[\/-]/).map(Number),[h=0,min=0]=clean(i.horas?.[0]).split(":").map(Number);return{...i,time:y?new Date(y<100?y+2000:y,m-1,d,h,min):null}});return{past:all.filter(i=>i.time&&i.time<now).sort((a,b)=>b.time-a.time),next:all.filter(i=>i.time&&i.time>=now).sort((a,b)=>a.time-b.time)}}
 
-  function showNextArrival(items,impraticavel=false){
-    const name=$("#bar-next-name"),detail=$("#bar-next-detail");
-    const entry=items.find(item=>clean(item.manobra).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase()==="entrada");
-    if(!entry){name.textContent="Nenhuma atracação prevista";detail.textContent="";return}
-    name.textContent=clean(entry.navio||entry.nome||"Navio");
-    const hour=clean(entry.hora||entry.horas?.[0]);
-    const date=clean(entry.data||entry.datas?.[0]);
-    const schedule=impraticavel||hour.toUpperCase()==="TBC"?"TBC — horário a confirmar":[date,[hour,clean(entry.tipoHorario)].filter(Boolean).join(" ")].filter(Boolean).join(" às ");
-    detail.textContent=[schedule,entry.berco&&"Berço "+clean(entry.berco),clean(entry.situacao)].filter(Boolean).join(" · ");
-  }
-  async function loadShips(){const buttons=[$("#refresh"),$("#refresh-bar")].filter(Boolean),icons=[$("#refresh-icon"),$("#refresh-bar-icon")].filter(Boolean);buttons.forEach(button=>button.disabled=true);icons.forEach(icon=>icon.classList.add("spin"));$("#ship-status").textContent="Consultando a Praticagem ZP-21…";try{const r=await fetch(`/api/movimentacao-navios?atualizar=${Date.now()}`,{headers:{Accept:"application/json"},cache:"no-store"}),type=r.headers.get("content-type")||"";if(!r.ok||!type.includes("application/json"))throw new Error(`resposta inválida (${r.status})`);const data=await r.json();if(data.sucesso===false)throw new Error(data.erro||"consulta indisponível");const impraticavel=updateBar(data.condicaoBarra);let past=Array.isArray(data.ultimasRealizadas)?data.ultimasRealizadas:[],next=Array.isArray(data.proximasManobras)?data.proximasManobras:Array.isArray(data.proximasAtracacoes)?data.proximasAtracacoes:[];if(!past.length&&!next.length&&Array.isArray(data.registros))({past,next}=legacy(data.registros));showNextArrival(data.proximaAtracacao?[data.proximaAtracacao]:next,impraticavel);render($("#past"),past,"Nenhuma movimentação recente encontrada.");render($("#next"),next,impraticavel?"Toda a programação está TBC devido à barra impraticável.":"Nenhuma próxima manobra encontrada.",impraticavel);const updated=data.atualizadoEm?new Date(data.atualizadoEm).toLocaleString("pt-BR"):new Date().toLocaleString("pt-BR");$("#ship-status").textContent=`Atualizado em ${updated} · Fonte: Praticagem ZP-21`}catch(e){updateBar(null);$("#bar-next-name").textContent="Dados indisponíveis";$("#bar-next-detail").textContent="Tente atualizar novamente.";render($("#past"),[],"Dados temporariamente indisponíveis.");render($("#next"),[],"Tente atualizar novamente em instantes.");$("#ship-status").textContent=`Não foi possível consultar agora: ${e.message}.`}finally{buttons.forEach(button=>button.disabled=false);icons.forEach(icon=>icon.classList.remove("spin"))}}
-  $("#refresh").addEventListener("click",loadShips);$("#refresh-bar").addEventListener("click",loadShips);$("#year").textContent=new Date().getFullYear();clock();setInterval(clock,30000);loadLocalPortNews();setInterval(loadLocalPortNews,600000);loadWeather();setInterval(loadWeather,600000);loadMarket();setInterval(loadMarket,600000);loadShips();
+  async function loadShips(){const buttons=[$("#refresh"),$("#refresh-bar")].filter(Boolean),icons=[$("#refresh-icon"),$("#refresh-bar-icon")].filter(Boolean);buttons.forEach(button=>button.disabled=true);icons.forEach(icon=>icon.classList.add("spin"));$("#ship-status").textContent="Consultando a Praticagem ZP-21…";try{const r=await fetch(`/api/movimentacao-navios?atualizar=${Date.now()}`,{headers:{Accept:"application/json"},cache:"no-store"}),type=r.headers.get("content-type")||"";if(!r.ok||!type.includes("application/json"))throw new Error(`resposta inválida (${r.status})`);const data=await r.json();if(data.sucesso===false)throw new Error(data.erro||"consulta indisponível");const impraticavel=updateBar(data.condicaoBarra);let past=Array.isArray(data.ultimasRealizadas)?data.ultimasRealizadas:[],next=Array.isArray(data.proximasManobras)?data.proximasManobras:Array.isArray(data.proximasAtracacoes)?data.proximasAtracacoes:[];if(!past.length&&!next.length&&Array.isArray(data.registros))({past,next}=legacy(data.registros));render($("#past"),past,"Nenhuma movimentação recente encontrada.");render($("#next"),next,impraticavel?"Toda a programação está TBC devido à barra impraticável.":"Nenhuma próxima manobra encontrada.",impraticavel);const updated=data.atualizadoEm?new Date(data.atualizadoEm).toLocaleString("pt-BR"):new Date().toLocaleString("pt-BR");$("#ship-status").textContent=`Atualizado em ${updated} · Fonte: Praticagem ZP-21`}catch(e){updateBar(null);render($("#past"),[],"Dados temporariamente indisponíveis.");render($("#next"),[],"Tente atualizar novamente em instantes.");$("#ship-status").textContent=`Não foi possível consultar agora: ${e.message}.`}finally{buttons.forEach(button=>button.disabled=false);icons.forEach(icon=>icon.classList.remove("spin"))}}
+  $("#refresh").addEventListener("click",loadShips);$("#year").textContent=new Date().getFullYear();clock();setInterval(clock,30000);loadLocalPortNews();setInterval(loadLocalPortNews,600000);loadWeather();setInterval(loadWeather,600000);loadMarket();setInterval(loadMarket,600000);loadShips();
 </script>
 <script>
 (function(){
@@ -183,9 +181,17 @@
     try{result.textContent="= "+calculate(input.value).toLocaleString("pt-BR",{maximumSignificantDigits:12});result.dataset.error="false"}catch(error){result.textContent=error.message;result.dataset.error="true"}
   });
   input.addEventListener("input",function(){result.textContent="= …";result.dataset.error="false"});
-  document.getElementById("calc-open").addEventListener("click",function(e){
-    const popup=window.open(this.href,"jz-calculadora","popup=yes,width=430,height=660,resizable=yes,scrollbars=yes");
-    if(popup){popup.opener=null;popup.focus();e.preventDefault()}
+  document.getElementById("calc-keypad").addEventListener("click",function(e){
+    const button=e.target.closest("button[data-key]");if(!button)return;
+    const key=button.dataset.key;
+    if(key==="equals"){input.dispatchEvent(new KeyboardEvent("keydown",{key:"Enter",bubbles:true}));return}
+    if(key==="clear"){input.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true}));return}
+    input.focus();
+    const start=input.selectionStart,end=input.selectionEnd;
+    if(key==="sign")input.value=input.value.trim()?"-("+input.value+")":"-";
+    else if(key==="back"){input.setRangeText("",start===end?Math.max(0,start-1):start,end,"end")}
+    else if(input.value.length<200)input.setRangeText(key==="comma"?",":key,start,end,"end");
+    input.dispatchEvent(new Event("input",{bubbles:true}));
   });
 })();</script>
 <script>
@@ -194,6 +200,23 @@
   const zone="America/Sao_Paulo";
   function today(){const parts=new Intl.DateTimeFormat("en", {timeZone:zone,year:"numeric",month:"numeric",day:"numeric"}).formatToParts(new Date());const values={};parts.forEach(p=>values[p.type]=p.value);return {year:Number(values.year),month:Number(values.month)-1,day:Number(values.day)}}
   const current=today();let year=current.year,month=current.month;
+  const prefix="jz-calendar-note:",dialog=document.getElementById("calendar-note-dialog"),text=document.getElementById("calendar-note-text"),status=document.getElementById("calendar-note-status");
+  let selectedDate="";
+  function readNote(date){try{return localStorage.getItem(prefix+date)||""}catch(error){return ""}}
+  function openNote(date){
+    selectedDate=date;text.value=readNote(date);status.textContent="";
+    document.getElementById("calendar-note-date").textContent=new Date(date+"T12:00:00Z").toLocaleDateString("pt-BR",{day:"numeric",month:"long",year:"numeric",timeZone:"UTC"});
+    dialog.showModal();text.focus();
+  }
+  function saveNote(remove=false){
+    try{if(remove||!text.value.trim())localStorage.removeItem(prefix+selectedDate);else localStorage.setItem(prefix+selectedDate,text.value);renderCalendar();dialog.close()}
+    catch(error){status.textContent="Não foi possível salvar. Verifique se o armazenamento do navegador está disponível."}
+  }
+  document.getElementById("calendar-note-form").addEventListener("submit",e=>{e.preventDefault();saveNote()});
+  document.getElementById("calendar-note-delete").addEventListener("click",()=>saveNote(true));
+  document.getElementById("calendar-note-close").addEventListener("click",()=>dialog.close());
+  dialog.addEventListener("close",()=>{document.querySelector('[data-date="'+selectedDate+'"]')?.focus()});
+  window.addEventListener("storage",e=>{if(e.key===null||e.key.startsWith(prefix))renderCalendar()});
   function renderCalendar(){
     const current=today(),first=new Date(Date.UTC(year,month,1)),count=new Date(Date.UTC(year,month+1,0)).getUTCDate(),offset=first.getUTCDay();
     document.getElementById("calendar-month").textContent=first.toLocaleDateString("pt-BR",{month:"long",year:"numeric",timeZone:"UTC"});
@@ -206,7 +229,10 @@
         const time=document.createElement("time");time.textContent=String(day);time.dateTime=year+"-"+String(month+1).padStart(2,"0")+"-"+String(day).padStart(2,"0");
         time.setAttribute("aria-label",new Date(Date.UTC(year,month,day)).toLocaleDateString("pt-BR",{day:"numeric",month:"long",year:"numeric",timeZone:"UTC"}));
         if(year===current.year&&month===current.month&&day===current.day){cell.className="calendar-today";time.setAttribute("aria-current","date")}
-        cell.append(time);
+        const button=document.createElement("button");button.type="button";button.className="calendar-day";button.dataset.date=time.dateTime;
+        const hasNote=Boolean(readNote(time.dateTime).trim());button.setAttribute("aria-label",time.getAttribute("aria-label")+(hasNote?", com nota. Editar nota":", adicionar nota"));
+        button.append(time);if(hasNote){const dot=document.createElement("span");dot.className="calendar-note-dot";dot.setAttribute("aria-hidden","true");button.append(dot)}
+        button.addEventListener("click",()=>openNote(time.dateTime));cell.append(button);
       }
       body.lastElementChild.append(cell);
     }
@@ -215,7 +241,7 @@
   document.getElementById("calendar-prev").addEventListener("click",()=>move(-1));
   document.getElementById("calendar-next").addEventListener("click",()=>move(1));
   document.getElementById("calendar-today").addEventListener("click",()=>{const current=today();year=current.year;month=current.month;renderCalendar()});
-  renderCalendar();setInterval(renderCalendar,60000);
+  renderCalendar();setInterval(()=>{if(!dialog.open&&!document.activeElement.closest(".calendar-table"))renderCalendar()},60000);
 })();
 </script>
 </body>
