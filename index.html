@@ -27,7 +27,7 @@
     .calendar-panel{padding:16px}.calendar-head{display:flex;justify-content:space-between;align-items:center;gap:10px}.calendar-head h2{color:var(--cyan)}.calendar-today-btn{min-height:28px;padding:0 10px;font-size:.72rem}.calendar-nav{display:grid;grid-template-columns:28px 1fr 28px;align-items:center;gap:6px;margin:12px 0 8px}.calendar-nav button{width:28px;height:28px;padding:0;border:1px solid var(--line);border-radius:8px;background:rgba(57,216,255,.07);color:var(--cyan);font-size:1.15rem;cursor:pointer}.calendar-nav button:hover{background:rgba(57,216,255,.15)}.calendar-month{text-align:center;font-size:.82rem;font-weight:800;text-transform:capitalize}.calendar-table{width:100%;table-layout:fixed;border-collapse:separate;border-spacing:3px}.calendar-table th{height:20px;color:var(--muted);font-size:.7rem;font-weight:700}.calendar-table td{height:26px;text-align:center;border-radius:7px;color:var(--text);font-size:.74rem;font-variant-numeric:tabular-nums}.calendar-table td:first-child,.calendar-table td:last-child{color:#ffd166}.calendar-table .calendar-today{background:var(--cyan);color:#04101c!important;font-weight:900}.calendar-table time{display:block}
     .bar-inline{display:flex;align-items:center;justify-content:center;gap:7px;margin:12px 0 0;font-size:1rem;line-height:1.4;flex-wrap:wrap;text-align:center}.bar-inline b{min-width:0;overflow-wrap:anywhere}.bar-inline span{color:var(--muted)}.bar-inline[data-state="open"] b{color:var(--lime)}.bar-inline[data-state="closed"] b{color:#ff6478}.bar-inline[data-state="restricted"] b{color:#ffd166}
     .calendar-day{position:relative;display:block;width:100%;height:29px;padding:0 0 3px;border:0;border-radius:7px;color:inherit;background:transparent;font:inherit;cursor:pointer}.calendar-day:hover{background:rgba(57,216,255,.14)}.calendar-day:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}.calendar-note-dot{position:absolute;bottom:2px;left:calc(50% - 3px);width:6px;height:6px;border-radius:50%;background:var(--lime);box-shadow:0 0 6px var(--lime);animation:note-pulse 1.2s ease-in-out infinite}.calendar-today .calendar-note-dot{background:#06111f;box-shadow:none}@keyframes note-pulse{50%{opacity:.2}}
-    .calendar-note-dialog{width:min(480px,calc(100% - 32px));max-height:calc(100dvh - 32px);overflow:auto;padding:22px;border:1px solid var(--line);border-radius:20px;color:var(--text);background:#0f1d30;box-shadow:var(--shadow)}.calendar-note-dialog::backdrop{background:rgba(0,0,0,.65)}.calendar-note-dialog h2{color:var(--cyan)}.calendar-note-dialog label{font-size:.85rem}.calendar-note-dialog textarea{min-height:110px;margin:8px 0;resize:vertical}.calendar-note-actions{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:8px}#calendar-note-status{color:#ff6478;font-size:.8rem}#calendar-note-status:empty{display:none}.calendar-reminder-fields{margin:14px 0;padding:13px;border:1px solid rgba(255,209,102,.35);border-radius:12px;background:rgba(255,209,102,.06)}.calendar-reminder-toggle{display:flex;align-items:center;gap:9px;font-weight:800}.calendar-reminder-toggle input{accent-color:#ffd166;width:17px;height:17px}.calendar-reminder-details{display:grid;gap:9px;margin-top:12px}.calendar-reminder-details[hidden]{display:none}.calendar-reminder-details label{display:grid;gap:5px}.calendar-reminder-details input{width:100%;min-height:38px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;color:var(--text);background:#071423}.calendar-reminder-help{margin:10px 0 0;color:var(--muted);font-size:.72rem;line-height:1.45}.calendar-reminder-actions{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px}.calendar-reminder-actions .btn{min-height:32px;font-size:.7rem}.calendar-reminder-alert{padding:10px 12px;margin:10px 0 4px;border-radius:10px;color:#07111f;border:1px solid #ffd166;background:#ffd166;font-size:.76rem;font-weight:800;line-height:1.45}.calendar-reminder-alert[hidden]{display:none}.calendar-table td.calendar-reminder-date,.calendar-table td.calendar-today.calendar-reminder-date{background:#ffd166;color:#07111f!important;font-weight:900;box-shadow:0 0 12px rgba(255,209,102,.28)}.calendar-table td.calendar-reminder-date .calendar-day{color:#07111f}.calendar-table td.calendar-reminder-date .calendar-note-dot{background:#07111f;box-shadow:none}.calendar-table td.calendar-reminder-date.calendar-reminder-active,.calendar-table td.calendar-reminder-active{position:relative;z-index:1;color:#08210e!important;background:#86d99b!important;animation:calendar-reminder-flash .9s ease-in-out infinite;box-shadow:0 0 14px rgba(74,222,128,.65)}.calendar-table td.calendar-reminder-active .calendar-day{color:#08210e}@keyframes calendar-reminder-flash{0%,100%{background-color:#86d99b;box-shadow:0 0 14px rgba(74,222,128,.65)}50%{background-color:#a3e6b1;box-shadow:0 0 5px rgba(74,222,128,.4)}}@media(prefers-reduced-motion:reduce){.calendar-table td.calendar-reminder-active{animation:none;background:#86d99b!important}}
+    .calendar-note-dialog{width:min(480px,calc(100% - 32px));max-height:calc(100dvh - 32px);overflow:auto;padding:22px;border:1px solid var(--line);border-radius:20px;color:var(--text);background:#0f1d30;box-shadow:var(--shadow)}.calendar-note-dialog::backdrop{background:rgba(0,0,0,.65)}.calendar-note-dialog h2{color:var(--cyan)}.calendar-note-dialog label{font-size:.85rem}.calendar-note-dialog textarea{min-height:110px;margin:8px 0;resize:vertical}.calendar-note-actions{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:8px}#calendar-note-status{color:#ff6478;font-size:.8rem}#calendar-note-status:empty{display:none}.calendar-reminder-fields{margin:14px 0;padding:13px;border:1px solid rgba(255,209,102,.35);border-radius:12px;background:rgba(255,209,102,.06)}.calendar-reminder-toggle{display:flex;align-items:center;gap:9px;font-weight:800}.calendar-reminder-toggle input{accent-color:#ffd166;width:17px;height:17px}.calendar-reminder-details{display:grid;gap:9px;margin-top:12px}.calendar-reminder-details[hidden]{display:none}.calendar-reminder-details label{display:grid;gap:5px}.calendar-reminder-details input{width:100%;min-height:38px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;color:var(--text);background:#071423}.calendar-reminder-help{margin:10px 0 0;color:var(--muted);font-size:.72rem;line-height:1.45}.calendar-reminder-actions{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px}.calendar-reminder-actions .btn{min-height:32px;font-size:.7rem}.calendar-reminder-alert{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;margin:10px 0 4px;border-radius:10px;color:#08210e;border:1px solid #5cbf78;background:#86d99b;font-size:.76rem;font-weight:800;line-height:1.45}.calendar-reminder-alert[hidden]{display:none}.calendar-reminder-alert button{flex:0 0 28px;display:grid;place-items:center;width:28px;height:28px;padding:0;border:0;border-radius:8px;color:#08210e;background:rgba(8,33,14,.1);font-size:1.2rem;font-weight:900;line-height:1;cursor:pointer}.calendar-reminder-alert button:hover{background:rgba(8,33,14,.2)}.calendar-table td.calendar-reminder-date,.calendar-table td.calendar-today.calendar-reminder-date{background:#ffd166;color:#07111f!important;font-weight:900;box-shadow:0 0 12px rgba(255,209,102,.28)}.calendar-table td.calendar-reminder-date .calendar-day{color:#07111f}.calendar-table td.calendar-reminder-date .calendar-note-dot{background:#07111f;box-shadow:none}.calendar-table td.calendar-reminder-date.calendar-reminder-active,.calendar-table td.calendar-reminder-active{position:relative;z-index:1;color:#08210e!important;background:#86d99b!important;animation:calendar-reminder-flash .9s ease-in-out infinite;box-shadow:0 0 14px rgba(74,222,128,.65)}.calendar-table td.calendar-reminder-active .calendar-day{color:#08210e}@keyframes calendar-reminder-flash{0%,100%{background-color:#86d99b;box-shadow:0 0 14px rgba(74,222,128,.65)}50%{background-color:#a3e6b1;box-shadow:0 0 5px rgba(74,222,128,.4)}}@media(prefers-reduced-motion:reduce){.calendar-table td.calendar-reminder-active{animation:none;background:#86d99b!important}}
     @media(prefers-reduced-motion:reduce){.calendar-note-dot{animation:none}}
     .bar-inline[data-state="stale"] b{color:#ffd166}.ships[data-stale="true"] .meta{color:#ffd166}
     [hidden]{display:none!important}.clock-pair{display:flex;justify-content:space-between;gap:10px;padding-top:10px;margin-top:10px;border-top:1px solid var(--line);font-size:.65rem;color:var(--muted)}.clock-pair time{display:block;color:var(--text);font-size:.82rem;font-weight:800;font-variant-numeric:tabular-nums}.bar-change-alert{padding:10px 12px;margin:0 0 12px;border-radius:10px;color:#ffd166;border:1px solid rgba(255,209,102,.35);background:rgba(255,209,102,.08);font-size:.75rem}.bar-change-alert button{float:right;border:0;background:none;color:inherit;cursor:pointer;font-size:1rem}
@@ -89,7 +89,7 @@
         </section>
         <section class="panel glass calendar-panel" aria-labelledby="calendar-title">
           <div class="calendar-head"><h2 id="calendar-title">Agenda de Eventos e Prazos</h2><button class="btn calendar-today-btn" id="calendar-today" type="button">Hoje</button></div>
-          <p class="calendar-reminder-alert" id="calendar-reminder-alert" role="status" aria-live="polite" hidden></p>
+          <div class="calendar-reminder-alert" id="calendar-reminder-alert" role="status" aria-live="polite" hidden><span id="calendar-reminder-message"></span><button id="calendar-reminder-close" type="button" aria-label="Fechar aviso" title="Fechar aviso">×</button></div>
           <div class="calendar-nav"><button id="calendar-prev" type="button" aria-label="Mês anterior">‹</button><span class="calendar-month" id="calendar-month" aria-live="polite"></span><button id="calendar-next" type="button" aria-label="Próximo mês">›</button></div>
           <table class="calendar-table" aria-labelledby="calendar-month"><thead><tr><th scope="col" aria-label="Domingo">Dom</th><th scope="col" aria-label="Segunda-feira">Seg</th><th scope="col" aria-label="Terça-feira">Ter</th><th scope="col" aria-label="Quarta-feira">Qua</th><th scope="col" aria-label="Quinta-feira">Qui</th><th scope="col" aria-label="Sexta-feira">Sex</th><th scope="col" aria-label="Sábado">Sáb</th></tr></thead><tbody id="calendar-days"></tbody></table>
 </section>
@@ -298,6 +298,7 @@
   "use strict";
   const prefix="jz-calendar-reminder:";
   const firedPrefix="jz-calendar-reminder-fired:";
+  const dismissedPrefix="jz-calendar-reminder-dismissed:";
   const $=id=>document.getElementById(id);
   const days=$("calendar-days");
   const dialog=$("calendar-note-dialog");
@@ -310,6 +311,7 @@
   const timeInput=$("calendar-reminder-time");
   const removeButton=$("calendar-reminder-delete");
   const alertBox=$("calendar-reminder-alert");
+  const alertMessage=$("calendar-reminder-message");
   let selectedDate="";
   let currentReminder=null;
   function readReminder(date){
@@ -354,8 +356,10 @@
         }catch(error){}
       }
     }
-    alertBox.textContent="Lembrete de hoje ("+reminder.time+"): "+reminder.title;
-    alertBox.hidden=false;
+    alertMessage.textContent="Lembrete de hoje ("+reminder.time+"): "+reminder.title;
+    let dismissed=false;
+    try{dismissed=localStorage.getItem(dismissedPrefix+date+":"+(reminder.id||"legacy"))==="1"}catch(error){}
+    alertBox.hidden=dismissed;
   }
   function nowInItajai(){
     const parts=new Intl.DateTimeFormat("en-CA",{
@@ -386,7 +390,7 @@
       due.forEach(item=>notifyUser(item.reminder,item.date));
     }else{
       alertBox.hidden=true;
-      alertBox.textContent="";
+      alertMessage.textContent="";
     }
   }
   function refreshMarkers(){
@@ -445,6 +449,11 @@
       status.textContent="Não foi possível salvar. Verifique se o armazenamento do navegador está disponível.";
     }
   },true);
+  $("calendar-reminder-close").addEventListener("click",()=>{
+    const today=nowInItajai().date,reminder=readReminder(today);
+    if(reminder){try{localStorage.setItem(dismissedPrefix+today+":"+(reminder.id||"legacy"),"1")}catch(error){}}
+    alertBox.hidden=true;
+  });
   removeButton.addEventListener("click",()=>{
     if(!selectedDate)return;
     try{
