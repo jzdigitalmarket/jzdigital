@@ -27,7 +27,7 @@
     .calendar-panel{padding:16px}.calendar-head{display:flex;justify-content:space-between;align-items:center;gap:10px}.calendar-head h2{color:var(--cyan)}.calendar-today-btn{min-height:28px;padding:0 10px;font-size:.72rem}.calendar-nav{display:grid;grid-template-columns:28px 1fr 28px;align-items:center;gap:6px;margin:12px 0 8px}.calendar-nav button{width:28px;height:28px;padding:0;border:1px solid var(--line);border-radius:8px;background:rgba(57,216,255,.07);color:var(--cyan);font-size:1.15rem;cursor:pointer}.calendar-nav button:hover{background:rgba(57,216,255,.15)}.calendar-month{text-align:center;font-size:.82rem;font-weight:800;text-transform:capitalize}.calendar-table{width:100%;table-layout:fixed;border-collapse:separate;border-spacing:3px}.calendar-table th{height:20px;color:var(--muted);font-size:.7rem;font-weight:700}.calendar-table td{height:26px;text-align:center;border-radius:7px;color:var(--text);font-size:.74rem;font-variant-numeric:tabular-nums}.calendar-table td:first-child,.calendar-table td:last-child{color:#ffd166}.calendar-table .calendar-today{background:var(--cyan);color:#04101c!important;font-weight:900}.calendar-table time{display:block}
     .bar-inline{display:flex;align-items:center;justify-content:center;gap:7px;margin:12px 0 0;font-size:1rem;line-height:1.4;flex-wrap:wrap;text-align:center}.bar-inline b{min-width:0;overflow-wrap:anywhere}.bar-inline span{color:var(--muted)}.bar-inline[data-state="open"] b{color:var(--lime)}.bar-inline[data-state="closed"] b{color:#ff6478}.bar-inline[data-state="restricted"] b{color:#ffd166}
     .calendar-day{position:relative;display:block;width:100%;height:29px;padding:0 0 3px;border:0;border-radius:7px;color:inherit;background:transparent;font:inherit;cursor:pointer}.calendar-day:hover{background:rgba(57,216,255,.14)}.calendar-day:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}.calendar-note-dot{position:absolute;bottom:2px;left:calc(50% - 3px);width:6px;height:6px;border-radius:50%;background:var(--lime);box-shadow:0 0 6px var(--lime);animation:note-pulse 1.2s ease-in-out infinite}.calendar-today .calendar-note-dot{background:#06111f;box-shadow:none}@keyframes note-pulse{50%{opacity:.2}}
-    .calendar-note-dialog{width:min(480px,calc(100% - 32px));max-height:calc(100dvh - 32px);overflow:auto;padding:22px;border:1px solid var(--line);border-radius:20px;color:var(--text);background:#0f1d30;box-shadow:var(--shadow)}.calendar-note-dialog::backdrop{background:rgba(0,0,0,.65)}.calendar-note-dialog h2{color:var(--cyan)}.calendar-note-dialog label{font-size:.85rem}.calendar-note-dialog textarea{min-height:150px;margin:8px 0;resize:vertical}.calendar-note-actions{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:8px}#calendar-note-status{color:#ff6478;font-size:.8rem}#calendar-note-status:empty{display:none}
+    .calendar-note-dialog{width:min(480px,calc(100% - 32px));max-height:calc(100dvh - 32px);overflow:auto;padding:22px;border:1px solid var(--line);border-radius:20px;color:var(--text);background:#0f1d30;box-shadow:var(--shadow)}.calendar-note-dialog::backdrop{background:rgba(0,0,0,.65)}.calendar-note-dialog h2{color:var(--cyan)}.calendar-note-dialog label{font-size:.85rem}.calendar-note-dialog textarea{min-height:110px;margin:8px 0;resize:vertical}.calendar-note-actions{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:8px}#calendar-note-status{color:#ff6478;font-size:.8rem}#calendar-note-status:empty{display:none}.calendar-reminder-fields{margin:14px 0;padding:13px;border:1px solid rgba(255,209,102,.35);border-radius:12px;background:rgba(255,209,102,.06)}.calendar-reminder-toggle{display:flex;align-items:center;gap:9px;font-weight:800}.calendar-reminder-toggle input{accent-color:#ffd166;width:17px;height:17px}.calendar-reminder-details{display:grid;gap:9px;margin-top:12px}.calendar-reminder-details[hidden]{display:none}.calendar-reminder-details label{display:grid;gap:5px}.calendar-reminder-details input{width:100%;min-height:38px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;color:var(--text);background:#071423}.calendar-reminder-help{margin:10px 0 0;color:var(--muted);font-size:.72rem;line-height:1.45}.calendar-reminder-actions{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px}.calendar-reminder-actions .btn{min-height:32px;font-size:.7rem}.calendar-reminder-alert{padding:10px 12px;margin:10px 0 4px;border-radius:10px;color:#07111f;border:1px solid #ffd166;background:#ffd166;font-size:.76rem;font-weight:800;line-height:1.45}.calendar-reminder-alert[hidden]{display:none}.calendar-table td.calendar-reminder-date,.calendar-table td.calendar-today.calendar-reminder-date{background:#ffd166;color:#07111f!important;font-weight:900;box-shadow:0 0 12px rgba(255,209,102,.28)}.calendar-table td.calendar-reminder-date .calendar-day{color:#07111f}.calendar-table td.calendar-reminder-date .calendar-note-dot{background:#07111f;box-shadow:none}
     @media(prefers-reduced-motion:reduce){.calendar-note-dot{animation:none}}
     .bar-inline[data-state="stale"] b{color:#ffd166}.ships[data-stale="true"] .meta{color:#ffd166}
     [hidden]{display:none!important}.clock-pair{display:flex;justify-content:space-between;gap:10px;padding-top:10px;margin-top:10px;border-top:1px solid var(--line);font-size:.65rem;color:var(--muted)}.clock-pair time{display:block;color:var(--text);font-size:.82rem;font-weight:800;font-variant-numeric:tabular-nums}.bar-change-alert{padding:10px 12px;margin:0 0 12px;border-radius:10px;color:#ffd166;border:1px solid rgba(255,209,102,.35);background:rgba(255,209,102,.08);font-size:.75rem}.bar-change-alert button{float:right;border:0;background:none;color:inherit;cursor:pointer;font-size:1rem}
@@ -88,7 +88,8 @@
             </figure>
         </section>
         <section class="panel glass calendar-panel" aria-labelledby="calendar-title">
-          <div class="calendar-head"><h2 id="calendar-title">Calendário com Notas</h2><button class="btn calendar-today-btn" id="calendar-today" type="button">Hoje</button></div>
+          <div class="calendar-head"><h2 id="calendar-title">Calendário com Notas e Lembretes</h2><button class="btn calendar-today-btn" id="calendar-today" type="button">Hoje</button></div>
+          <p class="calendar-reminder-alert" id="calendar-reminder-alert" role="status" aria-live="polite" hidden></p>
           <div class="calendar-nav"><button id="calendar-prev" type="button" aria-label="Mês anterior">‹</button><span class="calendar-month" id="calendar-month" aria-live="polite"></span><button id="calendar-next" type="button" aria-label="Próximo mês">›</button></div>
           <table class="calendar-table" aria-labelledby="calendar-month"><thead><tr><th scope="col" aria-label="Domingo">Dom</th><th scope="col" aria-label="Segunda-feira">Seg</th><th scope="col" aria-label="Terça-feira">Ter</th><th scope="col" aria-label="Quarta-feira">Qua</th><th scope="col" aria-label="Quinta-feira">Qui</th><th scope="col" aria-label="Sexta-feira">Sex</th><th scope="col" aria-label="Sábado">Sáb</th></tr></thead><tbody id="calendar-days"></tbody></table>
 </section>
@@ -100,8 +101,24 @@
       <h2 id="calendar-note-title">Nota da data</h2>
       <p id="calendar-note-date"></p>
       <label for="calendar-note-text">Sua nota</label>
-      <textarea id="calendar-note-text" rows="6" maxlength="5000" placeholder="Anote um compromisso ou lembrete..."></textarea>
-      <p class="meta">Notas salvas neste navegador e dispositivo.</p>
+      <textarea id="calendar-note-text" rows="4" maxlength="5000" placeholder="Anote informações para esta data..."></textarea>
+      <div class="calendar-reminder-fields">
+        <label class="calendar-reminder-toggle"><input id="calendar-reminder-enabled" type="checkbox"> Agendar tarefa importante</label>
+        <div class="calendar-reminder-details" id="calendar-reminder-details" hidden>
+          <label for="calendar-reminder-title">Tarefa
+            <input id="calendar-reminder-title" type="text" maxlength="180" placeholder="Ex.: pagar uma conta" autocomplete="off">
+          </label>
+          <label for="calendar-reminder-time">Horário do aviso
+            <input id="calendar-reminder-time" type="time" value="09:00">
+          </label>
+          <div class="calendar-reminder-actions">
+            <button class="btn" id="calendar-reminder-delete" type="button" hidden>Remover agendamento</button>
+            <button class="btn" id="calendar-notification-enable" type="button">Ativar notificações</button>
+          </div>
+        </div>
+      </div>
+      <p class="calendar-reminder-help">O aviso aparece no horário escolhido enquanto o site estiver aberto. Se você acessar o site depois desse horário, ele mostrará a tarefa do dia. Os dados ficam salvos neste navegador e dispositivo.</p>
+      <p class="meta">Notas e tarefas salvas neste navegador e dispositivo.</p>
       <p id="calendar-note-status" role="status" aria-live="polite"></p>
       <div class="calendar-note-actions"><button class="btn" id="calendar-note-delete" type="button">Excluir nota</button><button class="btn" id="calendar-note-close" type="button">Fechar</button><button class="btn primary" type="submit">Salvar</button></div>
     </form>
@@ -275,6 +292,190 @@
   document.getElementById("calendar-today").addEventListener("click",()=>{const current=today();year=current.year;month=current.month;renderCalendar()});
   renderCalendar();setInterval(()=>{if(!dialog.open&&!document.activeElement.closest(".calendar-table"))renderCalendar()},60000);
 })();
+<script>
+(function(){
+  "use strict";
+  const prefix="jz-calendar-reminder:";
+  const firedPrefix="jz-calendar-reminder-fired:";
+  const $=id=>document.getElementById(id);
+  const days=$("calendar-days");
+  const dialog=$("calendar-note-dialog");
+  const form=$("calendar-note-form");
+  const noteText=$("calendar-note-text");
+  const status=$("calendar-note-status");
+  const enabled=$("calendar-reminder-enabled");
+  const details=$("calendar-reminder-details");
+  const titleInput=$("calendar-reminder-title");
+  const timeInput=$("calendar-reminder-time");
+  const removeButton=$("calendar-reminder-delete");
+  const alertBox=$("calendar-reminder-alert");
+  let selectedDate="";
+  let currentReminder=null;
+  function readReminder(date){
+    try{
+      const value=JSON.parse(localStorage.getItem(prefix+date)||"null");
+      return value&&typeof value.title==="string"&&typeof value.time==="string"?value:null;
+    }catch(error){return null}
+  }
+  function toggleFields(){
+    details.hidden=!enabled.checked;
+    titleInput.required=enabled.checked;
+    timeInput.required=enabled.checked;
+  }
+  enabled.addEventListener("change",toggleFields);
+  days.addEventListener("click",event=>{
+    const button=event.target.closest(".calendar-day");
+    if(!button)return;
+    selectedDate=button.dataset.date||"";
+    currentReminder=readReminder(selectedDate);
+    enabled.checked=Boolean(currentReminder);
+    titleInput.value=currentReminder?.title||"";
+    timeInput.value=currentReminder?.time||"09:00";
+    removeButton.hidden=!currentReminder;
+    status.textContent="";
+    toggleFields();
+  },true);
+  function notifyUser(reminder,date){
+    const dateKey=prefix+date;
+    const firedKey=firedPrefix+date+":"+(reminder.id||"legacy");
+    let alreadyFired=false;
+    try{alreadyFired=localStorage.getItem(firedKey)==="1"}catch(error){}
+    if(!alreadyFired){
+      try{localStorage.setItem(firedKey,"1")}catch(error){}
+      if("Notification" in window&&Notification.permission==="granted"){
+        try{
+          const notification=new Notification("Lembrete: "+reminder.title,{
+            body:"Hoje às "+reminder.time+" · tarefa agendada no Calendário com Notas e Lembretes.",
+            tag:"jz-calendar-"+date+"-"+(reminder.id||"task")
+          });
+          notification.onclick=()=>{window.focus();notification.close()};
+        }catch(error){}
+      }
+    }
+    alertBox.textContent="Lembrete de hoje ("+reminder.time+"): "+reminder.title;
+    alertBox.hidden=false;
+  }
+  function nowInItajai(){
+    const parts=new Intl.DateTimeFormat("en-CA",{
+      timeZone:"America/Sao_Paulo",year:"numeric",month:"2-digit",day:"2-digit",
+      hour:"2-digit",minute:"2-digit",hourCycle:"h23"
+    }).formatToParts(new Date());
+    const values={};
+    parts.forEach(part=>values[part.type]=part.value);
+    return {date:values.year+"-"+values.month+"-"+values.day,minutes:Number(values.hour)*60+Number(values.minute)};
+  }
+  function checkReminders(){
+    const now=nowInItajai();
+    const due=[];
+    try{
+      for(let index=0;index<localStorage.length;index++){
+        const key=localStorage.key(index);
+        if(!key||!key.startsWith(prefix))continue;
+        const date=key.slice(prefix.length);
+        if(date!==now.date)continue;
+        const reminder=readReminder(date);
+        if(!reminder)continue;
+        const time=reminder.time.split(":").map(Number);
+        const dueMinutes=time[0]*60+time[1];
+        if(now.minutes>=dueMinutes)due.push({date,reminder});
+      }
+    }catch(error){}
+    if(due.length){
+      due.forEach(item=>notifyUser(item.reminder,item.date));
+    }else{
+      alertBox.hidden=true;
+      alertBox.textContent="";
+    }
+  }
+  function refreshMarkers(){
+    days.querySelectorAll(".calendar-day").forEach(button=>{
+      const date=button.dataset.date;
+      const reminder=readReminder(date);
+      const cell=button.closest("td");
+      const base=button.dataset.baseAriaLabel||button.getAttribute("aria-label")||"";
+      if(!button.dataset.baseAriaLabel)button.dataset.baseAriaLabel=base;
+      if(reminder){
+        cell.classList.add("calendar-reminder-date");
+        button.title="Tarefa: "+reminder.title+" · aviso às "+reminder.time;
+        button.setAttribute("aria-label",button.dataset.baseAriaLabel+", tarefa agendada: "+reminder.title+", aviso às "+reminder.time);
+      }else{
+        cell.classList.remove("calendar-reminder-date");
+        button.title=button.dataset.baseTitle||"";
+        button.setAttribute("aria-label",button.dataset.baseAriaLabel);
+      }
+    });
+  }
+  function signalCalendarChanged(date){
+    try{window.dispatchEvent(new StorageEvent("storage",{key:"jz-calendar-note:"+date}))}catch(error){}
+    refreshMarkers();
+  }
+  form.addEventListener("submit",event=>{
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    status.textContent="";
+    const task=titleInput.value.trim();
+    if(enabled.checked&&(!task||!timeInput.value)){
+      status.textContent="Informe a tarefa e o horário do aviso.";
+      (!task?titleInput:timeInput).focus();
+      return;
+    }
+    try{
+      const note=noteText.value;
+      if(note.trim())localStorage.setItem("jz-calendar-note:"+selectedDate,note);
+      else localStorage.removeItem("jz-calendar-note:"+selectedDate);
+      if(enabled.checked){
+        const unchanged=currentReminder&&currentReminder.title===task&&currentReminder.time===timeInput.value;
+        const reminder={id:unchanged?currentReminder.id:String(Date.now())+"-"+Math.random().toString(36).slice(2),title:task,time:timeInput.value};
+        localStorage.setItem(prefix+selectedDate,JSON.stringify(reminder));
+      }else{
+        localStorage.removeItem(prefix+selectedDate);
+      }
+      signalCalendarChanged(selectedDate);
+      checkReminders();
+      dialog.close();
+    }catch(error){
+      status.textContent="Não foi possível salvar. Verifique se o armazenamento do navegador está disponível.";
+    }
+  },true);
+  removeButton.addEventListener("click",()=>{
+    if(!selectedDate)return;
+    try{
+      localStorage.removeItem(prefix+selectedDate);
+      currentReminder=null;
+      enabled.checked=false;
+      titleInput.value="";
+      removeButton.hidden=true;
+      toggleFields();
+      signalCalendarChanged(selectedDate);
+      checkReminders();
+    }catch(error){status.textContent="Não foi possível remover o agendamento."}
+  });
+  $("calendar-notification-enable").addEventListener("click",async()=>{
+    if(!("Notification" in window)){
+      status.textContent="Este navegador não oferece notificações. O aviso dentro do site continuará funcionando.";
+      return;
+    }
+    try{
+      const permission=await Notification.requestPermission();
+      status.textContent=permission==="granted"?"Notificações ativadas neste navegador.":permission==="denied"?"Notificações bloqueadas pelo navegador; o aviso dentro do site continuará funcionando.":"Permissão de notificação não concedida.";
+    }catch(error){status.textContent="Não foi possível ativar as notificações neste navegador."}
+  });
+  function observeCalendar(){
+    refreshMarkers();
+    new MutationObserver(refreshMarkers).observe(days,{childList:true,subtree:true});
+  }
+  window.addEventListener("storage",event=>{
+    if(event.key===null||event.key.startsWith(prefix)||event.key.startsWith("jz-calendar-note:")){
+      refreshMarkers();
+      checkReminders();
+    }
+  });
+  document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkReminders()});
+  observeCalendar();
+  checkReminders();
+  setInterval(checkReminders,30000);
+})();
+</script>
 </script>
 <script>
 (function(){
