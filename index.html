@@ -125,7 +125,17 @@
   const $=s=>document.querySelector(s);
   (()=>{
     const videoId="HLbQIdAiO1M",frame=document.getElementById("channel-camera"),status=document.getElementById("channel-camera-status"),button=document.getElementById("channel-camera-start"),iframe=document.getElementById("channel-youtube-player");
-    let player=null,ready=false;
+    let player=null,ready=false,lastLiveCatchup=0;
+    function keepNearLive(){
+      if(!ready||!player||player.getPlayerState()!==YT.PlayerState.PLAYING)return;
+      const liveEnd=Number(player.getDuration()),position=Number(player.getCurrentTime()),behind=liveEnd-position;
+      if(Number.isFinite(liveEnd)&&Number.isFinite(position)&&liveEnd>0&&behind>45&&Date.now()-lastLiveCatchup>60000){
+        status.textContent="Sincronizando novamente com a transmissão ao vivo…";
+        player.seekTo(Math.max(0,liveEnd-10),true);
+        lastLiveCatchup=Date.now();
+      }
+    }
+    setInterval(keepNearLive,30000);
     const url=new URL(iframe.src);url.searchParams.set("origin",location.origin);iframe.src=url.href;
     function onStateChange(event){
       if(event.data===YT.PlayerState.PLAYING){frame.dataset.state="ready";status.textContent="Reprodução ao vivo iniciada · use os controles do vídeo";button.hidden=true;}
