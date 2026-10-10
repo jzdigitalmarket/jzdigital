@@ -292,6 +292,7 @@
   document.getElementById("calendar-today").addEventListener("click",()=>{const current=today();year=current.year;month=current.month;renderCalendar()});
   renderCalendar();setInterval(()=>{if(!dialog.open&&!document.activeElement.closest(".calendar-table"))renderCalendar()},60000);
 })();
+</script>
 <script>
 (function(){
   "use strict";
@@ -475,7 +476,6 @@
   checkReminders();
   setInterval(checkReminders,30000);
 })();
-</script>
 </script>
 <script>
 (function(){
